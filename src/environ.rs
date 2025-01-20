@@ -16,9 +16,6 @@ impl Plugin for EnvironPlugin {
 }
 
 fn setup_environment(mut commands: Commands) {
-    // Spawn the camera
-    commands.spawn(Camera2d);
-
     // Spawn the ground with physics and centralized boundary thickness
     commands.spawn((
         RigidBody::Static,

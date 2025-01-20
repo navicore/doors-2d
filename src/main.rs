@@ -1,5 +1,6 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use camera::CameraPlugin;
 use environ::EnvironPlugin;
 use movement::MovementPlugin;
 use platform::PlatformPlugin;
@@ -7,6 +8,7 @@ use player::PlayerPlugin;
 use schedule::SchedulePlugin;
 use state::StatePlugin;
 
+mod camera;
 mod environ;
 mod movement;
 mod platform;
@@ -32,6 +34,7 @@ fn main() {
             StatePlugin,
             EnvironPlugin,
             PlatformPlugin,
+            CameraPlugin,
         ))
         .run();
 }
