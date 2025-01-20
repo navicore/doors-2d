@@ -2,13 +2,15 @@ use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 
 // Define window size
-const WINDOW_WIDTH: f32 = 800.0;
-const WINDOW_HEIGHT: f32 = 600.0;
-const BOUNDARY_THICKNESS: f32 = 0.5; // Centralized thickness value
+const WINDOW_WIDTH: f32 = 1200.0;
+const WINDOW_HEIGHT: f32 = 800.0;
+const BOUNDARY_THICKNESS: f32 = 0.5;
+const BOUNCE_EFFECT: f32 = 0.4;
 
-// Player movement constants
-const PLAYER_SPEED: f32 = 1000.0; // Increase speed significantly
-const JUMP_FORCE: f32 = 5000.0; // Stronger jump force
+// Define movement constants
+const PLAYER_MOVE_SPEED: f32 = 1000.0; // Horizontal movement speed
+const PLAYER_JUMP_FORCE: f32 = 35000.0; // Jump force applied when pressing space
+const PLAYER_GRAVITY_SCALE: f32 = 25.0; // Gravity multiplier for falling speed
 
 #[derive(Component)]
 struct Grounded(bool);
@@ -46,6 +48,10 @@ fn setup(mut commands: Commands) {
             static_coefficient: 0.9,
             combine_rule: CoefficientCombine::Average,
         },
+        Restitution {
+            coefficient: BOUNCE_EFFECT % 2.0,
+            combine_rule: CoefficientCombine::Max,
+        },
     ));
 
     // Left wall
@@ -57,6 +63,10 @@ fn setup(mut commands: Commands) {
             dynamic_coefficient: 0.5,
             static_coefficient: 0.6,
             combine_rule: CoefficientCombine::Average,
+        },
+        Restitution {
+            coefficient: BOUNCE_EFFECT,
+            combine_rule: CoefficientCombine::Max,
         },
     ));
 
@@ -70,6 +80,10 @@ fn setup(mut commands: Commands) {
             static_coefficient: 0.6,
             combine_rule: CoefficientCombine::Average,
         },
+        Restitution {
+            coefficient: BOUNCE_EFFECT,
+            combine_rule: CoefficientCombine::Max,
+        },
     ));
 
     // Top boundary
@@ -77,6 +91,10 @@ fn setup(mut commands: Commands) {
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(WINDOW_WIDTH / 2.0, BOUNDARY_THICKNESS)),
         Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - BOUNDARY_THICKNESS, 0.0),
+        Restitution {
+            coefficient: BOUNCE_EFFECT,
+            combine_rule: CoefficientCombine::Max,
+        },
     ));
 
     // Spawn the player with physics
@@ -84,7 +102,7 @@ fn setup(mut commands: Commands) {
         RigidBody::Dynamic,
         Collider::from(SharedShape::cuboid(40.0, 40.0)),
         ExternalForce::default(),
-        GravityScale(1.0),
+        GravityScale(PLAYER_GRAVITY_SCALE), // Use gravity scale constant
         Mass(1.0),
         Friction {
             dynamic_coefficient: 0.3,
@@ -113,14 +131,14 @@ fn player_movement(
         // Restrict movement to when the player is on the ground
         if grounded.0 {
             if keyboard_input.pressed(KeyCode::ArrowLeft) {
-                force.apply_force(Vec2::new(-PLAYER_SPEED, 0.0));
+                force.apply_force(Vec2::new(-PLAYER_MOVE_SPEED, 0.0));
             }
             if keyboard_input.pressed(KeyCode::ArrowRight) {
-                force.apply_force(Vec2::new(PLAYER_SPEED, 0.0));
+                force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
             }
 
             if keyboard_input.just_pressed(KeyCode::Space) {
-                force.apply_force(Vec2::new(0.0, JUMP_FORCE));
+                force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
             }
         }
     }
