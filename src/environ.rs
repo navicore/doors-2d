@@ -4,7 +4,7 @@ use bevy::prelude::*;
 // Define window size and environment constants
 const WINDOW_WIDTH: f32 = 1200.0;
 const WINDOW_HEIGHT: f32 = 800.0;
-const BOUNDARY_THICKNESS: f32 = 0.5;
+const BOUNDARY_THICKNESS: f32 = 0.1;
 const BOUNCE_EFFECT: f32 = 0.4;
 
 pub struct EnvironPlugin;

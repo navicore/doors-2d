@@ -2,12 +2,14 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use environ::EnvironPlugin;
 use movement::MovementPlugin;
+use platform::PlatformPlugin;
 use player::PlayerPlugin;
 use schedule::SchedulePlugin;
 use state::StatePlugin;
 
 mod environ;
 mod movement;
+mod platform;
 mod player;
 mod schedule;
 mod state;
@@ -28,7 +30,8 @@ fn main() {
             PlayerPlugin,
             SchedulePlugin,
             StatePlugin,
-            EnvironPlugin, // Add the new environment plugin
+            EnvironPlugin,
+            PlatformPlugin,
         ))
         .run();
 }

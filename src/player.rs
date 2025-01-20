@@ -7,8 +7,8 @@ use crate::{
 };
 
 // Define movement constants
-const PLAYER_MOVE_SPEED: f32 = 1000.0; // Horizontal movement speed
-const PLAYER_JUMP_FORCE: f32 = 35000.0; // Jump force applied when pressing space
+const PLAYER_MOVE_SPEED: f32 = 500.0; // Horizontal movement speed
+const PLAYER_JUMP_FORCE: f32 = 25000.0; // Jump force applied when pressing space
 const PLAYER_GRAVITY_SCALE: f32 = 25.0; // Gravity multiplier for falling speed
 
 #[derive(Bundle)]
@@ -71,18 +71,15 @@ fn player_movement(
     if let Ok((mut force, grounded)) = query.get_single_mut() {
         force.set_force(Vec2::ZERO);
 
-        // Restrict movement to when the player is on the ground
-        if grounded.0 {
-            if keyboard_input.pressed(KeyCode::ArrowLeft) {
-                force.apply_force(Vec2::new(-PLAYER_MOVE_SPEED, 0.0));
-            }
-            if keyboard_input.pressed(KeyCode::ArrowRight) {
-                force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
-            }
+        if keyboard_input.pressed(KeyCode::ArrowLeft) {
+            force.apply_force(Vec2::new(-PLAYER_MOVE_SPEED, 0.0));
+        }
+        if keyboard_input.pressed(KeyCode::ArrowRight) {
+            force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
+        }
 
-            if keyboard_input.just_pressed(KeyCode::Space) {
-                force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
-            }
+        if grounded.0 && keyboard_input.just_pressed(KeyCode::Space) {
+            force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
         }
     }
 }
