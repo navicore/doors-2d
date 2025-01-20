@@ -151,7 +151,7 @@ fn check_grounded(
     // Collect all player entities to avoid mutable borrow conflict
     let player_entities: Vec<Entity> = query.iter().map(|(entity, _)| entity).collect();
 
-    for (_, mut grounded) in query.iter_mut() {
+    for (_, mut grounded) in &mut query {
         grounded.0 = false; // Reset grounded state each frame
 
         for collision in collision_events.read() {
