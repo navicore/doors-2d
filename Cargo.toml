@@ -1,0 +1,11 @@
+[package]
+name = "kubernetes-platformer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.15"
+leafwing-input-manager = "0.16"
+serde_json = "1.0"
+avian2d = "0.2.0"
+bevy_lunex = "0.2.4"
