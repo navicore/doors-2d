@@ -11,8 +11,8 @@ Plans:
       * up arrow to enter doorways
       * entering a doorway renders a new room/game and the player drops into the
         room from a door near the ceiling
-      * __to leave a room/game, use the bottom center door and player will reenter the
-        outer room from one of the sides__ or these jump up to the door they
+      * ~~to leave a room/game, use the bottom center door and player will reenter the
+        outer room from one of the sides~~ or these jump up to the door they
         fell from
 * As a game
     * Loot
