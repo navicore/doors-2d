@@ -30,18 +30,23 @@ fn check_grounded(
         for collision in collision_events.read() {
             let contacts = &collision.0;
 
-            if !contacts.is_sensor
-                && (player_entities.contains(&contacts.entity1)
-                    || player_entities.contains(&contacts.entity2))
+            if contacts.is_sensor {
+                continue;
+            }
+
+            let involved_entities = [contacts.entity1, contacts.entity2];
+            if !involved_entities
+                .iter()
+                .any(|e| player_entities.contains(e))
             {
-                // Check if the collision is with ground or platform entities
-                if ground_query.get(contacts.entity1).is_ok()
-                    || ground_query.get(contacts.entity2).is_ok()
-                    || platform_query.get(contacts.entity1).is_ok()
-                    || platform_query.get(contacts.entity2).is_ok()
-                {
-                    grounded.0 = true;
-                }
+                continue;
+            }
+
+            if involved_entities
+                .iter()
+                .any(|e| ground_query.get(*e).is_ok() || platform_query.get(*e).is_ok())
+            {
+                grounded.0 = true;
             }
         }
     }
