@@ -82,7 +82,7 @@ fn player_movement(
             force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
         }
 
-        if grounded.0 && keyboard_input.just_pressed(KeyCode::Space) {
+        if grounded.0 && keyboard_input.pressed(KeyCode::Space) {
             force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
         }
     }

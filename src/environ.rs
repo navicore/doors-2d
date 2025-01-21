@@ -10,6 +10,9 @@ const BOUNCE_EFFECT: f32 = 0.4;
 const WALL_DISTANCE_FROM_CENTER: f32 = 1500.0;
 const FLOOR_CEILING_WIDTH: f32 = WALL_DISTANCE_FROM_CENTER * 2.0;
 
+#[derive(Component)]
+pub struct Ground;
+
 pub struct EnvironPlugin;
 
 impl Plugin for EnvironPlugin {
@@ -37,6 +40,7 @@ fn setup_environment(mut commands: Commands) {
             coefficient: BOUNCE_EFFECT % 2.0,
             combine_rule: CoefficientCombine::Max,
         },
+        Ground,
     ));
 
     // Left wall
