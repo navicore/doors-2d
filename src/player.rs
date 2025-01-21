@@ -5,6 +5,7 @@ use crate::{
     environ::WINDOW_HEIGHT,
     movement::{Grounded, Movable},
     schedule::InGameSet,
+    state::GameState,
 };
 
 // Define movement constants
@@ -53,8 +54,12 @@ impl PlayerBundle {
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, spawn_player)
-            .add_systems(Update, player_movement.in_set(InGameSet::UserInput));
+        app.add_systems(PostStartup, spawn_player).add_systems(
+            Update,
+            player_movement
+                .in_set(InGameSet::UserInput)
+                .run_if(in_state(GameState::InGame)),
+        );
     }
 }
 

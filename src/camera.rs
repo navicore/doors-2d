@@ -19,7 +19,7 @@ impl Plugin for CameraPlugin {
 #[derive(Component)]
 pub struct MainCamera;
 
-fn spawn_camera(mut commands: Commands) {
+pub fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         Camera2d, MainCamera, // Mark the camera for easy querying
     ));
