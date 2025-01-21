@@ -59,12 +59,11 @@ fn display_paused_text(
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let box_size = Vec2::new(200.0, 50.0);
 
-    // Get the camera's position
-    let camera_position = if let Ok(camera_transform) = camera_query.get_single() {
-        camera_transform.translation.truncate() // Get x and y from Vec3
-    } else {
-        Vec2::ZERO // Default position if camera not found
-    };
+    let camera_position = camera_query
+        .get_single()
+        .map_or(Vec2::ZERO, |camera_transform| {
+            camera_transform.translation.truncate()
+        });
 
     let box_position = camera_position + Vec2::new(0.0, 150.0); // Centered relative to camera
 
