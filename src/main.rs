@@ -1,7 +1,7 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
 use camera::CameraPlugin;
-use environ::EnvironPlugin;
+use environ::{EnvironPlugin, WINDOW_HEIGHT, WINDOW_WIDTH};
 use movement::MovementPlugin;
 use platform::PlatformPlugin;
 use player::PlayerPlugin;
@@ -22,7 +22,7 @@ fn main() {
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Kubernetes Platformer".to_string(),
-                    resolution: (1200.0, 800.0).into(),
+                    resolution: bevy::window::WindowResolution::from((WINDOW_WIDTH, WINDOW_HEIGHT)),
                     ..default()
                 }),
                 ..default()

@@ -2,6 +2,7 @@ use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 
 use crate::{
+    environ::WINDOW_HEIGHT,
     movement::{Grounded, Movable},
     schedule::InGameSet,
 };
@@ -61,7 +62,10 @@ impl Plugin for PlayerPlugin {
 pub struct Player;
 
 fn spawn_player(mut commands: Commands) {
-    commands.spawn(PlayerBundle::new());
+    commands.spawn((
+        PlayerBundle::new(),
+        Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 0.0),
+    ));
 }
 
 fn player_movement(
