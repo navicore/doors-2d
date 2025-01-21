@@ -51,16 +51,29 @@ fn pause_game(mut time: ResMut<Time<Virtual>>, state: Res<State<GameState>>) {
     }
 }
 
-fn display_paused_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn display_paused_text(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    camera_query: Query<&Transform, With<Camera2d>>,
+) {
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    let box_size = Vec2::new(200.0, 75.0);
-    let box_position = Vec2::new(0.0, -250.0);
-    // Demonstrate text wrapping
+    let box_size = Vec2::new(200.0, 50.0);
+
+    // Get the camera's position
+    let camera_position = if let Ok(camera_transform) = camera_query.get_single() {
+        camera_transform.translation.truncate() // Get x and y from Vec3
+    } else {
+        Vec2::ZERO // Default position if camera not found
+    };
+
+    let box_position = camera_position + Vec2::new(0.0, 150.0); // Centered relative to camera
+
     let slightly_smaller_text_font = TextFont {
         font,
         font_size: 35.0,
         ..default()
     };
+
     commands
         .spawn((
             Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), box_size),
@@ -69,14 +82,11 @@ fn display_paused_text(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|builder| {
             builder.spawn((
-                //Text2d::new("Game Over - Press <Enter> to play again"),
-                Text2d::new("Paused"),
+                Text2d::new("Paused !    "),
                 slightly_smaller_text_font.clone(),
-                TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
-                // Wrap text in the rectangle
+                TextLayout::new(JustifyText::Center, LineBreak::WordBoundary), // Ensure center justification
                 TextBounds::from(box_size),
-                // ensure the text is drawn on top of the box
-                Transform::from_translation(Vec3::Z),
+                Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)), // Ensure text is centered in the parent
                 PausedText,
             ));
         });
