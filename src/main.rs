@@ -1,5 +1,6 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
 use environ::{EnvironPlugin, WINDOW_HEIGHT, WINDOW_WIDTH};
 use movement::MovementPlugin;
@@ -19,6 +20,9 @@ mod state;
 fn main() {
     App::new()
         .add_plugins((
+            EmbeddedAssetPlugin {
+                mode: PluginMode::ReplaceDefault,
+            },
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Kubernetes Platformer".to_string(),
