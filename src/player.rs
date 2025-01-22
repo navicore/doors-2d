@@ -1,5 +1,10 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
+use leafwing_input_manager::{
+    plugin::InputManagerPlugin,
+    prelude::{ActionState, InputMap},
+    Actionlike, InputManagerBundle,
+};
 
 use crate::{
     environ::WINDOW_HEIGHT,
@@ -54,41 +59,54 @@ impl PlayerBundle {
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, spawn_player).add_systems(
-            Update,
-            player_movement
-                .in_set(InGameSet::UserInput)
-                .run_if(in_state(GameState::InGame)),
-        );
+        app.add_systems(PostStartup, spawn_player)
+            .add_systems(
+                Update,
+                player_movement
+                    .in_set(InGameSet::UserInput)
+                    .run_if(in_state(GameState::InGame)),
+            )
+            .add_plugins(InputManagerPlugin::<Action>::default());
     }
+}
+
+#[derive(Actionlike, PartialEq, Eq, Hash, Clone, Copy, Debug, Reflect)]
+enum Action {
+    MoveLeft,
+    MoveRight,
+    Jump,
 }
 
 #[derive(Component)]
 pub struct Player;
 
 fn spawn_player(mut commands: Commands) {
+    let input_map = InputMap::new([
+        (Action::Jump, KeyCode::Space),
+        (Action::MoveLeft, KeyCode::ArrowLeft),
+        (Action::MoveRight, KeyCode::ArrowRight),
+    ]);
     commands.spawn((
+        InputManagerBundle::with_map(input_map),
         PlayerBundle::new(),
         Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 0.0),
     ));
 }
 
 fn player_movement(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut ExternalForce, &Grounded), With<Player>>,
+    mut query: Query<(&mut ExternalForce, &Grounded, &ActionState<Action>), With<Player>>,
 ) {
-    if let Ok((mut force, grounded)) = query.get_single_mut() {
+    if let Ok((mut force, grounded, action_state)) = query.get_single_mut() {
         force.set_force(Vec2::ZERO);
 
-        if keyboard_input.pressed(KeyCode::ArrowLeft) {
+        if grounded.0 && action_state.pressed(&Action::Jump) {
+            force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
+        }
+        if action_state.pressed(&Action::MoveLeft) {
             force.apply_force(Vec2::new(-PLAYER_MOVE_SPEED, 0.0));
         }
-        if keyboard_input.pressed(KeyCode::ArrowRight) {
+        if action_state.pressed(&Action::MoveRight) {
             force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
-        }
-
-        if grounded.0 && keyboard_input.pressed(KeyCode::Space) {
-            force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
         }
     }
 }
