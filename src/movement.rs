@@ -18,13 +18,13 @@ impl Plugin for MovementPlugin {
 
 fn check_grounded(
     mut collision_events: EventReader<Collision>,
-    mut query: Query<(Entity, &mut Grounded), With<Movable>>,
-    ground_query: Query<Entity, (With<Ground>, Without<Movable>)>, // Query for ground entities
-    platform_query: Query<Entity, (With<Platform>, Without<Movable>)>, // Query for platforms
+    mut query: Query<(Entity, &mut Grounded, &Transform), With<Movable>>,
+    ground_query: Query<(Entity, &Transform), (With<Ground>, Without<Movable>)>, // Query for ground entities
+    platform_query: Query<(Entity, &Transform), (With<Platform>, Without<Movable>)>, // Query for platforms
 ) {
-    let player_entities: Vec<Entity> = query.iter().map(|(entity, _)| entity).collect();
+    let player_entities: Vec<Entity> = query.iter().map(|(entity, _, _)| entity).collect();
 
-    for (_, mut grounded) in &mut query {
+    for (_, mut grounded, player_transform) in &mut query {
         grounded.0 = false; // Reset grounded state each frame
 
         for collision in collision_events.read() {
@@ -42,11 +42,16 @@ fn check_grounded(
                 continue;
             }
 
-            if involved_entities
-                .iter()
-                .any(|e| ground_query.get(*e).is_ok() || platform_query.get(*e).is_ok())
-            {
-                grounded.0 = true;
+            for entity in &involved_entities {
+                if let Ok((_, ground_transform)) = ground_query.get(*entity) {
+                    if player_transform.translation.y > ground_transform.translation.y {
+                        grounded.0 = true;
+                    }
+                } else if let Ok((_, platform_transform)) = platform_query.get(*entity) {
+                    if player_transform.translation.y > platform_transform.translation.y {
+                        grounded.0 = true;
+                    }
+                }
             }
         }
     }
