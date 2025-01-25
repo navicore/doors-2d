@@ -110,3 +110,42 @@ fn player_movement(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SchedulePlugin;
+    use bevy::input::InputPlugin;
+
+    #[test]
+    fn test_player_spawning() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(InputPlugin)
+            .add_plugins(SchedulePlugin)
+            .add_plugins(PlayerPlugin);
+
+        // Run the startup systems to spawn the player
+        app.update();
+
+        // Get the world reference
+        let world = app.world_mut();
+
+        // Query for the player
+        let mut query = world.query::<(&Transform, &Player)>();
+        let players: Vec<_> = query.iter(world).collect();
+
+        // Check that the player was spawned
+        assert_eq!(
+            players.len(),
+            1,
+            "Expected 1 player, found {}",
+            players.len()
+        );
+
+        // Check the properties of the player
+        let (transform, _) = players[0];
+        assert_eq!(transform.translation.x, 0.0);
+        assert_eq!(transform.translation.y, WINDOW_HEIGHT / 2.0 - 50.0);
+    }
+}

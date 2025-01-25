@@ -53,3 +53,44 @@ fn spawn_platforms(mut commands: Commands) {
         ));
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_platform_spawning() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins).add_plugins(PlatformPlugin);
+
+        // Run the startup systems to spawn the platforms
+        app.update();
+
+        // Get the world reference
+        let world = app.world_mut();
+
+        // Query for the platforms
+        let mut query = world.query::<(&Transform, &Sprite, &Platform)>();
+        let platforms: Vec<_> = query.iter(world).collect();
+
+        // Check that the correct number of platforms were spawned
+        assert_eq!(platforms.len(), 3);
+
+        // Check the properties of each platform
+        let expected_positions = [
+            Vec2::new(-300.0, PLATFORM_Y_POS),
+            Vec2::new(150.0, PLATFORM_Y_POS + 100.0),
+            Vec2::new(400.0, PLATFORM_Y_POS - 50.0),
+        ];
+
+        for (i, (transform, sprite, _)) in platforms.iter().enumerate() {
+            assert_eq!(transform.translation.x, expected_positions[i].x);
+            assert_eq!(transform.translation.y, expected_positions[i].y);
+            assert_eq!(sprite.color, Color::srgb(0.5, 0.5, 0.5));
+            assert_eq!(
+                sprite.custom_size.unwrap(),
+                Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)
+            );
+        }
+    }
+}
