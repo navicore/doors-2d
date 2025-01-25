@@ -25,7 +25,6 @@ fn setup_environment(mut commands: Commands) {
     // Spawn the ground with physics and centralized boundary thickness
     commands.spawn((
         RigidBody::Static,
-        //Collider::from(SharedShape::cuboid(WINDOW_WIDTH / 2.0, BOUNDARY_THICKNESS)),
         Collider::from(SharedShape::cuboid(
             FLOOR_CEILING_WIDTH / 2.0,
             BOUNDARY_THICKNESS,
@@ -87,7 +86,6 @@ fn setup_environment(mut commands: Commands) {
     // Top boundary
     commands.spawn((
         RigidBody::Static,
-        //Collider::from(SharedShape::cuboid(WINDOW_WIDTH / 2.0, BOUNDARY_THICKNESS)),
         Collider::from(SharedShape::cuboid(
             FLOOR_CEILING_WIDTH / 2.0,
             BOUNDARY_THICKNESS,
