@@ -2,7 +2,7 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
-use environ::{EnvironPlugin, WINDOW_HEIGHT, WINDOW_WIDTH};
+use environ::EnvironPlugin;
 use movement::MovementPlugin;
 use platform::PlatformPlugin;
 use player::PlayerPlugin;
@@ -23,20 +23,12 @@ fn main() {
             EmbeddedAssetPlugin {
                 mode: PluginMode::ReplaceDefault,
             },
-            DefaultPlugins.set(WindowPlugin {
-                primary_window: Some(Window {
-                    title: "Kubernetes Platformer".to_string(),
-                    resolution: bevy::window::WindowResolution::from((WINDOW_WIDTH, WINDOW_HEIGHT)),
-                    ..default()
-                }),
-                ..default()
-            }),
+            EnvironPlugin,
             PhysicsPlugins::default(),
             MovementPlugin,
             PlayerPlugin,
             SchedulePlugin,
             StatePlugin,
-            EnvironPlugin,
             PlatformPlugin,
             CameraPlugin,
         ))
