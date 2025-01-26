@@ -125,7 +125,7 @@ fn detect_player_at_door(
             let distance = player_transform
                 .translation
                 .distance(door_transform.translation);
-            if distance < 10.0 {
+            if distance < 20.0 {
                 for action_state in action_state_query.iter() {
                     if action_state.pressed(&Action::Enter) {
                         info!("Player is in front of the door and pressed the enter door action!");
