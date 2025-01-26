@@ -1,7 +1,7 @@
 use avian2d::prelude::*;
 use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
-use camera::CameraPlugin;
+use camera::camera_plugin::CameraPlugin;
 use environ::EnvironPlugin;
 use movement::MovementPlugin;
 use platform::PlatformPlugin;

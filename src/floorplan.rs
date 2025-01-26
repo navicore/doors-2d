@@ -2,34 +2,34 @@ use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 
-#[derive(Clone, Eq, PartialEq)]
-pub struct Room {
+#[derive(Clone)]
+struct Room {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Clone, Eq, PartialEq)]
-pub struct Door {
+#[derive(Clone)]
+struct Door {
     pub id: String,
     pub name: String,
 }
 
 #[derive(Debug)]
-pub enum FloorPlanError {
+enum FloorPlanError {
     RoomNotFound(String),
     DoorNotFound(String),
 }
 
-pub type FloorPlanResult<T> = Result<T, FloorPlanError>;
+type FloorPlanResult<T> = Result<T, FloorPlanError>;
 
-pub struct FloorPlan {
+struct FloorPlan {
     graph: DiGraph<Room, Door>,
     room_index_map: HashMap<String, NodeIndex>,
 }
 
 impl FloorPlan {
     pub fn new() -> Self {
-        FloorPlan {
+        Self {
             graph: DiGraph::new(),
             room_index_map: HashMap::new(),
         }
@@ -37,7 +37,7 @@ impl FloorPlan {
 
     pub fn add_room(&mut self, room: Room) -> NodeIndex {
         let room_index = self.graph.add_node(room.clone());
-        self.room_index_map.insert(room.id.clone(), room_index);
+        self.room_index_map.insert(room.id, room_index);
         room_index
     }
 
@@ -63,7 +63,7 @@ impl FloorPlan {
                 return self
                     .graph
                     .node_weight(target_index)
-                    .ok_or(FloorPlanError::RoomNotFound(door_id.to_string()));
+                    .ok_or_else(|| FloorPlanError::RoomNotFound(door_id.to_string()));
             }
         }
         Err(FloorPlanError::DoorNotFound(door_id.to_string()))
@@ -73,7 +73,7 @@ impl FloorPlan {
         self.room_index_map
             .get(room_id)
             .copied()
-            .ok_or(FloorPlanError::RoomNotFound(room_id.to_string()))
+            .ok_or_else(|| FloorPlanError::RoomNotFound(room_id.to_string()))
     }
 
     pub fn get_doors_and_connected_rooms(
@@ -85,12 +85,13 @@ impl FloorPlan {
             .graph
             .edges(room_index)
             .map(|edge| {
-                (
-                    edge.weight(),
-                    self.graph.node_weight(edge.target()).unwrap(),
-                )
+                let door = edge.weight();
+                let room = self.graph.node_weight(edge.target()).ok_or_else(|| {
+                    FloorPlanError::RoomNotFound(edge.target().index().to_string())
+                })?;
+                Ok((door, room))
             })
-            .collect();
+            .collect::<Result<Vec<_>, _>>()?;
         Ok(result)
     }
 }
