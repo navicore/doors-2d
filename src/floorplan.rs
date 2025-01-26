@@ -1,31 +1,44 @@
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::EdgeRef;
+use std::collections::HashMap;
 
-#[derive(Clone)]
-struct Room {
+#[derive(Clone, Eq, PartialEq)]
+pub struct Room {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Clone)]
-struct Door {
+#[derive(Clone, Eq, PartialEq)]
+pub struct Door {
     pub id: String,
     pub name: String,
 }
 
-struct FloorPlan {
+#[derive(Debug)]
+pub enum FloorPlanError {
+    RoomNotFound(String),
+    DoorNotFound(String),
+}
+
+pub type FloorPlanResult<T> = Result<T, FloorPlanError>;
+
+pub struct FloorPlan {
     graph: DiGraph<Room, Door>,
+    room_index_map: HashMap<String, NodeIndex>,
 }
 
 impl FloorPlan {
     pub fn new() -> Self {
         FloorPlan {
             graph: DiGraph::new(),
+            room_index_map: HashMap::new(),
         }
     }
 
     pub fn add_room(&mut self, room: Room) -> NodeIndex {
-        self.graph.add_node(room)
+        let room_index = self.graph.add_node(room.clone());
+        self.room_index_map.insert(room.id.clone(), room_index);
+        room_index
     }
 
     pub fn add_door(&mut self, from: NodeIndex, to: NodeIndex, door: Door) {
@@ -39,14 +52,46 @@ impl FloorPlan {
             .collect()
     }
 
-    pub fn get_connected_room(&self, room_index: NodeIndex, door_id: &str) -> Option<&Room> {
+    pub fn get_connected_room(
+        &self,
+        room_index: NodeIndex,
+        door_id: &str,
+    ) -> FloorPlanResult<&Room> {
         for edge in self.graph.edges(room_index) {
             if edge.weight().id == door_id {
                 let target_index = edge.target();
-                return self.graph.node_weight(target_index);
+                return self
+                    .graph
+                    .node_weight(target_index)
+                    .ok_or(FloorPlanError::RoomNotFound(door_id.to_string()));
             }
         }
-        None
+        Err(FloorPlanError::DoorNotFound(door_id.to_string()))
+    }
+
+    pub fn get_room_by_id(&self, room_id: &str) -> FloorPlanResult<NodeIndex> {
+        self.room_index_map
+            .get(room_id)
+            .copied()
+            .ok_or(FloorPlanError::RoomNotFound(room_id.to_string()))
+    }
+
+    pub fn get_doors_and_connected_rooms(
+        &self,
+        room_id: &str,
+    ) -> FloorPlanResult<Vec<(&Door, &Room)>> {
+        let room_index = self.get_room_by_id(room_id)?;
+        let result = self
+            .graph
+            .edges(room_index)
+            .map(|edge| {
+                (
+                    edge.weight(),
+                    self.graph.node_weight(edge.target()).unwrap(),
+                )
+            })
+            .collect();
+        Ok(result)
     }
 }
 
@@ -80,10 +125,9 @@ mod tests {
         assert_eq!(doors.len(), 1);
         assert_eq!(doors[0].name, "Door 1");
 
-        if let Some(connected_room) = floor_plan.get_connected_room(room1_index, &doors[0].id) {
-            assert_eq!(connected_room.name, "Room 2");
-        } else {
-            panic!("Connected room not found");
+        match floor_plan.get_connected_room(room1_index, &doors[0].id) {
+            Ok(connected_room) => assert_eq!(connected_room.name, "Room 2"),
+            Err(_) => panic!("Connected room not found"),
         }
     }
 
@@ -123,16 +167,65 @@ mod tests {
         let doors = floor_plan.get_doors(room2_index);
         assert_eq!(doors.len(), 1);
 
-        if let Some(connected_room) = floor_plan.get_connected_room(room2_index, &doors[0].id) {
-            assert_eq!(connected_room.name, "Room 3");
-        } else {
-            panic!("Connected room not found for door 1");
+        match floor_plan.get_connected_room(room2_index, &doors[0].id) {
+            Ok(connected_room) => assert_eq!(connected_room.name, "Room 3"),
+            Err(_) => panic!("Connected room not found for door 1"),
         }
 
-        if let Some(connected_room) = floor_plan.get_connected_room(room2_index, &doors[0].id) {
-            assert_eq!(connected_room.name, "Room 3");
-        } else {
-            panic!("Connected room not found for door 2");
+        match floor_plan.get_connected_room(room2_index, &doors[0].id) {
+            Ok(connected_room) => assert_eq!(connected_room.name, "Room 3"),
+            Err(_) => panic!("Connected room not found for door 2"),
+        }
+    }
+
+    #[test]
+    fn test_get_doors_and_connected_rooms() {
+        let mut floor_plan = FloorPlan::new();
+
+        let room1 = Room {
+            id: "1".to_string(),
+            name: "Room 1".to_string(),
+        };
+        let room2 = Room {
+            id: "2".to_string(),
+            name: "Room 2".to_string(),
+        };
+        let room3 = Room {
+            id: "3".to_string(),
+            name: "Room 3".to_string(),
+        };
+
+        floor_plan.add_room(room1.clone());
+        floor_plan.add_room(room2.clone());
+        floor_plan.add_room(room3.clone());
+
+        let door1 = Door {
+            id: "1".to_string(),
+            name: "Door 1".to_string(),
+        };
+        let door2 = Door {
+            id: "2".to_string(),
+            name: "Door 2".to_string(),
+        };
+
+        floor_plan.add_door(
+            floor_plan.get_room_by_id(&room1.id).unwrap(),
+            floor_plan.get_room_by_id(&room2.id).unwrap(),
+            door1.clone(),
+        );
+        floor_plan.add_door(
+            floor_plan.get_room_by_id(&room2.id).unwrap(),
+            floor_plan.get_room_by_id(&room3.id).unwrap(),
+            door2.clone(),
+        );
+
+        match floor_plan.get_doors_and_connected_rooms(&room2.id) {
+            Ok(doors_and_rooms) => {
+                assert_eq!(doors_and_rooms.len(), 1);
+                assert_eq!(doors_and_rooms[0].0.name, "Door 2");
+                assert_eq!(doors_and_rooms[0].1.name, "Room 3");
+            }
+            Err(_) => panic!("Failed to get doors and connected rooms"),
         }
     }
 }
