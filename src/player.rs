@@ -9,6 +9,7 @@ use leafwing_input_manager::{
 use crate::{
     environ::WINDOW_HEIGHT,
     movement::{Grounded, Movable},
+    platform::Door,
     schedule::InGameSet,
     state::GameState,
 };
@@ -60,6 +61,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, spawn_player)
+            .add_systems(Update, detect_player_at_door)
             .add_systems(
                 Update,
                 player_movement
@@ -75,6 +77,7 @@ enum Action {
     MoveLeft,
     MoveRight,
     Jump,
+    Enter,
 }
 
 #[derive(Component)]
@@ -85,6 +88,7 @@ fn spawn_player(mut commands: Commands) {
         (Action::Jump, KeyCode::Space),
         (Action::MoveLeft, KeyCode::ArrowLeft),
         (Action::MoveRight, KeyCode::ArrowRight),
+        (Action::Enter, KeyCode::ArrowUp),
     ]);
     commands.spawn((
         InputManagerBundle::with_map(input_map),
@@ -107,6 +111,28 @@ fn player_movement(
         }
         if action_state.pressed(&Action::MoveRight) {
             force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
+        }
+    }
+}
+
+fn detect_player_at_door(
+    player_query: Query<&Transform, With<Player>>,
+    door_query: Query<&Transform, With<Door>>,
+    action_state_query: Query<&ActionState<Action>>,
+) {
+    if let Ok(player_transform) = player_query.get_single() {
+        for door_transform in door_query.iter() {
+            let distance = player_transform
+                .translation
+                .distance(door_transform.translation);
+            if distance < 10.0 {
+                for action_state in action_state_query.iter() {
+                    if action_state.pressed(&Action::Enter) {
+                        info!("Player is in front of the door and pressed the enter door action!");
+                        // Add your logic for entering the door here
+                    }
+                }
+            }
         }
     }
 }
