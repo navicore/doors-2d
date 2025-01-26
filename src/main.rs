@@ -11,6 +11,7 @@ use state::StatePlugin;
 
 mod camera;
 mod environ;
+mod floorplan;
 mod movement;
 mod platform;
 mod player;
