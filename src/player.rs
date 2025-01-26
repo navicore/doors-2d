@@ -89,7 +89,7 @@ fn spawn_player(mut commands: Commands) {
     commands.spawn((
         InputManagerBundle::with_map(input_map),
         PlayerBundle::new(),
-        Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 0.0),
+        Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 1.0),
     ));
 }
 

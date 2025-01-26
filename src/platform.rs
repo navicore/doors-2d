@@ -19,8 +19,10 @@ impl Plugin for PlatformPlugin {
 #[derive(Component)]
 pub struct Platform;
 
+#[derive(Component)]
+pub struct Door;
+
 fn spawn_platforms(mut commands: Commands) {
-    // Hardcoded platform data representing possible dynamic inputs
     let platform_positions = vec![
         Vec2::new(-300.0, PLATFORM_Y_POS),
         Vec2::new(150.0, PLATFORM_Y_POS + 100.0),
@@ -28,6 +30,7 @@ fn spawn_platforms(mut commands: Commands) {
     ];
 
     for position in platform_positions {
+        // Spawn the platform
         commands.spawn((
             RigidBody::Static,
             Collider::from(SharedShape::cuboid(
@@ -44,10 +47,25 @@ fn spawn_platforms(mut commands: Commands) {
                 coefficient: BOUNCE_EFFECT,
                 combine_rule: CoefficientCombine::Max,
             },
-            Platform, // Tag for platform objects
+            Platform,
             Sprite {
                 color: Color::srgb(0.5, 0.5, 0.5),
                 custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
+                ..default()
+            },
+        ));
+
+        // Spawn the door on top of the platform
+        commands.spawn((
+            Door,
+            Transform::from_xyz(
+                position.x,
+                position.y + PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0,
+                0.1,
+            ), // Adjust the position to sit on the platform
+            Sprite {
+                color: Color::srgb(0.3, 0.3, 0.3),
+                custom_size: Some(Vec2::new(PLATFORM_WIDTH / 4.0, PLATFORM_WIDTH / 2.0)), // Twice as tall as wide
                 ..default()
             },
         ));
