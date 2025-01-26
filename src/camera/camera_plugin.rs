@@ -1,5 +1,5 @@
 use crate::camera::camera_systems::{follow_player, spawn_camera};
-use crate::schedule::InGameSet;
+use crate::scheduler::schedule_plugin::InGameSet;
 use bevy::prelude::*;
 
 /// a 2D camera that follows the player perpendicularly

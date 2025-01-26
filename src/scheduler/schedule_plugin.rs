@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::state::GameState;
+use crate::state::state_component::GameState;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
 pub enum InGameSet {

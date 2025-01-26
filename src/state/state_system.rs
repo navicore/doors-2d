@@ -1,27 +1,8 @@
 use bevy::{prelude::*, text::TextBounds};
 
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-pub enum GameState {
-    #[default]
-    InGame,
-    Paused,
-}
+use super::state_component::{GameState, PausedText};
 
-#[derive(Debug, Component)]
-struct PausedText;
-
-pub struct StatePlugin;
-
-impl Plugin for StatePlugin {
-    fn build(&self, app: &mut App) {
-        app.init_state::<GameState>()
-            .add_systems(Update, (pause_game, game_state_input_events))
-            .add_systems(OnEnter(GameState::Paused), display_paused_text)
-            .add_systems(OnExit(GameState::Paused), remove_pause_text);
-    }
-}
-
-fn remove_pause_text(mut commands: Commands, query: Query<Entity, With<PausedText>>) {
+pub fn remove_pause_text(mut commands: Commands, query: Query<Entity, With<PausedText>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
     }
@@ -43,7 +24,7 @@ pub fn game_state_input_events(
     }
 }
 
-fn pause_game(mut time: ResMut<Time<Virtual>>, state: Res<State<GameState>>) {
+pub fn pause_game(mut time: ResMut<Time<Virtual>>, state: Res<State<GameState>>) {
     if *state == GameState::Paused {
         time.set_relative_speed(0.0); // Freeze physics and animation
     } else {
@@ -51,7 +32,7 @@ fn pause_game(mut time: ResMut<Time<Virtual>>, state: Res<State<GameState>>) {
     }
 }
 
-fn display_paused_text(
+pub fn display_paused_text(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     camera_query: Query<&Transform, With<Camera2d>>,
