@@ -13,6 +13,8 @@ const FLOOR_CEILING_WIDTH: f32 = WALL_DISTANCE_FROM_CENTER * 2.0;
 #[derive(Component)]
 pub struct Ground;
 
+/// define the game window size and environment constants and create the left and right walls, the
+/// ground, and the top boundary.
 pub struct EnvironPlugin;
 
 impl Plugin for EnvironPlugin {

@@ -7,6 +7,7 @@ const PLATFORM_HEIGHT: f32 = 20.0;
 const PLATFORM_Y_POS: f32 = -100.0; // 50% above the floor assuming a floor at -WINDOW_HEIGHT / 2.0
 const BOUNCE_EFFECT: f32 = 0.1;
 
+/// create platforms for the player to jump on.  platforms tend to have doors on top of them.
 pub struct PlatformPlugin;
 
 impl Plugin for PlatformPlugin {

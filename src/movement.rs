@@ -9,6 +9,7 @@ pub struct Grounded(pub bool);
 #[derive(Component)]
 pub struct Movable;
 
+///the main movement this plugin manages is the grounded state of the player
 pub struct MovementPlugin;
 impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {

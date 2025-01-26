@@ -1,11 +1,11 @@
-use bevy::prelude::*;
-
 use crate::schedule::InGameSet;
+use bevy::prelude::*;
 
 const CAMERA_MOVE_SPEED: f32 = 10.0; // Speed at which the camera moves
 const SCREEN_HALF_WIDTH: f32 = 600.0; // Half of window width (assuming 1200x800 resolution)
 const SCROLL_THRESHOLD: f32 = 400.0; // Distance from the screen edge before scrolling
 
+/// a 2D camera that follows the player perpendicularly
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
