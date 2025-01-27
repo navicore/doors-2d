@@ -1,31 +1,38 @@
 #![allow(dead_code)]
+use bevy::prelude::*;
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 
+#[derive(Event)]
+pub struct FloorPlanEvent {
+    pub floor_plan: FloorPlan,
+}
+
 #[derive(Clone)]
-struct Room {
+pub struct Room {
     pub id: String,
     pub name: String,
 }
 
 #[derive(Clone)]
-struct Door {
+pub struct Door {
     pub id: String,
     pub name: String,
 }
 
 #[derive(Debug)]
-enum FloorPlanError {
+pub enum FloorPlanError {
     RoomNotFound(String),
     DoorNotFound(String),
 }
 
-type FloorPlanResult<T> = Result<T, FloorPlanError>;
+pub type FloorPlanResult<T> = Result<T, FloorPlanError>;
 
-struct FloorPlan {
+pub struct FloorPlan {
     graph: DiGraph<Room, Door>,
     room_index_map: HashMap<String, NodeIndex>,
+    start_room_id: Option<String>,
 }
 
 impl FloorPlan {
@@ -33,13 +40,40 @@ impl FloorPlan {
         Self {
             graph: DiGraph::new(),
             room_index_map: HashMap::new(),
+            start_room_id: None,
         }
     }
 
     pub fn add_room(&mut self, room: Room) -> NodeIndex {
         let room_index = self.graph.add_node(room.clone());
-        self.room_index_map.insert(room.id, room_index);
+        self.room_index_map.insert(room.id.clone(), room_index);
+        if self.start_room_id.is_none() {
+            self.start_room_id = Some(room.id);
+        }
         room_index
+    }
+
+    pub fn set_start_room(&mut self, room_id: &str) -> FloorPlanResult<()> {
+        if self.room_index_map.contains_key(room_id) {
+            self.start_room_id = Some(room_id.to_string());
+            Ok(())
+        } else {
+            Err(FloorPlanError::RoomNotFound(room_id.to_string()))
+        }
+    }
+
+    pub fn get_start_room(&self) -> FloorPlanResult<&Room> {
+        match &self.start_room_id {
+            Some(room_id) => {
+                let room_index = self.get_room_by_id(room_id)?;
+                self.graph
+                    .node_weight(room_index)
+                    .ok_or_else(|| FloorPlanError::RoomNotFound(room_id.clone()))
+            }
+            None => Err(FloorPlanError::RoomNotFound(
+                "Start room not set".to_string(),
+            )),
+        }
     }
 
     pub fn add_door(&mut self, from: NodeIndex, to: NodeIndex, door: Door) {
@@ -229,5 +263,27 @@ mod tests {
             }
             Err(_) => panic!("Failed to get doors and connected rooms"),
         }
+    }
+
+    #[test]
+    fn test_start_room() {
+        let mut floor_plan = FloorPlan::new();
+
+        let room1 = Room {
+            id: "1".to_string(),
+            name: "Room 1".to_string(),
+        };
+        let room2 = Room {
+            id: "2".to_string(),
+            name: "Room 2".to_string(),
+        };
+
+        floor_plan.add_room(room1.clone());
+        floor_plan.add_room(room2.clone());
+
+        assert_eq!(floor_plan.get_start_room().unwrap().name, "Room 1");
+
+        floor_plan.set_start_room(&room2.id).unwrap();
+        assert_eq!(floor_plan.get_start_room().unwrap().name, "Room 2");
     }
 }

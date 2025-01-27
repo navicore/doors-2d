@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
 use environ::EnvironPlugin;
+use integration::TestModeIntegrationPlugin;
 use movement::MovementPlugin;
 use platform::PlatformPlugin;
 use player::PlayerPlugin;
@@ -12,6 +13,7 @@ use state::StatePlugin;
 mod camera;
 mod environ;
 mod floorplan;
+mod integration;
 mod movement;
 mod platform;
 mod player;
@@ -32,6 +34,7 @@ fn main() {
             StatePlugin,
             PlatformPlugin,
             CameraPlugin,
+            TestModeIntegrationPlugin,
         ))
         .run();
 }
