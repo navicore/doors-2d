@@ -1,29 +1,11 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 
-// Constants for platform placement
-const PLATFORM_WIDTH: f32 = 200.0;
-const PLATFORM_HEIGHT: f32 = 20.0;
-const PLATFORM_Y_POS: f32 = -100.0; // 50% above the floor assuming a floor at -WINDOW_HEIGHT / 2.0
-const BOUNCE_EFFECT: f32 = 0.1;
+use super::platform_component::{
+    Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH, PLATFORM_Y_POS,
+};
 
-/// create platforms for the player to jump on.  platforms tend to have doors on top of them.
-pub struct PlatformPlugin;
-
-impl Plugin for PlatformPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_platforms);
-    }
-}
-
-// Component to identify platforms
-#[derive(Component)]
-pub struct Platform;
-
-#[derive(Component)]
-pub struct Door;
-
-fn spawn_platforms(mut commands: Commands) {
+pub fn spawn_platforms(mut commands: Commands) {
     let platform_positions = vec![
         Vec2::new(-300.0, PLATFORM_Y_POS),
         Vec2::new(150.0, PLATFORM_Y_POS + 100.0),
@@ -75,7 +57,10 @@ fn spawn_platforms(mut commands: Commands) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::platform::platform_component::{PLATFORM_HEIGHT, PLATFORM_WIDTH, PLATFORM_Y_POS};
+    use crate::platform::Platform;
+    use crate::platform::PlatformPlugin;
+    use bevy::prelude::*;
 
     #[test]
     fn test_platform_spawning() {
