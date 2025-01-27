@@ -1,4 +1,4 @@
-use avian2d::prelude::*;
+use avian2d::PhysicsPlugins;
 use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
@@ -6,7 +6,7 @@ use environ::EnvironPlugin;
 use movement::MovementPlugin;
 use platform::PlatformPlugin;
 use player::PlayerPlugin;
-use schedule::SchedulePlugin;
+use scheduler::SchedulePlugin;
 use state::StatePlugin;
 
 mod camera;
@@ -15,7 +15,7 @@ mod floorplan;
 mod movement;
 mod platform;
 mod player;
-mod schedule;
+mod scheduler;
 mod state;
 
 fn main() {

@@ -1,24 +1,11 @@
+use super::movement_component::{Grounded, Movable};
+use crate::environ::Ground;
+use crate::platform::Platform;
 use avian2d::prelude::*;
 use bevy::prelude::*;
 
-use crate::{environ::Ground, platform::Platform, schedule::InGameSet};
-
-#[derive(Component)]
-pub struct Grounded(pub bool);
-
-#[derive(Component)]
-pub struct Movable;
-
-///the main movement this plugin manages is the grounded state of the player
-pub struct MovementPlugin;
-impl Plugin for MovementPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, check_grounded.in_set(InGameSet::CollisionDetection));
-    }
-}
-
 #[allow(clippy::type_complexity)]
-fn check_grounded(
+pub fn check_grounded(
     mut collision_events: EventReader<Collision>,
     mut query: Query<(Entity, &mut Grounded, &Transform), With<Movable>>,
     ground_query: Query<(Entity, &Transform), (With<Ground>, Without<Movable>)>, // Query for ground entities
