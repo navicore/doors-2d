@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use super::environ_systems::{setup_environment, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::scheduler::InGameSet;
+
+use super::environ_systems::{
+    handle_floor_plan_changes, setup_environment, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 /// define the game window size and environment constants and create the left and right walls, the
 /// ground, and the top boundary.
 pub struct EnvironPlugin;
@@ -15,6 +19,10 @@ impl Plugin for EnvironPlugin {
             }),
             ..default()
         }))
-        .add_systems(Startup, setup_environment);
+        .add_systems(Startup, setup_environment)
+        .add_systems(
+            Update,
+            handle_floor_plan_changes.in_set(InGameSet::EntityUpdates),
+        );
     }
 }

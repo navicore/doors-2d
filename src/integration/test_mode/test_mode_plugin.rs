@@ -1,3 +1,5 @@
+use crate::floorplan::FloorPlanEvent;
+
 use super::test_mode_systems::fire_floor_plan_event;
 use bevy::prelude::*;
 
@@ -5,7 +7,8 @@ pub struct TestModeIntegrationPlugin;
 
 impl Plugin for TestModeIntegrationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, fire_floor_plan_event);
+        app.add_event::<FloorPlanEvent>()
+            .add_systems(Startup, fire_floor_plan_event);
     }
 }
 

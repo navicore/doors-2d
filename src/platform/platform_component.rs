@@ -1,4 +1,4 @@
-use bevy::prelude::Component;
+use bevy::prelude::{Component, Event};
 
 // Constants for platform placement
 pub const PLATFORM_WIDTH: f32 = 200.0;
@@ -12,3 +12,8 @@ pub struct Platform;
 
 #[derive(Component)]
 pub struct Door;
+
+#[derive(Event)]
+pub struct PlatformEvent {
+    pub door: Door,
+}
