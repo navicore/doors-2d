@@ -2,7 +2,7 @@ use avian2d::PhysicsPlugins;
 use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
-use environ::EnvironPlugin;
+use environ::{environ_component::CurrentFloorPlan, EnvironPlugin};
 use integration::TestModeIntegrationPlugin;
 use movement::MovementPlugin;
 use platform::PlatformPlugin;
