@@ -6,13 +6,13 @@ pub const WINDOW_WIDTH: f32 = 1200.0;
 pub const WINDOW_HEIGHT: f32 = 800.0;
 
 #[derive(Component)]
-pub struct Ground;
+pub struct Floor;
 #[derive(Component)]
 pub struct LeftWall;
 #[derive(Component)]
 pub struct RightWall;
 #[derive(Component)]
-pub struct TopBoundary;
+pub struct Ceiling;
 
 #[derive(Default, Resource)]
 pub struct CurrentFloorPlan {
@@ -20,7 +20,7 @@ pub struct CurrentFloorPlan {
 }
 
 #[derive(Resource)]
-pub struct EnvironState {
+pub struct RoomState {
     pub wall_distance_from_center: f32,
     pub floor_ceiling_width: f32,
     pub boundary_thickness: f32,
@@ -30,7 +30,7 @@ pub struct EnvironState {
 // this is temporary until we can order the recalculation of room size
 const DEFAULT_WALL_DISTANCE_FROM_CENTER: f32 = 1500.0;
 
-impl Default for EnvironState {
+impl Default for RoomState {
     fn default() -> Self {
         Self {
             wall_distance_from_center: DEFAULT_WALL_DISTANCE_FROM_CENTER,

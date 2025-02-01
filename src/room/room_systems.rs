@@ -3,8 +3,8 @@ use bevy::prelude::*;
 
 use crate::floorplan::FloorPlanEvent;
 
-use super::environ_component::{
-    CurrentFloorPlan, EnvironState, Ground, LeftWall, RightWall, TopBoundary, WINDOW_HEIGHT,
+use super::room_component::{
+    Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
 };
 
 pub fn handle_floor_plan_changes(
@@ -36,15 +36,15 @@ pub fn handle_floor_plan_changes(
 
 #[allow(clippy::type_complexity)]
 pub fn update_environment(
-    environ_state: Res<EnvironState>,
+    room_state: Res<RoomState>,
     mut param_set: ParamSet<(
-        Query<(&mut Transform, &mut Collider), With<Ground>>,
+        Query<(&mut Transform, &mut Collider), With<Floor>>,
         Query<(&mut Transform, &mut Collider, &mut Sprite), With<LeftWall>>,
         Query<(&mut Transform, &mut Collider, &mut Sprite), With<RightWall>>,
-        Query<(&mut Transform, &mut Collider), With<TopBoundary>>,
+        Query<(&mut Transform, &mut Collider), With<Ceiling>>,
     )>,
 ) {
-    if !environ_state.is_changed() {
+    if !room_state.is_changed() {
         return;
     }
     debug!("Updating changing environment...");
@@ -52,12 +52,12 @@ pub fn update_environment(
     // Update ground
     for (mut transform, mut collider) in &mut param_set.p0() {
         *collider = Collider::from(SharedShape::cuboid(
-            environ_state.floor_ceiling_width / 2.0,
-            environ_state.boundary_thickness,
+            room_state.floor_ceiling_width / 2.0,
+            room_state.boundary_thickness,
         ));
         *transform = Transform::from_xyz(
             0.0,
-            -WINDOW_HEIGHT / 2.0 + environ_state.boundary_thickness,
+            -WINDOW_HEIGHT / 2.0 + room_state.boundary_thickness,
             0.0,
         );
     }
@@ -65,12 +65,12 @@ pub fn update_environment(
     // Update left wall
     for (mut transform, mut collider, mut sprite) in &mut param_set.p1() {
         *collider = Collider::from(SharedShape::cuboid(
-            environ_state.boundary_thickness,
+            room_state.boundary_thickness,
             WINDOW_HEIGHT / 2.0,
         ));
-        *transform = Transform::from_xyz(-environ_state.wall_distance_from_center, 0.0, 0.0);
+        *transform = Transform::from_xyz(-room_state.wall_distance_from_center, 0.0, 0.0);
         sprite.custom_size = Some(Vec2::new(
-            environ_state.boundary_thickness * 200.0,
+            room_state.boundary_thickness * 200.0,
             WINDOW_HEIGHT,
         ));
     }
@@ -78,12 +78,12 @@ pub fn update_environment(
     // Update right wall
     for (mut transform, mut collider, mut sprite) in &mut param_set.p2() {
         *collider = Collider::from(SharedShape::cuboid(
-            environ_state.boundary_thickness,
+            room_state.boundary_thickness,
             WINDOW_HEIGHT / 2.0,
         ));
-        *transform = Transform::from_xyz(environ_state.wall_distance_from_center, 0.0, 0.0);
+        *transform = Transform::from_xyz(room_state.wall_distance_from_center, 0.0, 0.0);
         sprite.custom_size = Some(Vec2::new(
-            environ_state.boundary_thickness * 200.0,
+            room_state.boundary_thickness * 200.0,
             WINDOW_HEIGHT,
         ));
     }
@@ -91,27 +91,27 @@ pub fn update_environment(
     // Update top boundary
     for (mut transform, mut collider) in &mut param_set.p3() {
         *collider = Collider::from(SharedShape::cuboid(
-            environ_state.floor_ceiling_width / 2.0,
-            environ_state.boundary_thickness,
+            room_state.floor_ceiling_width / 2.0,
+            room_state.boundary_thickness,
         ));
         *transform = Transform::from_xyz(
             0.0,
-            WINDOW_HEIGHT / 2.0 - environ_state.boundary_thickness,
+            WINDOW_HEIGHT / 2.0 - room_state.boundary_thickness,
             0.0,
         );
     }
 }
 
-pub fn setup_environment(mut commands: Commands, environ_state: ResMut<EnvironState>) {
+pub fn setup_environment(mut commands: Commands, room_state: ResMut<RoomState>) {
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
-            environ_state.floor_ceiling_width / 2.0,
-            environ_state.boundary_thickness,
+            room_state.floor_ceiling_width / 2.0,
+            room_state.boundary_thickness,
         )),
         Transform::from_xyz(
             0.0,
-            -WINDOW_HEIGHT / 2.0 + environ_state.boundary_thickness,
+            -WINDOW_HEIGHT / 2.0 + room_state.boundary_thickness,
             0.0,
         ),
         Friction {
@@ -120,33 +120,33 @@ pub fn setup_environment(mut commands: Commands, environ_state: ResMut<EnvironSt
             combine_rule: CoefficientCombine::Average,
         },
         Restitution {
-            coefficient: environ_state.bounce_effect % 2.0,
+            coefficient: room_state.bounce_effect % 2.0,
             combine_rule: CoefficientCombine::Max,
         },
-        Ground,
+        Floor,
     ));
 
     // Left wall
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
-            environ_state.boundary_thickness,
+            room_state.boundary_thickness,
             WINDOW_HEIGHT / 2.0,
         )),
-        Transform::from_xyz(-environ_state.wall_distance_from_center, 0.0, 0.0),
+        Transform::from_xyz(-room_state.wall_distance_from_center, 0.0, 0.0),
         Friction {
             dynamic_coefficient: 0.5,
             static_coefficient: 0.6,
             combine_rule: CoefficientCombine::Average,
         },
         Restitution {
-            coefficient: environ_state.bounce_effect,
+            coefficient: room_state.bounce_effect,
             combine_rule: CoefficientCombine::Max,
         },
         Sprite {
             color: Color::srgb(0.5, 0.5, 0.5), // Matching the platform color
             custom_size: Some(Vec2::new(
-                environ_state.boundary_thickness * 200.0,
+                room_state.boundary_thickness * 200.0,
                 WINDOW_HEIGHT,
             )),
             ..default()
@@ -158,23 +158,23 @@ pub fn setup_environment(mut commands: Commands, environ_state: ResMut<EnvironSt
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
-            environ_state.boundary_thickness,
+            room_state.boundary_thickness,
             WINDOW_HEIGHT / 2.0,
         )),
-        Transform::from_xyz(environ_state.wall_distance_from_center, 0.0, 0.0),
+        Transform::from_xyz(room_state.wall_distance_from_center, 0.0, 0.0),
         Friction {
             dynamic_coefficient: 0.5,
             static_coefficient: 0.6,
             combine_rule: CoefficientCombine::Average,
         },
         Restitution {
-            coefficient: environ_state.bounce_effect,
+            coefficient: room_state.bounce_effect,
             combine_rule: CoefficientCombine::Max,
         },
         Sprite {
             color: Color::srgb(0.5, 0.5, 0.5), // Matching the platform color
             custom_size: Some(Vec2::new(
-                environ_state.boundary_thickness * 200.0,
+                room_state.boundary_thickness * 200.0,
                 WINDOW_HEIGHT,
             )),
             ..default()
@@ -186,18 +186,18 @@ pub fn setup_environment(mut commands: Commands, environ_state: ResMut<EnvironSt
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
-            environ_state.floor_ceiling_width / 2.0,
-            environ_state.boundary_thickness,
+            room_state.floor_ceiling_width / 2.0,
+            room_state.boundary_thickness,
         )),
         Transform::from_xyz(
             0.0,
-            WINDOW_HEIGHT / 2.0 - environ_state.boundary_thickness,
+            WINDOW_HEIGHT / 2.0 - room_state.boundary_thickness,
             0.0,
         ),
         Restitution {
-            coefficient: environ_state.bounce_effect,
+            coefficient: room_state.bounce_effect,
             combine_rule: CoefficientCombine::Max,
         },
-        TopBoundary,
+        Ceiling,
     ));
 }

@@ -1,6 +1,6 @@
 use super::movement_component::{Grounded, Movable};
-use crate::environ::Ground;
 use crate::platform::Platform;
+use crate::room::Floor;
 use avian2d::prelude::*;
 use bevy::prelude::*;
 
@@ -8,7 +8,7 @@ use bevy::prelude::*;
 pub fn check_grounded(
     mut collision_events: EventReader<Collision>,
     mut query: Query<(Entity, &mut Grounded, &Transform), With<Movable>>,
-    ground_query: Query<(Entity, &Transform), (With<Ground>, Without<Movable>)>, // Query for ground entities
+    ground_query: Query<(Entity, &Transform), (With<Floor>, Without<Movable>)>, // Query for ground entities
     platform_query: Query<(Entity, &Transform), (With<Platform>, Without<Movable>)>, // Query for platforms
 ) {
     let player_entities: Vec<Entity> = query.iter().map(|(entity, _, _)| entity).collect();
@@ -73,7 +73,7 @@ mod tests {
         let ground_entity = app
             .world_mut()
             .spawn((
-                Ground,
+                Floor,
                 Transform::from_xyz(0.0, 0.0, 0.0), // Ground is below the player
             ))
             .id();
