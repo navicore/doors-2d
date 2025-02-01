@@ -7,6 +7,12 @@ pub const WINDOW_HEIGHT: f32 = 800.0;
 
 #[derive(Component)]
 pub struct Ground;
+#[derive(Component)]
+pub struct LeftWall;
+#[derive(Component)]
+pub struct RightWall;
+#[derive(Component)]
+pub struct TopBoundary;
 
 #[derive(Default, Resource)]
 pub struct CurrentFloorPlan {
@@ -21,11 +27,14 @@ pub struct EnvironState {
     pub bounce_effect: f32,
 }
 
+// this is temporary until we can order the recalculation of room size
+const DEFAULT_WALL_DISTANCE_FROM_CENTER: f32 = 1500.0;
+
 impl Default for EnvironState {
     fn default() -> Self {
         Self {
-            wall_distance_from_center: 1500.0,
-            floor_ceiling_width: 3000.0,
+            wall_distance_from_center: DEFAULT_WALL_DISTANCE_FROM_CENTER,
+            floor_ceiling_width: DEFAULT_WALL_DISTANCE_FROM_CENTER * 2.0,
             boundary_thickness: 0.1,
             bounce_effect: 0.4,
         }
