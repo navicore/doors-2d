@@ -47,7 +47,7 @@ pub fn update_environment(
     if !environ_state.is_changed() {
         return;
     }
-    info!("Updating changing environment...");
+    debug!("Updating changing environment...");
 
     // Update ground
     for (mut transform, mut collider) in &mut param_set.p0() {
