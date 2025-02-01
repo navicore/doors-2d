@@ -12,3 +12,8 @@ pub struct Platform;
 
 #[derive(Component)]
 pub struct Door;
+
+// #[derive(Event)]
+// pub struct PlatformEvent {
+//     pub door: Door,
+// }

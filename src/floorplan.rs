@@ -1,27 +1,27 @@
 #![allow(dead_code)]
-use bevy::prelude::*;
+use bevy::prelude::{Event, States};
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 
 #[derive(Event)]
 pub struct FloorPlanEvent {
-    pub floor_plan: FloorPlan,
+    pub floorplan: FloorPlan,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Default, Eq, PartialEq, Hash, States)]
 pub struct Room {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Default, Eq, PartialEq, Hash, States)]
 pub struct Door {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum FloorPlanError {
     RoomNotFound(String),
     DoorNotFound(String),
@@ -29,11 +29,27 @@ pub enum FloorPlanError {
 
 pub type FloorPlanResult<T> = Result<T, FloorPlanError>;
 
+#[derive(Debug, Clone, Default, States)]
 pub struct FloorPlan {
     graph: DiGraph<Room, Door>,
     room_index_map: HashMap<String, NodeIndex>,
     start_room_id: Option<String>,
 }
+
+impl std::hash::Hash for FloorPlan {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.room_index_map.keys().for_each(|key| key.hash(state));
+        self.start_room_id.hash(state);
+    }
+}
+
+impl PartialEq for FloorPlan {
+    fn eq(&self, other: &Self) -> bool {
+        self.room_index_map == other.room_index_map && self.start_room_id == other.start_room_id
+    }
+}
+
+impl Eq for FloorPlan {}
 
 impl FloorPlan {
     pub fn new() -> Self {

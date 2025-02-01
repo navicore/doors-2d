@@ -4,4 +4,3 @@ pub mod environ_systems;
 
 pub use environ_component::Ground;
 pub use environ_plugin::EnvironPlugin;
-pub use environ_systems::WINDOW_HEIGHT;

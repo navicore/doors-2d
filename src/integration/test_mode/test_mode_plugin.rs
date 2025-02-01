@@ -1,11 +1,14 @@
-use super::test_mode_systems::fire_floor_plan_event;
+use crate::floorplan::FloorPlanEvent;
+
+use super::test_mode_systems::fire_floorplan_event;
 use bevy::prelude::*;
 
 pub struct TestModeIntegrationPlugin;
 
 impl Plugin for TestModeIntegrationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, fire_floor_plan_event);
+        app.add_event::<FloorPlanEvent>()
+            .add_systems(Startup, fire_floorplan_event);
     }
 }
 
@@ -15,7 +18,7 @@ mod tests {
     use crate::floorplan::FloorPlanEvent;
 
     #[test]
-    fn test_fire_floor_plan_event() {
+    fn test_fire_floorplan_event() {
         // Create a new Bevy app and add the necessary plugins and events
         let mut app = App::new();
         app.add_plugins(TestModeIntegrationPlugin);
@@ -34,7 +37,7 @@ mod tests {
         assert_eq!(events.len(), 1);
 
         // Validate the floor plan event details
-        let plan = &events[0].floor_plan;
+        let plan = &events[0].floorplan;
         let start_room = plan.get_start_room().unwrap();
         assert_eq!(start_room.id, "1");
 
