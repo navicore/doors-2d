@@ -1,18 +1,33 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 
-use super::platform_component::{
-    Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH, PLATFORM_Y_POS,
-};
+use crate::room::room_component::RoomState;
 
-pub fn spawn_platforms(mut commands: Commands) {
-    let platform_positions = vec![
-        Vec2::new(-300.0, PLATFORM_Y_POS),
-        Vec2::new(150.0, PLATFORM_Y_POS + 100.0),
-        Vec2::new(400.0, PLATFORM_Y_POS - 50.0),
-    ];
+use super::platform_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
-    for position in platform_positions {
+pub fn spawn_platforms(
+    mut commands: Commands,
+    room_state: Res<RoomState>,
+    query: Query<Entity, With<Platform>>,
+) {
+    if !room_state.is_changed() {
+        return;
+    }
+
+    info!("Room state changed, respawning platforms...");
+
+    // Despawn all existing platforms
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+    }
+
+    // Spawn new platforms based on the current room state
+    for (position, id) in room_state
+        .clone()
+        .doors
+        .into_iter()
+        .map(|door_state| (door_state.position, door_state.id))
+    {
         // Spawn the platform
         commands.spawn((
             RigidBody::Static,
@@ -30,7 +45,7 @@ pub fn spawn_platforms(mut commands: Commands) {
                 coefficient: BOUNCE_EFFECT,
                 combine_rule: CoefficientCombine::Max,
             },
-            Platform,
+            Platform { id },
             Sprite {
                 color: Color::srgb(0.5, 0.5, 0.5),
                 custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
@@ -52,49 +67,5 @@ pub fn spawn_platforms(mut commands: Commands) {
                 ..default()
             },
         ));
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::platform::platform_component::{PLATFORM_HEIGHT, PLATFORM_WIDTH, PLATFORM_Y_POS};
-    use crate::platform::Platform;
-    use crate::platform::PlatformPlugin;
-    use bevy::prelude::*;
-
-    #[test]
-    fn test_platform_spawning() {
-        let mut app = App::new();
-        app.add_plugins(MinimalPlugins).add_plugins(PlatformPlugin);
-
-        // Run the startup systems to spawn the platforms
-        app.update();
-
-        // Get the world reference
-        let world = app.world_mut();
-
-        // Query for the platforms
-        let mut query = world.query::<(&Transform, &Sprite, &Platform)>();
-        let platforms: Vec<_> = query.iter(world).collect();
-
-        // Check that the correct number of platforms were spawned
-        assert_eq!(platforms.len(), 3);
-
-        // Check the properties of each platform
-        let expected_positions = [
-            Vec2::new(-300.0, PLATFORM_Y_POS),
-            Vec2::new(150.0, PLATFORM_Y_POS + 100.0),
-            Vec2::new(400.0, PLATFORM_Y_POS - 50.0),
-        ];
-
-        for (i, (transform, sprite, _)) in platforms.iter().enumerate() {
-            assert_eq!(transform.translation.x, expected_positions[i].x);
-            assert_eq!(transform.translation.y, expected_positions[i].y);
-            assert_eq!(sprite.color, Color::srgb(0.5, 0.5, 0.5));
-            assert_eq!(
-                sprite.custom_size.unwrap(),
-                Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)
-            );
-        }
     }
 }

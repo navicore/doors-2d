@@ -1,7 +1,7 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 
-use crate::floorplan::FloorPlanEvent;
+use crate::{floorplan::FloorPlanEvent, room::room_component::DoorState};
 
 use super::room_component::{
     Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
@@ -10,7 +10,6 @@ use super::room_component::{
 pub fn handle_floor_plan_changes(
     mut floorplan_events: EventReader<FloorPlanEvent>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
-    //mut _events: EventWriter<PlatformEvent>,
 ) {
     for event in floorplan_events.read() {
         debug!("Floor plan event received.");
@@ -28,14 +27,70 @@ pub fn handle_floor_plan_changes(
         } else {
             info!("Initial floor plan set.");
         }
+        let you_are_here = current_floorplan.you_are_here.as_ref().map_or_else(
+            || {
+                new_floorplan.get_start_room().map_or_else(
+                    |_| {
+                        warn!("No start room found in the floor plan.");
+                        None
+                    },
+                    |room| Some(room.id.clone()),
+                )
+            },
+            |location| Some(location.clone()),
+        );
 
         // Update the current floor plan
-        current_floorplan.floorplan = Some(new_floorplan);
+        *current_floorplan = CurrentFloorPlan {
+            floorplan: Some(new_floorplan),
+            you_are_here,
+        };
+    }
+}
+
+pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: ResMut<RoomState>) {
+    if !current_floorplan.is_changed() {
+        return;
+    }
+    if let Some(floorplan) = current_floorplan.floorplan.as_ref() {
+        if let Some(room_id) = &current_floorplan.you_are_here {
+            info!("Updating doors...");
+            match floorplan.get_doors_and_connected_rooms(room_id) {
+                Ok(doors_and_rooms) => {
+                    // calculate door placement and room size
+                    let number_of_doors = doors_and_rooms.len();
+                    #[allow(clippy::cast_precision_loss)]
+                    let room_width: f32 = 300.0 * (number_of_doors + 1) as f32; // empty each side of the room
+                    room_state.wall_distance_from_center = room_width / 2.0;
+
+                    #[allow(clippy::cast_precision_loss)]
+                    let mut room_positions: Vec<Vec2> = (0..number_of_doors)
+                        .map(|i| Vec2 {
+                            x: 300.0f32.mul_add(i as f32, 300.0)
+                                - room_state.wall_distance_from_center,
+                            y: 0.0,
+                        })
+                        .collect();
+
+                    for (door, _) in doors_and_rooms {
+                        if let Some(position) = room_positions.pop() {
+                            let door_state = DoorState {
+                                id: door.id.clone(),
+                                position,
+                            };
+                            info!("Updating door...");
+                            room_state.doors.push(door_state);
+                        }
+                    }
+                }
+                _ => panic!("Failed to get doors and connected rooms"),
+            }
+        }
     }
 }
 
 #[allow(clippy::type_complexity)]
-pub fn update_environment(
+pub fn update_room(
     room_state: Res<RoomState>,
     mut param_set: ParamSet<(
         Query<(&mut Transform, &mut Collider), With<Floor>>,
@@ -47,7 +102,7 @@ pub fn update_environment(
     if !room_state.is_changed() {
         return;
     }
-    debug!("Updating changing environment...");
+    debug!("Updating room...");
 
     // Update ground
     for (mut transform, mut collider) in &mut param_set.p0() {
@@ -102,7 +157,18 @@ pub fn update_environment(
     }
 }
 
-pub fn setup_environment(mut commands: Commands, room_state: ResMut<RoomState>) {
+// todo: question what is the purpose of setting up a room before there is a floorplan
+pub fn setup_room(
+    mut commands: Commands,
+    room_state: ResMut<RoomState>,
+    current_floorplan: Res<CurrentFloorPlan>,
+) {
+    if current_floorplan.you_are_here.is_some() {
+        // room is already setup
+        return;
+    }
+    info!("Setting up room...");
+
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(

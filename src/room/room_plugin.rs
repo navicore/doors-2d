@@ -4,7 +4,7 @@ use crate::scheduler::InGameSet;
 
 use super::{
     room_component::{CurrentFloorPlan, RoomState, WINDOW_HEIGHT, WINDOW_WIDTH},
-    room_systems::{handle_floor_plan_changes, setup_environment, update_environment},
+    room_systems::{handle_floor_plan_changes, setup_room, update_doors, update_room},
 };
 /// define the game window size and environment constants and create the left and right walls, the
 /// ground, and the top boundary.
@@ -22,10 +22,15 @@ impl Plugin for RoomPlugin {
                 }),
                 ..default()
             }))
-            .add_systems(Startup, setup_environment)
+            //.add_systems(Startup, setup_room)
             .add_systems(
                 Update,
-                (handle_floor_plan_changes, update_environment)
+                (
+                    setup_room,
+                    handle_floor_plan_changes,
+                    update_doors,
+                    update_room,
+                )
                     .chain()
                     .in_set(InGameSet::EntityUpdates),
             );
