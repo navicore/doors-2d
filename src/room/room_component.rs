@@ -18,6 +18,7 @@ pub struct Ceiling;
 pub struct CurrentFloorPlan {
     pub floorplan: Option<FloorPlan>,
     pub you_are_here: Option<String>,
+    pub you_were_here: Option<String>,
 }
 
 #[derive(Resource, Clone)]
@@ -34,8 +35,10 @@ pub struct RoomState {
     pub floor_ceiling_width: f32,
     pub boundary_thickness: f32,
     pub bounce_effect: f32,
-    //pub room_id: Option<String>,
     pub doors: Vec<DoorState>,
+    #[allow(dead_code)]
+    pub room_id: Option<String>,
+    pub previous_room_id: Option<String>,
 }
 
 // this is temporary until we can order the recalculation of room size
@@ -48,8 +51,9 @@ impl Default for RoomState {
             floor_ceiling_width: DEFAULT_WALL_DISTANCE_FROM_CENTER * 2.0,
             boundary_thickness: 0.1,
             bounce_effect: 0.4,
-            //room_id: None,
             doors: vec![],
+            room_id: None,
+            previous_room_id: None,
         }
     }
 }

@@ -71,7 +71,12 @@ fn generate_test_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
             connected_rooms[room1_index].push(room2_index);
             connected_rooms[room2_index].push(room1_index);
 
-            floorplan.add_door(room_indices[room1_index], room_indices[room2_index], door);
+            floorplan.add_door(
+                room_indices[room1_index],
+                room_indices[room2_index],
+                door.clone(),
+            );
+            floorplan.add_door(room_indices[room2_index], room_indices[room1_index], door);
         }
     });
     floorplan

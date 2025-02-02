@@ -10,5 +10,6 @@ pub struct Platform {}
 #[derive(Component)]
 pub struct Door {
     pub room_id: String,
+    #[allow(dead_code)]
     pub room_name: String,
 }

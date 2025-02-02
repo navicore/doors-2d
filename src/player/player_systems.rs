@@ -5,7 +5,7 @@ use super::Player;
 use crate::door::Door;
 use crate::door::Platform;
 use crate::player::player_component::Grounded;
-use crate::room::room_component::CurrentFloorPlan;
+use crate::room::room_component::{CurrentFloorPlan, RoomState};
 use crate::room::{Floor, WINDOW_HEIGHT};
 use avian2d::prelude::*;
 use bevy::prelude::*;
@@ -13,6 +13,27 @@ use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
 };
+pub fn player_enters_new_room(
+    mut commands: Commands,
+    room_state: Res<RoomState>,
+    player_query: Query<(Entity, &Transform), With<Player>>,
+) {
+    if !room_state.is_changed() {
+        return;
+    }
+    if let Some(previous_room_id) = room_state.previous_room_id.clone() {
+        room_state.doors.iter().for_each(|door_state| {
+            if door_state.room_id == previous_room_id {
+                let new_location: Vec2 = door_state.position;
+                let (player_entity, _) = player_query.single();
+                commands.entity(player_entity).insert(Transform {
+                    translation: Vec3::new(new_location.x, new_location.y + 50.0, 1.0),
+                    ..Default::default()
+                });
+            }
+        });
+    }
+}
 
 pub fn spawn_player(mut commands: Commands) {
     let input_map = InputMap::new([
@@ -60,12 +81,7 @@ pub fn detect_player_at_door(
             if distance < 20.0 {
                 for action_state in action_state_query.iter() {
                     if action_state.pressed(&Action::Enter) {
-                        debug!("Player is in front of the door and pressed the enter door action!");
-                        info!(
-                            "The room_id of the door is: {} room name is: {}",
-                            door.room_id.clone(),
-                            door.room_name.clone()
-                        );
+                        current_floorplan.you_were_here = current_floorplan.you_are_here.clone();
                         current_floorplan.you_are_here = Some(door.room_id.clone());
                     }
                 }

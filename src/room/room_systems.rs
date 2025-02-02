@@ -32,12 +32,14 @@ pub fn handle_floor_plan_changes(
             }
         }
 
-        let you_are_here = determine_current_location(&new_floorplan, &current_floorplan);
+        let (you_are_here, you_were_here) =
+            determine_current_location(&new_floorplan, &current_floorplan);
 
         // Update the current floor plan
         *current_floorplan = CurrentFloorPlan {
             floorplan: Some(new_floorplan),
             you_are_here,
+            you_were_here,
         };
     }
 }
@@ -46,18 +48,28 @@ pub fn handle_floor_plan_changes(
 fn determine_current_location(
     new_floorplan: &FloorPlan,
     current_floorplan: &CurrentFloorPlan,
-) -> Option<String> {
+) -> (Option<String>, Option<String>) {
     current_floorplan.you_are_here.as_ref().map_or_else(
         || {
             new_floorplan.get_start_room().map_or_else(
                 |_| {
                     warn!("No start room found in the floor plan.");
-                    None
+                    (None, current_floorplan.you_were_here.clone())
                 },
-                |room| Some(room.id.clone()),
+                |room| {
+                    (
+                        Some(room.id.clone()),
+                        current_floorplan.you_are_here.clone(),
+                    )
+                },
             )
         },
-        |location| Some(location.clone()),
+        |location| {
+            (
+                Some(location.clone()),
+                current_floorplan.you_were_here.clone(),
+            )
+        },
     )
 }
 
@@ -66,6 +78,10 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
         return;
     }
     room_state.doors.clear();
+    room_state
+        .previous_room_id
+        .clone_from(&current_floorplan.you_were_here);
+
     if let Some(floorplan) = current_floorplan.floorplan.as_ref() {
         if let Some(room_id) = &current_floorplan.you_are_here {
             match floorplan.get_doors_and_connected_rooms(room_id) {
