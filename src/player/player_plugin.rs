@@ -5,7 +5,7 @@ use leafwing_input_manager::plugin::InputManagerPlugin;
 
 use super::{
     player_component::Action,
-    player_systems::{detect_player_at_door, player_movement, spawn_player},
+    player_systems::{check_grounded, detect_player_at_door, player_movement, spawn_player},
 };
 
 pub struct PlayerPlugin;
@@ -18,6 +18,7 @@ impl Plugin for PlayerPlugin {
                     .in_set(InGameSet::UserInput)
                     .run_if(in_state(GameState::InGame)),
             )
+            .add_systems(Update, check_grounded.in_set(InGameSet::CollisionDetection))
             .add_systems(
                 Update,
                 player_movement

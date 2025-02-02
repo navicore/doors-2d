@@ -1,4 +1,3 @@
-use crate::movement::{Grounded, Movable};
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 use leafwing_input_manager::Actionlike;
@@ -57,3 +56,9 @@ pub enum Action {
 
 #[derive(Component)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct Grounded(pub bool);
+
+#[derive(Component)]
+pub struct Movable;

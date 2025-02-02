@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
 use integration::TestModeIntegrationPlugin;
-use movement::MovementPlugin;
 use platform::PlatformPlugin;
 use player::PlayerPlugin;
 use room::RoomPlugin;
@@ -13,7 +12,6 @@ use state::StatePlugin;
 mod camera;
 mod floorplan;
 mod integration;
-mod movement;
 mod platform;
 mod player;
 mod room;
@@ -28,7 +26,6 @@ fn main() {
             },
             RoomPlugin,
             PhysicsPlugins::default(),
-            MovementPlugin,
             PlayerPlugin,
             SchedulePlugin,
             StatePlugin,
