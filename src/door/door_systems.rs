@@ -5,11 +5,12 @@ use crate::room::room_component::RoomState;
 
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
+#[allow(clippy::type_complexity)]
 pub fn spawn_platforms(
     mut commands: Commands,
-    room_state: Res<RoomState>,
     asset_server: Res<AssetServer>,
-    query: Query<Entity, With<Platform>>,
+    room_state: Res<RoomState>,
+    param_set: ParamSet<(Query<Entity, With<Platform>>, Query<Entity, With<Door>>)>,
 ) {
     if !room_state.is_changed() {
         return;
@@ -17,23 +18,31 @@ pub fn spawn_platforms(
 
     info!("Room state changed, respawning platforms...");
 
-    despawn_existing_platforms(&mut commands, &query);
+    despawn_existing_platforms(&mut commands, param_set);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let text_font = create_text_font(font);
 
-    for (position, room_name) in room_state
-        .clone()
-        .doors
-        .into_iter()
-        .map(|door_state| (door_state.position, door_state.room_name))
-    {
-        spawn_platform(&mut commands, position, &text_font, room_name);
-        spawn_door(&mut commands, position);
+    for (position, room_name, room_id) in room_state.clone().doors.into_iter().map(|door_state| {
+        (
+            door_state.position,
+            door_state.room_name,
+            door_state.room_id,
+        )
+    }) {
+        spawn_platform(&mut commands, position, &text_font, room_name.clone());
+        spawn_door(&mut commands, position, room_id, room_name);
     }
 }
 
-fn despawn_existing_platforms(commands: &mut Commands, query: &Query<Entity, With<Platform>>) {
-    for entity in query.iter() {
+#[allow(clippy::type_complexity)]
+fn despawn_existing_platforms(
+    commands: &mut Commands,
+    mut param_set: ParamSet<(Query<Entity, With<Platform>>, Query<Entity, With<Door>>)>,
+) {
+    for entity in param_set.p0().iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+    for entity in param_set.p1().iter() {
         commands.entity(entity).despawn();
     }
 }
@@ -87,9 +96,9 @@ fn spawn_platform(
         });
 }
 
-fn spawn_door(commands: &mut Commands, position: Vec2) {
+fn spawn_door(commands: &mut Commands, position: Vec2, room_id: String, room_name: String) {
     commands.spawn((
-        Door,
+        Door { room_id, room_name },
         Transform::from_xyz(
             position.x,
             position.y + PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0,
