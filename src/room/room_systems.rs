@@ -42,6 +42,7 @@ pub fn handle_floor_plan_changes(
     }
 }
 
+/// if there is no current room location, then it is the start room of the new floor plan
 fn determine_current_location(
     new_floorplan: &FloorPlan,
     current_floorplan: &CurrentFloorPlan,
