@@ -2,58 +2,51 @@ use crate::floorplan::{Door, FloorPlan, FloorPlanEvent, Room};
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
-pub fn fire_floorplan_event(
-    mut events: EventWriter<FloorPlanEvent>,
-    mut exit: EventWriter<AppExit>,
-) {
-    // Create a new FloorPlan instance
+const NUMBER_OF_ROOMS: usize = 15;
+const NUMBER_OF_DOORS: usize = 250;
+
+pub fn fire_floorplan_event(mut events: EventWriter<FloorPlanEvent>, exit: EventWriter<AppExit>) {
+    let floorplan = generate_test_floorplan(exit);
+    events.send(FloorPlanEvent { floorplan });
+}
+
+fn generate_test_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
     let mut floorplan = FloorPlan::new();
 
-    // Use the API to add rooms and doors
-    let room1 = Room {
-        id: "1".to_string(),
-        name: "Room 1".to_string(),
-    };
-    let room2 = Room {
-        id: "2".to_string(),
-        name: "Room 2".to_string(),
-    };
-    let room3 = Room {
-        id: "3".to_string(),
-        name: "Room 3".to_string(),
-    };
-    let room4 = Room {
-        id: "4".to_string(),
-        name: "Room 4".to_string(),
-    };
+    // Create rooms
+    let rooms: Vec<Room> = (0..NUMBER_OF_ROOMS)
+        .map(|i| Room {
+            id: i.to_string(),
+            name: format!("Room {}", i + 1),
+        })
+        .collect();
 
-    let first_room_id = &room1.id.clone();
-    let room1_index = floorplan.add_room(room1);
-    let room2_index = floorplan.add_room(room2);
-    let room3_index = floorplan.add_room(room3);
-    let room4_index = floorplan.add_room(room4);
-    if let Err(e) = floorplan.set_start_room(first_room_id) {
-        error!("Failed to set start room: {:?}", e);
-        exit.send(AppExit::error());
+    // Add rooms to floorplan
+    let room_indices: Vec<petgraph::prelude::NodeIndex> = rooms
+        .iter()
+        .map(|room| floorplan.add_room(room.clone()))
+        .collect();
+
+    // Create doors and connect rooms
+    for i in 0..NUMBER_OF_DOORS {
+        let door = Door {
+            id: i.to_string(),
+            name: format!("Door {}", i + 1),
+        };
+
+        if i == 0 {
+            let first_room_id = &rooms[i].id.clone();
+            if let Err(e) = floorplan.set_start_room(first_room_id) {
+                error!("Failed to set start room: {:?}", e);
+                exit.send(AppExit::error());
+            }
+        }
+
+        // Connect rooms in a simple linear fashion for now
+        let room1_index = room_indices[i % NUMBER_OF_ROOMS];
+        let room2_index = room_indices[(i + 1) % NUMBER_OF_ROOMS];
+
+        floorplan.add_door(room1_index, room2_index, door);
     }
-
-    let door = Door {
-        id: "1".to_string(),
-        name: "Door 1".to_string(),
-    };
-    floorplan.add_door(room1_index, room2_index, door);
-    let door2 = Door {
-        id: "2".to_string(),
-        name: "Door 2".to_string(),
-    };
-    floorplan.add_door(room1_index, room3_index, door2);
-
-    let door3 = Door {
-        id: "3".to_string(),
-        name: "Door 3".to_string(),
-    };
-    floorplan.add_door(room1_index, room4_index, door3);
-
-    // Fire the event
-    events.send(FloorPlanEvent { floorplan });
+    floorplan
 }

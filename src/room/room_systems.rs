@@ -7,6 +7,11 @@ use super::room_component::{
     Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
 };
 
+const PLATFORM_X_SEPARATOR: f32 = 450.0;
+const PLATFORM_Y_SEPARATOR: &[f32] = &[
+    0.0, -150.0, 250.0, -100.0, -210.0, 100.0, -200.0, -50.0, 175.0, 25.0,
+];
+
 pub fn handle_floor_plan_changes(
     mut floorplan_events: EventReader<FloorPlanEvent>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
@@ -60,15 +65,26 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
                     // calculate door placement and room size
                     let number_of_doors = doors_and_rooms.len();
                     #[allow(clippy::cast_precision_loss)]
-                    let room_width: f32 = 300.0 * (number_of_doors + 1) as f32; // empty each side of the room
+                    let room_width: f32 = PLATFORM_X_SEPARATOR * (number_of_doors + 1) as f32; // empty each side of the room
                     room_state.wall_distance_from_center = room_width / 2.0;
+                    room_state.floor_ceiling_width = room_width;
 
+                    let mut room_seq = 0;
                     #[allow(clippy::cast_precision_loss)]
                     let mut room_positions: Vec<Vec2> = (0..number_of_doors)
-                        .map(|i| Vec2 {
-                            x: 300.0f32.mul_add(i as f32, 300.0)
-                                - room_state.wall_distance_from_center,
-                            y: 0.0,
+                        .map(|i| {
+                            let y_index = if room_seq < PLATFORM_Y_SEPARATOR.len() {
+                                room_seq
+                            } else {
+                                room_seq % PLATFORM_Y_SEPARATOR.len()
+                            };
+                            room_seq += 1;
+
+                            Vec2 {
+                                x: PLATFORM_X_SEPARATOR.mul_add(i as f32, PLATFORM_X_SEPARATOR)
+                                    - room_state.wall_distance_from_center,
+                                y: PLATFORM_Y_SEPARATOR[y_index],
+                            }
                         })
                         .collect();
 
@@ -172,7 +188,7 @@ pub fn setup_room(
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
-            room_state.floor_ceiling_width / 2.0,
+            room_state.floor_ceiling_width,
             room_state.boundary_thickness,
         )),
         Transform::from_xyz(
@@ -248,11 +264,11 @@ pub fn setup_room(
         RightWall,
     ));
 
-    // Top boundary
+    // Ceiling
     commands.spawn((
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
-            room_state.floor_ceiling_width / 2.0,
+            room_state.floor_ceiling_width,
             room_state.boundary_thickness,
         )),
         Transform::from_xyz(
