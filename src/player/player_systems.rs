@@ -1,6 +1,6 @@
 use super::player_component::{Action, PlayerBundle, PLAYER_JUMP_FORCE, PLAYER_MOVE_SPEED};
 use super::Player;
-use crate::environ::environ_component::WINDOW_HEIGHT;
+use crate::room::WINDOW_HEIGHT;
 use crate::{movement::Grounded, platform::Door};
 use avian2d::prelude::*;
 use bevy::prelude::*;
