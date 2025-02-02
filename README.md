@@ -1,9 +1,7 @@
-Kubernetes Platformer
+Doorgraph
 ==========
 
-A fun Kubernetes UI as I learn Bevy and game programming.
-
-Possibly doing to rename it: DOORS
+A fun Platformer UI to Kubernetes and other data as I learn Bevy and game programming.
 
 # UNDER CONSTRUCTION
 # UNDER CONSTRUCTION
