@@ -1,4 +1,4 @@
-Doorgraph
+Doors
 ==========
 
 A fun Platformer UI to Kubernetes and other data as I learn Bevy and game programming.
