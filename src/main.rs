@@ -24,13 +24,13 @@ fn main() {
             EmbeddedAssetPlugin {
                 mode: PluginMode::ReplaceDefault,
             },
-            RoomPlugin,
             PhysicsPlugins::default(),
-            PlayerPlugin,
-            SchedulePlugin,
-            StatePlugin,
-            DoorPlugin,
             CameraPlugin,
+            SchedulePlugin,
+            RoomPlugin,
+            PlayerPlugin,
+            DoorPlugin,
+            StatePlugin,
             TestModeIntegrationPlugin,
         ))
         .run();
