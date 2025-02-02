@@ -22,7 +22,8 @@ pub struct CurrentFloorPlan {
 
 #[derive(Resource, Clone)]
 pub struct DoorState {
-    pub id: String,
+    pub room_id: String,
+    pub room_name: String,
     pub position: Vec2,
 }
 

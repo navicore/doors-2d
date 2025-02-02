@@ -7,10 +7,7 @@ pub const BOUNCE_EFFECT: f32 = 0.1;
 
 // Component to identify platforms
 #[derive(Component)]
-pub struct Platform {
-    #[allow(dead_code)]
-    pub id: String,
-}
+pub struct Platform {}
 
 #[derive(Component)]
 pub struct Door;

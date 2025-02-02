@@ -102,10 +102,11 @@ fn update_room_state_with_doors(room_state: &mut RoomState, doors_and_rooms: Vec
         })
         .collect();
 
-    for (door, _) in doors_and_rooms {
+    for (_, room) in doors_and_rooms {
         if let Some(position) = room_positions.pop() {
             let door_state = DoorState {
-                id: door.id.clone(),
+                room_id: room.id.clone(),
+                room_name: room.name.clone(),
                 position,
             };
             room_state.doors.push(door_state);
