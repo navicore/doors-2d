@@ -2,17 +2,17 @@ use avian2d::PhysicsPlugins;
 use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
+use door::DoorPlugin;
 use integration::TestModeIntegrationPlugin;
-use platform::PlatformPlugin;
 use player::PlayerPlugin;
 use room::RoomPlugin;
 use scheduler::SchedulePlugin;
 use state::StatePlugin;
 
 mod camera;
+mod door;
 mod floorplan;
 mod integration;
-mod platform;
 mod player;
 mod room;
 mod scheduler;
@@ -29,7 +29,7 @@ fn main() {
             PlayerPlugin,
             SchedulePlugin,
             StatePlugin,
-            PlatformPlugin,
+            DoorPlugin,
             CameraPlugin,
             TestModeIntegrationPlugin,
         ))

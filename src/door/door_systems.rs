@@ -3,7 +3,7 @@ use bevy::{prelude::*, text::TextBounds};
 
 use crate::room::room_component::RoomState;
 
-use super::platform_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
+use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
 pub fn spawn_platforms(
     mut commands: Commands,

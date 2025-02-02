@@ -2,8 +2,8 @@ use super::player_component::{
     Action, Movable, PlayerBundle, PLAYER_JUMP_FORCE, PLAYER_MOVE_SPEED,
 };
 use super::Player;
-use crate::platform::Door;
-use crate::platform::Platform;
+use crate::door::Door;
+use crate::door::Platform;
 use crate::player::player_component::Grounded;
 use crate::room::{Floor, WINDOW_HEIGHT};
 use avian2d::prelude::*;
