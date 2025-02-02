@@ -18,7 +18,7 @@ fn generate_test_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
     let rooms: Vec<Room> = (0..NUMBER_OF_ROOMS)
         .map(|i| Room {
             id: i.to_string(),
-            name: format!("Room {}", i + 1),
+            name: format!("Room {i}"),
         })
         .collect();
 

@@ -5,6 +5,7 @@ use super::Player;
 use crate::door::Door;
 use crate::door::Platform;
 use crate::player::player_component::Grounded;
+use crate::room::room_component::CurrentFloorPlan;
 use crate::room::{Floor, WINDOW_HEIGHT};
 use avian2d::prelude::*;
 use bevy::prelude::*;
@@ -47,19 +48,25 @@ pub fn player_movement(
 
 pub fn detect_player_at_door(
     player_query: Query<&Transform, With<Player>>,
-    door_query: Query<&Transform, With<Door>>,
+    door_query: Query<(&Transform, &Door)>,
     action_state_query: Query<&ActionState<Action>>,
+    mut current_floorplan: ResMut<CurrentFloorPlan>,
 ) {
     if let Ok(player_transform) = player_query.get_single() {
-        for door_transform in door_query.iter() {
+        for (door_transform, door) in door_query.iter() {
             let distance = player_transform
                 .translation
                 .distance(door_transform.translation);
             if distance < 20.0 {
                 for action_state in action_state_query.iter() {
                     if action_state.pressed(&Action::Enter) {
-                        info!("Player is in front of the door and pressed the enter door action!");
-                        // Add your logic for entering the door here
+                        debug!("Player is in front of the door and pressed the enter door action!");
+                        info!(
+                            "The room_id of the door is: {} room name is: {}",
+                            door.room_id.clone(),
+                            door.room_name.clone()
+                        );
+                        current_floorplan.you_are_here = Some(door.room_id.clone());
                     }
                 }
             }

@@ -65,6 +65,7 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
     if !current_floorplan.is_changed() {
         return;
     }
+    room_state.doors.clear();
     if let Some(floorplan) = current_floorplan.floorplan.as_ref() {
         if let Some(room_id) = &current_floorplan.you_are_here {
             match floorplan.get_doors_and_connected_rooms(room_id) {
