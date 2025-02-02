@@ -8,7 +8,7 @@ use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLAT
 pub fn spawn_platforms(
     mut commands: Commands,
     room_state: Res<RoomState>,
-    asset_server: Res<AssetServer>, // Add this resource to load fonts
+    asset_server: Res<AssetServer>,
     query: Query<Entity, With<Platform>>,
 ) {
     if !room_state.is_changed() {
@@ -17,73 +17,88 @@ pub fn spawn_platforms(
 
     info!("Room state changed, respawning platforms...");
 
-    // Despawn all existing platforms
-    for entity in query.iter() {
-        commands.entity(entity).despawn();
-    }
-
+    despawn_existing_platforms(&mut commands, &query);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    let slightly_smaller_text_font = TextFont {
-        font,
-        font_size: 14.0,
-        ..default()
-    };
+    let text_font = create_text_font(font);
 
-    // Spawn new platforms based on the current room state
     for (position, room_name) in room_state
         .clone()
         .doors
         .into_iter()
         .map(|door_state| (door_state.position, door_state.room_name))
     {
-        // Spawn the platform
-        commands
-            .spawn((
-                RigidBody::Static,
-                Collider::from(SharedShape::cuboid(
-                    PLATFORM_WIDTH / 2.0,
-                    PLATFORM_HEIGHT / 2.0,
-                )),
-                Transform::from_xyz(position.x, position.y, 0.0),
-                Friction {
-                    dynamic_coefficient: 0.6,
-                    static_coefficient: 0.8,
-                    combine_rule: CoefficientCombine::Average,
-                },
-                Restitution {
-                    coefficient: BOUNCE_EFFECT,
-                    combine_rule: CoefficientCombine::Max,
-                },
-                Platform {},
-                Sprite {
-                    color: Color::srgb(0.5, 0.5, 0.5),
-                    custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-                    ..default()
-                },
-            ))
-            .with_children(|builder| {
-                builder.spawn((
-                    Text2d::new(room_name.to_string()),
-                    slightly_smaller_text_font.clone(),
-                    TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
-                    TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-                    Transform::from_translation(Vec3::Z),
-                ));
-            });
+        spawn_platform(&mut commands, position, &text_font, room_name);
+        spawn_door(&mut commands, position);
+    }
+}
 
-        // Spawn the door on top of the platform
-        commands.spawn((
-            Door,
-            Transform::from_xyz(
-                position.x,
-                position.y + PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0,
-                0.1,
-            ), // Adjust the position to sit on the platform
+fn despawn_existing_platforms(commands: &mut Commands, query: &Query<Entity, With<Platform>>) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+    }
+}
+
+fn create_text_font(font: Handle<Font>) -> TextFont {
+    TextFont {
+        font,
+        font_size: 14.0,
+        ..default()
+    }
+}
+
+fn spawn_platform(
+    commands: &mut Commands,
+    position: Vec2,
+    text_font: &TextFont,
+    room_name: String,
+) {
+    commands
+        .spawn((
+            RigidBody::Static,
+            Collider::from(SharedShape::cuboid(
+                PLATFORM_WIDTH / 2.0,
+                PLATFORM_HEIGHT / 2.0,
+            )),
+            Transform::from_xyz(position.x, position.y, 0.0),
+            Friction {
+                dynamic_coefficient: 0.6,
+                static_coefficient: 0.8,
+                combine_rule: CoefficientCombine::Average,
+            },
+            Restitution {
+                coefficient: BOUNCE_EFFECT,
+                combine_rule: CoefficientCombine::Max,
+            },
+            Platform {},
             Sprite {
-                color: Color::srgb(0.3, 0.3, 0.3),
-                custom_size: Some(Vec2::new(PLATFORM_WIDTH / 4.0, PLATFORM_WIDTH / 2.0)), // Twice as tall as wide
+                color: Color::srgb(0.5, 0.5, 0.5),
+                custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
                 ..default()
             },
-        ));
-    }
+        ))
+        .with_children(|builder| {
+            builder.spawn((
+                Text2d::new(room_name),
+                text_font.clone(),
+                TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
+                TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
+                Transform::from_translation(Vec3::Z),
+            ));
+        });
+}
+
+fn spawn_door(commands: &mut Commands, position: Vec2) {
+    commands.spawn((
+        Door,
+        Transform::from_xyz(
+            position.x,
+            position.y + PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0,
+            0.1,
+        ),
+        Sprite {
+            color: Color::srgb(0.3, 0.3, 0.3),
+            custom_size: Some(Vec2::new(PLATFORM_WIDTH / 4.0, PLATFORM_WIDTH / 2.0)),
+            ..default()
+        },
+    ));
 }
