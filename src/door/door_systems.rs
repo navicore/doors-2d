@@ -16,7 +16,7 @@ pub fn spawn_platforms(
         return;
     }
 
-    info!("Room state changed, respawning platforms...");
+    debug!("Room state changed, respawning platforms...");
 
     despawn_existing_platforms(&mut commands, param_set);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
