@@ -1,12 +1,14 @@
 use bevy::{prelude::*, text::TextBounds};
 
-use super::state_component::{GameState, PausedText};
+use super::state_component::{GameState, PausedText, Transition};
 
 pub fn remove_pause_text(mut commands: Commands, query: Query<Entity, With<PausedText>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
     }
 }
+
+static PAUSED_TEXT_COLOR: Color = Color::srgb(1.0, 0.4, 0.3); // red / orange
 
 pub fn game_state_input_events(
     mut next_state: ResMut<NextState<GameState>>,
@@ -17,6 +19,7 @@ pub fn game_state_input_events(
         match state.get() {
             GameState::InGame => next_state.set(GameState::Paused),
             GameState::Paused => next_state.set(GameState::InGame),
+            _ => (), //noop
         }
     } else if keyboard_input.just_pressed(KeyCode::KeyQ) {
         // exit the game
@@ -56,8 +59,8 @@ pub fn display_paused_text(
 
     commands
         .spawn((
-            Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), box_size),
-            Transform::from_translation(box_position.extend(0.0)),
+            Sprite::from_color(PAUSED_TEXT_COLOR, box_size),
+            Transform::from_translation(box_position.extend(2.0)),
             PausedText,
         ))
         .with_children(|builder| {
@@ -66,8 +69,40 @@ pub fn display_paused_text(
                 slightly_smaller_text_font.clone(),
                 TextLayout::new(JustifyText::Center, LineBreak::WordBoundary), // Ensure center justification
                 TextBounds::from(box_size),
-                Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)), // Ensure text is centered in the parent
+                Transform::from_translation(Vec3::new(0.0, 0.0, 3.0)), // Ensure text is centered in the parent
                 PausedText,
             ));
         });
+}
+
+pub fn transition_out_system(
+    mut next_state: ResMut<NextState<GameState>>,
+    state: ResMut<State<GameState>>,
+    mut transition: ResMut<Transition>,
+    time: Res<Time>,
+) {
+    if *state.get() == GameState::TransitioningOut {
+        transition.progress += time.delta_secs();
+        if transition.progress >= 1.0 {
+            transition.progress = 0.0;
+            next_state.set(GameState::TransitioningIn);
+            // Hide current room entities and prepare new room entities
+        }
+    }
+}
+
+pub fn transition_in_system(
+    mut next_state: ResMut<NextState<GameState>>,
+    state: ResMut<State<GameState>>,
+    mut transition: ResMut<Transition>,
+    time: Res<Time>,
+) {
+    if *state.get() == GameState::TransitioningIn {
+        transition.progress += time.delta_secs();
+        if transition.progress >= 1.0 {
+            transition.progress = 0.0;
+            next_state.set(GameState::InGame);
+            // Show new room entities
+        }
+    }
 }
