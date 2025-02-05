@@ -13,7 +13,7 @@ pub fn remove_pause_text(mut commands: Commands, query: Query<Entity, With<Pause
     }
 }
 
-pub fn game_state_input_events(
+pub fn handle_pause_events(
     mut next_state: ResMut<NextState<GameState>>,
     state: Res<State<GameState>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
