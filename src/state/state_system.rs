@@ -7,14 +7,22 @@ pub fn transition_out_system(
     state: ResMut<State<GameState>>,
     mut transition: ResMut<Transition>,
     time: Res<Time>,
+    mut commands: Commands,
+    camera_query: Query<Entity, With<Camera2d>>,
 ) {
     if *state.get() == GameState::TransitioningOut {
         if transition.progress == 0.0 {
             // Capture the current screen
+            // Assuming you have a method to capture the screen and store it in transition
+            transition.capture_screen(&camera_query);
 
             // Store the captured image in the transition resource
+            // This is assumed to be handled by the capture_screen method
 
-            // disable the camera
+            // Disable the camera
+            for camera in camera_query.iter() {
+                commands.entity(camera).despawn();
+            }
         }
 
         // Increment the transition progress
@@ -25,22 +33,30 @@ pub fn transition_out_system(
         }
 
         if transition.progress < 1.0 {
-            // fade out from the captured_image
+            // Fade out from the captured_image
+            transition.fade_out();
         }
     }
 }
 
 pub fn transition_in_system(
-    //mut next_state: ResMut<NextState<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
     state: ResMut<State<GameState>>,
-    // mut transition: ResMut<Transition>,
-    // time: Res<Time>,
-    // mut commands: Commands,
-    // camera_query: Query<Entity, With<Camera2d>>,
+    mut transition: ResMut<Transition>,
+    mut commands: Commands,
+    camera_query: Query<Entity, With<Camera2d>>,
 ) {
     if *state.get() == GameState::TransitioningIn {
-        // restore camera
-        // set next_state to GameState::InGame
-        // set transition to 0.0 and None for captured_image
+        // Restore camera
+        for camera in camera_query.iter() {
+            commands.entity(camera).insert(Camera2d);
+        }
+
+        // Set next_state to GameState::InGame
+        next_state.set(GameState::InGame);
+
+        // Set transition to 0.0 and None for captured_image
+        transition.progress = 0.0;
+        transition.clear_captured_image();
     }
 }
