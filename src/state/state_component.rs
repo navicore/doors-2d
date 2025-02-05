@@ -9,16 +9,19 @@ pub enum GameState {
     TransitioningIn,
 }
 
-#[derive(Debug, Component)]
-pub struct PausedText;
-
 #[derive(Debug, Resource)]
 pub struct Transition {
     pub progress: f32,
+
+    #[allow(dead_code)]
+    pub captured_image: Option<Handle<Image>>,
 }
 
 impl Default for Transition {
     fn default() -> Self {
-        Self { progress: 0.0 }
+        Self {
+            progress: 0.0,
+            captured_image: None,
+        }
     }
 }
