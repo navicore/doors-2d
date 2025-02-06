@@ -7,24 +7,32 @@ use super::{
     GameState,
 };
 
-pub fn setup_fade_overlay(mut commands: Commands) {
-    commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color: Color::rgba(0.0, 0.0, 0.0, 0.0), // Fully transparent initially
-                custom_size: Some(Vec2::new(WINDOW_WIDTH, WINDOW_HEIGHT)), // Cover screen
+fn setup_fade_overlay(
+    mut commands: Commands,
+    camera_query: Query<Entity, With<Camera2d>>, // Find the camera entity
+) {
+    let camera_entity = camera_query.single();
+
+    // Spawn a fullscreen black sprite for fade effect
+    let fade_overlay = commands
+        .spawn((
+            SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgba(0.0, 0.0, 0.0, 0.0), // Fully transparent initially
+                    custom_size: Some(Vec2::new(WINDOW_WIDTH, WINDOW_HEIGHT)), // Covers screen
+                    ..default()
+                },
+                transform: Transform::from_xyz(0.0, 0.0, 1.0), // Slightly above to cover everything
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, 0.0, 10.0), // Render on top
-            ..default()
-        },
-        FadeOverlay, // Add this tag so our query finds it
-    ));
+            FadeOverlay, // Tag it to query later
+        ))
+        .id();
 
-    commands.insert_resource(FadeEffect {
-        alpha: 0.0,
-        fading_out: false,
-    });
+    // Attach the fade overlay to the camera so it moves together
+    commands.entity(camera_entity).add_child(fade_overlay);
+
+    println!("Fade Overlay Setup Complete.");
 }
 
 pub fn fade_out(
