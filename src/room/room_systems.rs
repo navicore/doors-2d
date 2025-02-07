@@ -78,13 +78,7 @@ fn determine_current_location(
     )
 }
 
-pub fn update_doors(
-    mut next_state: ResMut<NextState<GameState>>,
-    state: Res<State<GameState>>,
-
-    current_floorplan: Res<CurrentFloorPlan>,
-    mut room_state: ResMut<RoomState>,
-) {
+pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: ResMut<RoomState>) {
     if !current_floorplan.is_changed() {
         return;
     }
@@ -102,10 +96,6 @@ pub fn update_doors(
                 _ => panic!("Failed to get doors and connected rooms"),
             }
         }
-    }
-
-    if *state == GameState::RoomChange {
-        next_state.set(GameState::TransitioningIn);
     }
 }
 

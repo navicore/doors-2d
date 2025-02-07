@@ -33,7 +33,7 @@ pub fn spawn_platforms(
         spawn_platform(&mut commands, position, &text_font, room_name.clone());
         spawn_door(&mut commands, position, room_id, room_name);
     }
-    next_state.set(GameState::TransitioningIn);
+    //next_state.set(GameState::TransitioningIn);
 }
 
 #[allow(clippy::type_complexity)]

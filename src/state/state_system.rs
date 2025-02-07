@@ -7,6 +7,10 @@ use super::{
     GameState,
 };
 
+const FADE_OUT_DURATION: f32 = 1.5;
+const CURTAIN_DURATION: f32 = 1.1;
+const FADE_IN_DURATION: f32 = 2.0;
+
 pub fn setup_fade_overlay(mut commands: Commands, room_state: Res<RoomState>) {
     commands.spawn((
         Sprite {
@@ -19,6 +23,7 @@ pub fn setup_fade_overlay(mut commands: Commands, room_state: Res<RoomState>) {
     ));
 
     commands.insert_resource(FadeEffect {
+        curtain: 0.0,
         alpha: 0.0,
         fading_out: false,
     });
@@ -33,7 +38,7 @@ pub fn fade_out(
     let mut sprite = fade_query.single_mut();
 
     if fade.fading_out {
-        fade.alpha += time.delta_secs() * 1.5; // Slow fade-out
+        fade.alpha += time.delta_secs() * FADE_OUT_DURATION; // Slow fade-out
         fade.alpha = fade.alpha.min(1.0); // Clamp at full opacity
         sprite.color.set_alpha(fade.alpha);
 
@@ -42,6 +47,20 @@ pub fn fade_out(
                                      //next_state.set(GameState::RoomChange);
             next_state.set(GameState::RoomChange);
         }
+    }
+}
+
+pub fn room_change_curtain(
+    mut next_state: ResMut<NextState<GameState>>,
+    mut fade: ResMut<FadeEffect>,
+    time: Res<Time>,
+) {
+    fade.curtain += time.delta_secs() * CURTAIN_DURATION; // Slow fade-out
+    fade.curtain = fade.curtain.min(1.0); // Clamp at full opacity
+
+    if fade.curtain >= 1.0 {
+        next_state.set(GameState::TransitioningIn);
+        fade.curtain = 0.0; // Reset for next time
     }
 }
 
@@ -54,7 +73,7 @@ pub fn fade_in(
     let mut sprite = fade_query.single_mut();
 
     if !fade.fading_out {
-        fade.alpha -= time.delta_secs() * 1.5; // Slow fade-in
+        fade.alpha -= time.delta_secs() * FADE_IN_DURATION; // Slow fade-in
         fade.alpha = fade.alpha.max(0.0); // Clamp at full transparency
         sprite.color.set_alpha(fade.alpha);
 
