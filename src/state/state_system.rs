@@ -9,16 +9,13 @@ use super::{
 
 pub fn setup_fade_overlay(mut commands: Commands, room_state: Res<RoomState>) {
     commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color: Color::rgba(0.0, 0.0, 0.0, 0.0), // Fully transparent initially
-                custom_size: Some(Vec2::new(room_state.floor_ceiling_width, WINDOW_HEIGHT)), // Cover screen
-                ..default()
-            },
-            transform: Transform::from_xyz(0.0, 0.0, 10.0), // Render on top
+        Sprite {
+            color: Color::srgba(0.0, 0.0, 0.0, 0.0), // Fully transparent initially
+            custom_size: Some(Vec2::new(room_state.floor_ceiling_width, WINDOW_HEIGHT)), // Cover screen
             ..default()
         },
-        FadeOverlay, // Add this tag so our query finds it
+        Transform::from_xyz(0.0, 0.0, 10.0), // Render on top
+        FadeOverlay,                         // Add this tag so our query finds it
     ));
 
     commands.insert_resource(FadeEffect {
