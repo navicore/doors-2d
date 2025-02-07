@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
-use crate::room::{room_component::WINDOW_WIDTH, WINDOW_HEIGHT};
+use crate::room::{room_component::RoomState, WINDOW_HEIGHT};
 
 use super::{
     state_component::{FadeEffect, FadeOverlay},
     GameState,
 };
 
-pub fn setup_fade_overlay(mut commands: Commands) {
+pub fn setup_fade_overlay(mut commands: Commands, room_state: Res<RoomState>) {
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 color: Color::rgba(0.0, 0.0, 0.0, 0.0), // Fully transparent initially
-                custom_size: Some(Vec2::new(WINDOW_WIDTH, WINDOW_HEIGHT)), // Cover screen
+                custom_size: Some(Vec2::new(room_state.floor_ceiling_width, WINDOW_HEIGHT)), // Cover screen
                 ..default()
             },
             transform: Transform::from_xyz(0.0, 0.0, 10.0), // Render on top
