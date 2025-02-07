@@ -41,10 +41,9 @@ pub fn fade_out(
         sprite.color.set_alpha(fade.alpha);
 
         if fade.alpha >= 1.0 {
-            println!("Finished Fading Out, starting Fade In...");
             fade.fading_out = false; // Switch to fading in
                                      //next_state.set(GameState::RoomChange);
-            next_state.set(GameState::TransitioningIn);
+            next_state.set(GameState::RoomChange);
         }
     }
 }
@@ -63,7 +62,6 @@ pub fn fade_in(
         sprite.color.set_alpha(fade.alpha);
 
         if fade.alpha <= 0.0 {
-            println!("Finished Fading In, ready for next transition.");
             next_state.set(GameState::InGame); // Transition complete
         }
     }

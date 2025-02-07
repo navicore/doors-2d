@@ -7,7 +7,7 @@ use super::room_component::{
 use crate::{
     floorplan::{Door, FloorPlan, FloorPlanEvent, Room},
     room::room_component::DoorState,
-    state::GameState,
+    state::{state_component::FadeEffect, GameState},
 };
 
 const PLATFORM_X_SEPARATOR: f32 = 450.0;
@@ -16,8 +16,10 @@ const PLATFORM_Y_SEPARATOR: &[f32] = &[
 ];
 
 pub fn handle_floor_plan_changes(
+    mut next_state: ResMut<NextState<GameState>>,
     mut floorplan_events: EventReader<FloorPlanEvent>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
+    mut fade: ResMut<FadeEffect>,
 ) {
     for event in floorplan_events.read() {
         info!("Floor plan event received.");
@@ -42,6 +44,8 @@ pub fn handle_floor_plan_changes(
             you_are_here,
             you_were_here,
         };
+        next_state.set(GameState::TransitioningOut);
+        fade.fading_out = true;
     }
 }
 
