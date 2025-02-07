@@ -20,7 +20,7 @@ pub fn handle_floor_plan_changes(
     mut current_floorplan: ResMut<CurrentFloorPlan>,
 ) {
     for event in floorplan_events.read() {
-        debug!("Floor plan event received.");
+        info!("Floor plan event received.");
 
         let new_floorplan = event.floorplan.clone();
 

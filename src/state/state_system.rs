@@ -40,8 +40,6 @@ pub fn fade_out(
         fade.alpha = fade.alpha.min(1.0); // Clamp at full opacity
         sprite.color.set_alpha(fade.alpha);
 
-        println!("Fading Out: Alpha = {}", fade.alpha);
-
         if fade.alpha >= 1.0 {
             println!("Finished Fading Out, starting Fade In...");
             fade.fading_out = false; // Switch to fading in
@@ -63,8 +61,6 @@ pub fn fade_in(
         fade.alpha -= time.delta_secs() * 1.5; // Slow fade-in
         fade.alpha = fade.alpha.max(0.0); // Clamp at full transparency
         sprite.color.set_alpha(fade.alpha);
-
-        println!("Fading In: Alpha = {}", fade.alpha);
 
         if fade.alpha <= 0.0 {
             println!("Finished Fading In, ready for next transition.");
