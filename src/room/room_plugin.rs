@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::scheduler::InGameSet;
+use crate::state::GameState;
 
 use super::{
     room_component::{CurrentFloorPlan, RoomState, WINDOW_HEIGHT, WINDOW_WIDTH},
@@ -16,23 +16,20 @@ impl Plugin for RoomPlugin {
             .insert_resource(RoomState::default())
             .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "Kubernetes Platformer".to_string(),
+                    title: "Doors".to_string(),
                     resolution: bevy::window::WindowResolution::from((WINDOW_WIDTH, WINDOW_HEIGHT)),
                     ..default()
                 }),
                 ..default()
             }))
             //.add_systems(Startup, setup_room)
+            .add_systems(Startup, setup_room)
+            .add_systems(Update, handle_floor_plan_changes)
             .add_systems(
                 Update,
-                (
-                    setup_room,
-                    handle_floor_plan_changes,
-                    update_doors,
-                    update_room,
-                )
+                (update_doors, update_room)
                     .chain()
-                    .in_set(InGameSet::EntityUpdates),
+                    .run_if(in_state(GameState::RoomChange)),
             );
     }
 }

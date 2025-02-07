@@ -7,6 +7,7 @@ use super::room_component::{
 use crate::{
     floorplan::{Door, FloorPlan, FloorPlanEvent, Room},
     room::room_component::DoorState,
+    state::{state_component::FadeEffect, GameState},
 };
 
 const PLATFORM_X_SEPARATOR: f32 = 450.0;
@@ -15,11 +16,13 @@ const PLATFORM_Y_SEPARATOR: &[f32] = &[
 ];
 
 pub fn handle_floor_plan_changes(
+    mut next_state: ResMut<NextState<GameState>>,
     mut floorplan_events: EventReader<FloorPlanEvent>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
+    mut fade: ResMut<FadeEffect>,
 ) {
     for event in floorplan_events.read() {
-        debug!("Floor plan event received.");
+        info!("Floor plan event received.");
 
         let new_floorplan = event.floorplan.clone();
 
@@ -41,6 +44,8 @@ pub fn handle_floor_plan_changes(
             you_are_here,
             you_were_here,
         };
+        next_state.set(GameState::TransitioningOut);
+        fade.fading_out = true;
     }
 }
 
@@ -73,7 +78,13 @@ fn determine_current_location(
     )
 }
 
-pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: ResMut<RoomState>) {
+pub fn update_doors(
+    mut next_state: ResMut<NextState<GameState>>,
+    state: Res<State<GameState>>,
+
+    current_floorplan: Res<CurrentFloorPlan>,
+    mut room_state: ResMut<RoomState>,
+) {
     if !current_floorplan.is_changed() {
         return;
     }
@@ -91,6 +102,10 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
                 _ => panic!("Failed to get doors and connected rooms"),
             }
         }
+    }
+
+    if *state == GameState::RoomChange {
+        next_state.set(GameState::TransitioningIn);
     }
 }
 

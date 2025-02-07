@@ -9,6 +9,7 @@ const MAX_DOORS_PER_ROOM: usize = 19;
 pub fn fire_floorplan_event(mut events: EventWriter<FloorPlanEvent>, exit: EventWriter<AppExit>) {
     let floorplan = generate_test_floorplan(exit);
     events.send(FloorPlanEvent { floorplan });
+    info!("Fired FloorPlanEvent");
 }
 
 fn generate_test_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
