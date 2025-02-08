@@ -16,6 +16,7 @@ use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
 };
+
 pub fn player_enters_new_room(
     mut commands: Commands,
     room_state: Res<RoomState>,
@@ -46,28 +47,29 @@ pub fn player_enters_new_room(
     }
 }
 
-pub fn animate_player(
-    time: Res<Time>,
-    mut query: Query<(
-        &PlayerAnimationIndices,
-        &mut PlayerAnimationTimer,
-        &mut Sprite,
-    )>,
-) {
-    for (indices, mut timer, mut sprite) in &mut query {
-        timer.tick(time.delta());
+// pub fn animate_player(
+//     time: Res<Time>,
+//     mut query: Query<(
+//         &PlayerAnimationIndices,
+//         &mut PlayerAnimationTimer,
+//         &mut Sprite,
+//     )>,
+// ) {
+//     for (indices, mut timer, mut sprite) in &mut query {
+//         timer.tick(time.delta());
+//
+//         if timer.just_finished() {
+//             if let Some(atlas) = &mut sprite.texture_atlas {
+//                 atlas.index = if atlas.index == indices.last {
+//                     indices.first
+//                 } else {
+//                     atlas.index + 1
+//                 };
+//             }
+//         }
+//     }
+// }
 
-        if timer.just_finished() {
-            if let Some(atlas) = &mut sprite.texture_atlas {
-                atlas.index = if atlas.index == indices.last {
-                    indices.first
-                } else {
-                    atlas.index + 1
-                };
-            }
-        }
-    }
-}
 pub fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -110,6 +112,12 @@ pub fn spawn_player(
 }
 
 pub fn player_movement(
+    time: Res<Time>,
+    mut animation_query: Query<(
+        &PlayerAnimationIndices,
+        &mut PlayerAnimationTimer,
+        &mut Sprite,
+    )>,
     mut query: Query<(&mut ExternalForce, &Grounded, &ActionState<Action>), With<Player>>,
 ) {
     if let Ok((mut force, grounded, action_state)) = query.get_single_mut() {
@@ -123,6 +131,19 @@ pub fn player_movement(
         }
         if action_state.pressed(&Action::MoveRight) {
             force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
+            for (indices, mut timer, mut sprite) in &mut animation_query {
+                timer.tick(time.delta());
+
+                if timer.just_finished() {
+                    if let Some(atlas) = &mut sprite.texture_atlas {
+                        atlas.index = if atlas.index == indices.last {
+                            indices.first
+                        } else {
+                            atlas.index + 1
+                        };
+                    }
+                }
+            }
         }
     }
 }
