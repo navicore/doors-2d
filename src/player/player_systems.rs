@@ -1,5 +1,6 @@
 use super::player_component::{
-    Action, Movable, PlayerBundle, PLAYER_JUMP_FORCE, PLAYER_MOVE_SPEED,
+    Action, Movable, PlayerAnimationIndices, PlayerAnimationTimer, PlayerBundle, PLAYER_JUMP_FORCE,
+    PLAYER_MOVE_SPEED,
 };
 use super::Player;
 use crate::door::Door;
@@ -28,16 +29,65 @@ pub fn player_enters_new_room(
             if door_state.room_id == previous_room_id {
                 let new_location: Vec2 = door_state.position;
                 let (player_entity, _) = player_query.single();
-                commands.entity(player_entity).insert(Transform {
-                    translation: Vec3::new(new_location.x, new_location.y + 50.0, 1.0),
-                    ..Default::default()
-                });
+                commands.entity(player_entity).insert(
+                    Transform::from_scale(Vec3 {
+                        x: 4.0,
+                        y: 4.0,
+                        z: 2.0,
+                    })
+                    .with_translation(Vec3::new(
+                        new_location.x,
+                        new_location.y + 50.0,
+                        2.0,
+                    )),
+                );
             }
         });
     }
 }
 
-pub fn spawn_player(mut commands: Commands) {
+pub fn animate_player(
+    time: Res<Time>,
+    mut query: Query<(
+        &PlayerAnimationIndices,
+        &mut PlayerAnimationTimer,
+        &mut Sprite,
+    )>,
+) {
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+
+        if timer.just_finished() {
+            if let Some(atlas) = &mut sprite.texture_atlas {
+                atlas.index = if atlas.index == indices.last {
+                    indices.first
+                } else {
+                    atlas.index + 1
+                };
+            }
+        }
+    }
+}
+pub fn spawn_player(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    //let texture = asset_server.load("textures/rpg/chars/gabe/gabe-idle-run.png");
+    let texture = asset_server.load("gabe-idle-run.png");
+    //let texture = asset_server.load("stickman.png");
+    let layout = TextureAtlasLayout::from_grid(
+        // note, thie stickman is bad
+        UVec2::splat(24),
+        7,
+        1,
+        None, //Some(UVec2::splat(4)),
+        None, //Some(UVec2::splat(4)),
+    );
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
+    // Use only the subset of sprites in the sheet that make up the run animation
+    let animation_indices = PlayerAnimationIndices { first: 1, last: 6 };
+
     let input_map = InputMap::new([
         (Action::Jump, KeyCode::Space),
         (Action::MoveLeft, KeyCode::ArrowLeft),
@@ -46,8 +96,16 @@ pub fn spawn_player(mut commands: Commands) {
     ]);
     commands.spawn((
         InputManagerBundle::with_map(input_map),
-        PlayerBundle::new(),
-        Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 1.0),
+        PlayerBundle::new(texture, texture_atlas_layout, animation_indices.clone()),
+        Transform::from_scale(Vec3 {
+            x: 4.0,
+            y: 4.0,
+            z: 2.0,
+        })
+        .with_translation(Vec3::new(0.0, 0.0, 2.0)),
+        //Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 1.0),
+        animation_indices,
+        PlayerAnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
     ));
 }
 

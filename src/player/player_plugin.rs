@@ -5,8 +5,8 @@ use leafwing_input_manager::plugin::InputManagerPlugin;
 use super::{
     player_component::Action,
     player_systems::{
-        check_grounded, detect_player_at_door, player_enters_new_room, player_movement,
-        spawn_player,
+        animate_player, check_grounded, detect_player_at_door, player_enters_new_room,
+        player_movement, spawn_player,
     },
 };
 
@@ -19,7 +19,10 @@ impl Plugin for PlayerPlugin {
                 Update,
                 player_enters_new_room.run_if(in_state(GameState::RoomChange)),
             )
-            .add_systems(Update, player_movement.run_if(in_state(GameState::InGame)))
+            .add_systems(
+                Update,
+                (animate_player, player_movement).run_if(in_state(GameState::InGame)),
+            )
             .add_plugins(InputManagerPlugin::<Action>::default());
     }
 }
