@@ -125,7 +125,6 @@ pub fn player_movement(
 
 pub fn detect_player_at_door(
     mut next_state: ResMut<NextState<GameState>>,
-    state: Res<State<GameState>>,
     player_query: Query<&Transform, With<Player>>,
     door_query: Query<(&Transform, &Parent, &Door)>,
     platform_query: Query<&Transform, With<Platform>>,
@@ -133,9 +132,6 @@ pub fn detect_player_at_door(
     mut current_floorplan: ResMut<CurrentFloorPlan>,
     mut fade: ResMut<FadeEffect>,
 ) {
-    if *state != GameState::InGame {
-        return;
-    }
     if let Ok(player_transform) = player_query.get_single() {
         for (door_transform, parent, door) in door_query.iter() {
             if let Ok(platform_transform) = platform_query.get(parent.get()) {
