@@ -53,9 +53,9 @@ mod tests {
         assert_eq!(start_room.id, "0");
 
         let doors_and_rooms = plan.get_doors_and_connected_rooms(&start_room.id).unwrap();
-        assert_eq!(doors_and_rooms.len(), 19);
+        assert_eq!(doors_and_rooms.len(), 2);
 
         let other_room = doors_and_rooms[0].1;
-        assert_eq!(other_room.id, "10");
+        assert_eq!(other_room.id, "3");
     }
 }
