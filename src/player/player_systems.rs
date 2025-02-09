@@ -47,39 +47,14 @@ pub fn player_enters_new_room(
     }
 }
 
-// pub fn animate_player(
-//     time: Res<Time>,
-//     mut query: Query<(
-//         &PlayerAnimationIndices,
-//         &mut PlayerAnimationTimer,
-//         &mut Sprite,
-//     )>,
-// ) {
-//     for (indices, mut timer, mut sprite) in &mut query {
-//         timer.tick(time.delta());
-//
-//         if timer.just_finished() {
-//             if let Some(atlas) = &mut sprite.texture_atlas {
-//                 atlas.index = if atlas.index == indices.last {
-//                     indices.first
-//                 } else {
-//                     atlas.index + 1
-//                 };
-//             }
-//         }
-//     }
-// }
-
 pub fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    //let texture = asset_server.load("textures/rpg/chars/gabe/gabe-idle-run.png");
     let texture = asset_server.load("gabe-idle-run.png");
-    //let texture = asset_server.load("stickman.png");
+    //let texture = asset_server.load("PlayerSheet.png");
     let layout = TextureAtlasLayout::from_grid(
-        // note, thie stickman is bad
         UVec2::splat(24),
         7,
         1,

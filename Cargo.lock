@@ -2871,6 +2871,7 @@ dependencies = [
  "bevy_lunex",
  "leafwing-input-manager",
  "petgraph 0.7.1",
+ "serde",
  "serde_json",
 ]
 

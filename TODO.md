@@ -24,3 +24,5 @@ Plans:
       * Final boss gives you world builder ability - you can make a system
         just with your fav stuff
   * Flashlight Mode
+  * use compu shader for pods getting deleted: https://www.youtube.com/watch?v=2Ov7Boud89E
+
