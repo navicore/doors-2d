@@ -26,15 +26,6 @@ pub fn handle_floor_plan_changes(
 
         let new_floorplan = event.floorplan.clone();
 
-        if let Some(current_plan) = &current_floorplan.floorplan {
-            if *current_plan != new_floorplan {
-                warn!("Floor plan has changed.");
-                // Calculate the differences and fire other events
-                // For example, you can spawn new platforms based on the differences
-                // commands.spawn(...);
-            }
-        }
-
         let (you_are_here, you_were_here) =
             determine_current_location(&new_floorplan, &current_floorplan);
 

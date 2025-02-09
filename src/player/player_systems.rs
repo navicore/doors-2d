@@ -7,7 +7,7 @@ use crate::door::Door;
 use crate::door::Platform;
 use crate::player::player_component::Grounded;
 use crate::room::room_component::{CurrentFloorPlan, RoomState};
-use crate::room::{Floor, WINDOW_HEIGHT};
+use crate::room::Floor;
 use crate::state::state_component::FadeEffect;
 use crate::state::GameState;
 use avian2d::prelude::*;

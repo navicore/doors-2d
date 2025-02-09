@@ -1,7 +1,6 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
 use leafwing_input_manager::Actionlike;
-use serde::Deserialize;
 
 // Define movement constants
 pub const PLAYER_MOVE_SPEED: f32 = 500.0; // Horizontal movement speed
@@ -80,32 +79,3 @@ pub struct PlayerAnimationIndices {
 
 #[derive(Component, Deref, DerefMut)]
 pub struct PlayerAnimationTimer(pub Timer);
-
-#[derive(Deserialize)]
-pub struct Frame {
-    pub frame: Rect,
-    pub rotated: bool,
-    pub trimmed: bool,
-    pub spriteSourceSize: Rect,
-    pub sourceSize: Size,
-    pub duration: u32,
-}
-
-#[derive(Deserialize)]
-pub struct Rect {
-    pub x: u32,
-    pub y: u32,
-    pub w: u32,
-    pub h: u32,
-}
-
-#[derive(Deserialize)]
-pub struct Size {
-    pub w: u32,
-    pub h: u32,
-}
-
-#[derive(Deserialize)]
-pub struct SpriteSheetData {
-    pub frames: std::collections::HashMap<String, Frame>,
-}
