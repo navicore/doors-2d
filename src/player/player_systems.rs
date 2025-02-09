@@ -127,7 +127,8 @@ pub fn detect_player_at_door(
     mut next_state: ResMut<NextState<GameState>>,
     state: Res<State<GameState>>,
     player_query: Query<&Transform, With<Player>>,
-    door_query: Query<(&Transform, &Door)>,
+    door_query: Query<(&Transform, &Parent, &Door)>,
+    platform_query: Query<&Transform, With<Platform>>,
     action_state_query: Query<&ActionState<Action>>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
     mut fade: ResMut<FadeEffect>,
@@ -136,17 +137,21 @@ pub fn detect_player_at_door(
         return;
     }
     if let Ok(player_transform) = player_query.get_single() {
-        for (door_transform, door) in door_query.iter() {
-            let distance = player_transform
-                .translation
-                .distance(door_transform.translation);
-            if distance < 20.0 {
-                for action_state in action_state_query.iter() {
-                    if action_state.pressed(&Action::Enter) {
-                        current_floorplan.you_were_here = current_floorplan.you_are_here.clone();
-                        current_floorplan.you_are_here = Some(door.room_id.clone());
-                        next_state.set(GameState::TransitioningOut);
-                        fade.fading_out = true;
+        for (door_transform, parent, door) in door_query.iter() {
+            if let Ok(platform_transform) = platform_query.get(parent.get()) {
+                let door_world_transform = platform_transform.mul_transform(*door_transform);
+                let distance = player_transform
+                    .translation
+                    .distance(door_world_transform.translation);
+                if distance < 20.0 {
+                    for action_state in action_state_query.iter() {
+                        if action_state.pressed(&Action::Enter) {
+                            current_floorplan.you_were_here =
+                                current_floorplan.you_are_here.clone();
+                            current_floorplan.you_are_here = Some(door.room_id.clone());
+                            next_state.set(GameState::TransitioningOut);
+                            fade.fading_out = true;
+                        }
                     }
                 }
             }
