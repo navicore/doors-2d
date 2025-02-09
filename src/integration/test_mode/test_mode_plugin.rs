@@ -1,14 +1,25 @@
-use crate::floorplan::FloorPlanEvent;
+use crate::{cli, floorplan::FloorPlanEvent};
 
-use super::test_mode_systems::fire_floorplan_event;
 use bevy::prelude::*;
+use clap::Parser;
+
+use super::test_mode_systems::{
+    fire_room25_floorplan_event, fire_room2_floorplan_event, fire_room5_floorplan_event,
+};
 
 pub struct TestModeIntegrationPlugin;
 
 impl Plugin for TestModeIntegrationPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<FloorPlanEvent>()
-            .add_systems(Startup, fire_floorplan_event);
+        app.add_event::<FloorPlanEvent>();
+
+        if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms2) {
+            app.add_systems(Startup, fire_room2_floorplan_event);
+        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms5) {
+            app.add_systems(Startup, fire_room25_floorplan_event);
+        } else {
+            app.add_systems(Startup, fire_room5_floorplan_event);
+        }
     }
 }
 

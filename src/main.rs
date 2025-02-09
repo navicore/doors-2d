@@ -2,6 +2,7 @@ use avian2d::PhysicsPlugins;
 use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
+use clap::Parser;
 use door::DoorPlugin;
 use integration::TestModeIntegrationPlugin;
 use pause::PausePlugin;
@@ -20,6 +21,8 @@ mod room;
 mod state;
 
 fn main() {
+    cli::Cli::parse();
+
     App::new()
         .add_plugins((
             EmbeddedAssetPlugin {
