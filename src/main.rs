@@ -7,7 +7,6 @@ use integration::TestModeIntegrationPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use room::RoomPlugin;
-use scheduler::SchedulePlugin;
 use state::StatePlugin;
 
 mod camera;
@@ -17,7 +16,6 @@ mod integration;
 mod pause;
 mod player;
 mod room;
-mod scheduler;
 mod state;
 
 fn main() {
@@ -28,7 +26,6 @@ fn main() {
             },
             PhysicsPlugins::default(),
             CameraPlugin,
-            SchedulePlugin,
             RoomPlugin,
             PlayerPlugin,
             DoorPlugin,
