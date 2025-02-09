@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use leafwing_input_manager::Actionlike;
 
 // Define movement constants
-pub const PLAYER_MOVE_SPEED: f32 = 500.0; // Horizontal movement speed
+const PLAYER_MOVE_SPEED: f32 = 500.0; // Horizontal movement speed
 pub const PLAYER_JUMP_FORCE: f32 = 25000.0; // Jump force applied when pressing space
 pub const PLAYER_GRAVITY_SCALE: f32 = 25.0; // Gravity multiplier for falling speed
 
@@ -15,18 +15,13 @@ pub struct PlayerBundle {
     pub gravity: GravityScale,
     pub mass: Mass,
     pub friction: Friction,
-    pub sprite: Sprite,
     pub player: Player,
     pub movable: Movable,
     pub grounded: Grounded,
 }
 
-//    pub fn from_atlas_image(image: Handle<Image>, atlas: TextureAtlas) -> Self {
 impl PlayerBundle {
-    pub fn new(
-        texture: Handle<Image>,
-        texture_atlas_layout: Handle<TextureAtlasLayout>,
-        animation_indices: PlayerAnimationIndices,
+    pub fn new(// texture: Handle<Image>,
     ) -> Self {
         Self {
             rigid_body: RigidBody::Dynamic,
@@ -40,14 +35,7 @@ impl PlayerBundle {
                 static_coefficient: 0.5,
                 combine_rule: CoefficientCombine::Average,
             },
-            sprite: Sprite::from_atlas_image(
-                texture,
-                TextureAtlas {
-                    layout: texture_atlas_layout,
-                    index: animation_indices.first,
-                },
-            ),
-            player: Player,
+            player: Player::default(),
             movable: Movable,
             grounded: Grounded(false),
         }
@@ -63,7 +51,21 @@ pub enum Action {
 }
 
 #[derive(Component)]
-pub struct Player;
+pub struct Player {
+    pub walk_speed: f32,
+    pub state: PlayerState,
+    pub direction: PlayerDirection,
+}
+
+impl Player {
+    fn default() -> Player {
+        Player {
+            walk_speed: PLAYER_MOVE_SPEED,
+            state: PlayerState::Stand,
+            direction: PlayerDirection::Right,
+        }
+    }
+}
 
 #[derive(Component)]
 pub struct Grounded(pub bool);
@@ -71,11 +73,17 @@ pub struct Grounded(pub bool);
 #[derive(Component)]
 pub struct Movable;
 
-#[derive(Component, Clone)]
-pub struct PlayerAnimationIndices {
-    pub first: usize,
-    pub last: usize,
+#[derive(Debug, PartialEq)]
+pub enum PlayerState {
+    Walk,
+    Stand,
+    Jump,
+    Fall,
 }
-
-#[derive(Component, Deref, DerefMut)]
-pub struct PlayerAnimationTimer(pub Timer);
+#[derive(Debug, PartialEq)]
+pub enum PlayerDirection {
+    Up,
+    Down,
+    Left,
+    Right,
+}

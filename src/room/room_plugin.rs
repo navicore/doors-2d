@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::state::GameState;
+use crate::state::GameState::RoomChange;
 
 use super::{
     room_component::{CurrentFloorPlan, RoomState, WINDOW_HEIGHT, WINDOW_WIDTH},
@@ -25,11 +25,6 @@ impl Plugin for RoomPlugin {
             //.add_systems(Startup, setup_room)
             .add_systems(Startup, setup_room)
             .add_systems(Update, handle_floor_plan_changes)
-            .add_systems(
-                Update,
-                (update_doors, update_room)
-                    .chain()
-                    .run_if(in_state(GameState::RoomChange)),
-            );
+            .add_systems(OnEnter(RoomChange), (update_doors, update_room).chain());
     }
 }

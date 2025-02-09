@@ -1,6 +1,5 @@
 use super::player_component::{
-    Action, Movable, PlayerAnimationIndices, PlayerAnimationTimer, PlayerBundle, PLAYER_JUMP_FORCE,
-    PLAYER_MOVE_SPEED,
+    Action, Movable, PlayerBundle, PlayerDirection, PlayerState, PLAYER_JUMP_FORCE,
 };
 use super::Player;
 use crate::door::Door;
@@ -12,6 +11,7 @@ use crate::state::state_component::FadeEffect;
 use crate::state::GameState;
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use bevy_aseprite_ultra::prelude::*;
 use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
@@ -47,24 +47,7 @@ pub fn player_enters_new_room(
     }
 }
 
-pub fn spawn_player(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-) {
-    let texture = asset_server.load("gabe-idle-run.png");
-    //let texture = asset_server.load("PlayerSheet.png");
-    let layout = TextureAtlasLayout::from_grid(
-        UVec2::splat(24),
-        7,
-        1,
-        None, //Some(UVec2::splat(4)),
-        None, //Some(UVec2::splat(4)),
-    );
-    let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    // Use only the subset of sprites in the sheet that make up the run animation
-    let animation_indices = PlayerAnimationIndices { first: 1, last: 6 };
-
+pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let input_map = InputMap::new([
         (Action::Jump, KeyCode::Space),
         (Action::MoveLeft, KeyCode::ArrowLeft),
@@ -72,81 +55,128 @@ pub fn spawn_player(
         (Action::Enter, KeyCode::ArrowUp),
     ]);
     commands.spawn((
+        AseSpriteAnimation {
+            animation: Animation::tag("walk-up")
+                .with_repeat(AnimationRepeat::Loop)
+                .with_direction(AnimationDirection::Forward)
+                .with_speed(2.0),
+            aseprite: asset_server.load("Player_bevy_aseprite_ultra_demo.aseprite"),
+        },
+        Transform::default()
+            .with_scale(Vec3::new(4.0, 4.0, 2.0))
+            .with_translation(Vec3::new(0.0, 0.0, 2.0)), //needed for player to be in front of the door
         InputManagerBundle::with_map(input_map),
-        PlayerBundle::new(texture, texture_atlas_layout, animation_indices.clone()),
-        Transform::from_scale(Vec3 {
-            x: 4.0,
-            y: 4.0,
-            z: 2.0,
-        })
-        .with_translation(Vec3::new(0.0, 0.0, 2.0)),
-        //Transform::from_xyz(0.0, WINDOW_HEIGHT / 2.0 - 50.0, 1.0),
-        animation_indices,
-        PlayerAnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        PlayerBundle::new(),
     ));
 }
 
+pub fn player_animation(mut animation_query: Query<(&mut AseSpriteAnimation, &Player)>) {
+    for (mut ase_sprite_animation, player) in animation_query.iter_mut() {
+        match player.state {
+            PlayerState::Stand => {
+                ase_sprite_animation.animation.play_loop("idle");
+            }
+            PlayerState::Walk => match player.direction {
+                PlayerDirection::Up => {
+                    ase_sprite_animation.animation.play_loop("walk-up");
+                }
+                PlayerDirection::Down => {
+                    ase_sprite_animation.animation.play_loop("walk-down");
+                }
+                PlayerDirection::Left => {
+                    ase_sprite_animation.animation.play_loop("walk-right"); // there is no walk-left animation
+                }
+                PlayerDirection::Right => {
+                    ase_sprite_animation.animation.play_loop("walk-right");
+                }
+            },
+            PlayerState::Jump => {
+                ase_sprite_animation.animation.play_loop("idle");
+            }
+            PlayerState::Fall => {
+                ase_sprite_animation.animation.play_loop("idle");
+            }
+        }
+    }
+}
+
 pub fn player_movement(
-    time: Res<Time>,
-    mut animation_query: Query<(
-        &PlayerAnimationIndices,
-        &mut PlayerAnimationTimer,
-        &mut Sprite,
-    )>,
-    mut query: Query<(&mut ExternalForce, &Grounded, &ActionState<Action>), With<Player>>,
+    mut query: Query<
+        (
+            &mut ExternalForce,
+            &Grounded,
+            &ActionState<Action>,
+            &mut Player,
+        ),
+        With<Player>,
+    >,
 ) {
-    if let Ok((mut force, grounded, action_state)) = query.get_single_mut() {
+    if let Ok((mut force, grounded, action_state, mut player)) = query.get_single_mut() {
         force.set_force(Vec2::ZERO);
+
+        let mut pressed = false;
 
         if grounded.0 && action_state.pressed(&Action::Jump) {
             force.apply_force(Vec2::new(0.0, PLAYER_JUMP_FORCE));
+            player.direction = PlayerDirection::Up;
+            player.state = PlayerState::Stand;
+            pressed = true;
         }
+
+        if action_state.pressed(&Action::Jump) {
+            player.direction = PlayerDirection::Up;
+            player.state = PlayerState::Jump;
+            pressed = true;
+        } else if !grounded.0 {
+            player.direction = PlayerDirection::Down;
+            player.state = PlayerState::Fall;
+            pressed = true;
+        }
+
         if action_state.pressed(&Action::MoveLeft) {
-            force.apply_force(Vec2::new(-PLAYER_MOVE_SPEED, 0.0));
+            force.apply_force(Vec2::new(-player.walk_speed, 0.0));
+            player.direction = PlayerDirection::Left;
+            player.state = PlayerState::Walk;
+            pressed = true;
         }
         if action_state.pressed(&Action::MoveRight) {
-            force.apply_force(Vec2::new(PLAYER_MOVE_SPEED, 0.0));
-            for (indices, mut timer, mut sprite) in &mut animation_query {
-                timer.tick(time.delta());
+            force.apply_force(Vec2::new(player.walk_speed, 0.0));
+            player.direction = PlayerDirection::Right;
+            player.state = PlayerState::Walk;
+            pressed = true;
+        }
 
-                if timer.just_finished() {
-                    if let Some(atlas) = &mut sprite.texture_atlas {
-                        atlas.index = if atlas.index == indices.last {
-                            indices.first
-                        } else {
-                            atlas.index + 1
-                        };
-                    }
-                }
-            }
+        if !pressed {
+            player.state = PlayerState::Stand;
         }
     }
 }
 
 pub fn detect_player_at_door(
     mut next_state: ResMut<NextState<GameState>>,
-    state: Res<State<GameState>>,
     player_query: Query<&Transform, With<Player>>,
-    door_query: Query<(&Transform, &Door)>,
+    door_query: Query<(&Transform, &Parent, &Door)>,
+    platform_query: Query<&Transform, With<Platform>>,
     action_state_query: Query<&ActionState<Action>>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
     mut fade: ResMut<FadeEffect>,
 ) {
-    if *state != GameState::InGame {
-        return;
-    }
     if let Ok(player_transform) = player_query.get_single() {
-        for (door_transform, door) in door_query.iter() {
-            let distance = player_transform
-                .translation
-                .distance(door_transform.translation);
-            if distance < 20.0 {
-                for action_state in action_state_query.iter() {
-                    if action_state.pressed(&Action::Enter) {
-                        current_floorplan.you_were_here = current_floorplan.you_are_here.clone();
-                        current_floorplan.you_are_here = Some(door.room_id.clone());
-                        next_state.set(GameState::TransitioningOut);
-                        fade.fading_out = true;
+        for (door_transform, parent, door) in door_query.iter() {
+            if let Ok(platform_transform) = platform_query.get(parent.get()) {
+                let door_world_transform = platform_transform.mul_transform(*door_transform);
+                let distance = player_transform
+                    .translation
+                    .distance(door_world_transform.translation);
+                if distance < 20.0 {
+                    for action_state in action_state_query.iter() {
+                        if action_state.pressed(&Action::Enter) {
+                            current_floorplan.you_were_here =
+                                current_floorplan.you_are_here.clone();
+                            current_floorplan.you_are_here = Some(door.room_id.clone());
+                            next_state.set(GameState::TransitioningOut);
+                            fade.fading_out = true;
+                        }
                     }
                 }
             }
