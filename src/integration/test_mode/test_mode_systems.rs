@@ -1,21 +1,17 @@
-use crate::floorplan::{Door, FloorPlan, FloorPlanEvent, Room};
-use bevy::app::AppExit;
+use crate::floorplan::{Door, FloorPlan, FloorPlanEvent, FloorPlanResult, Room};
 use bevy::prelude::*;
 
 const NUMBER_OF_ROOMS: usize = 25;
 const NUMBER_OF_DOORS: usize = 250;
 const MAX_DOORS_PER_ROOM: usize = 19;
 
-pub fn fire_room25_floorplan_event(
-    mut events: EventWriter<FloorPlanEvent>,
-    exit: EventWriter<AppExit>,
-) {
-    let floorplan = generate_room25_floorplan(exit);
+pub fn fire_room25_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
+    let floorplan = generate_room25_floorplan();
     events.send(FloorPlanEvent { floorplan });
     info!("Fired 25Room FloorPlanEvent");
 }
 
-fn generate_room25_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
+fn generate_room25_floorplan() -> FloorPlan {
     let mut floorplan = FloorPlan::new();
 
     // Create rooms
@@ -45,7 +41,6 @@ fn generate_room25_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
             let first_room_id = &rooms[i].id.clone();
             if let Err(e) = floorplan.set_start_room(first_room_id) {
                 error!("Failed to set start room: {:?}", e);
-                exit.send(AppExit::error());
             }
         }
 
@@ -86,16 +81,16 @@ fn generate_room25_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
     floorplan
 }
 
-pub fn fire_room2_floorplan_event(
-    mut events: EventWriter<FloorPlanEvent>,
-    exit: EventWriter<AppExit>,
-) {
-    let floorplan = generate_room2_floorplan(exit);
-    events.send(FloorPlanEvent { floorplan });
-    info!("Fired 2Room FloorPlanEvent");
+pub fn fire_room2_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
+    if let Ok(floorplan) = generate_room2_floorplan() {
+        events.send(FloorPlanEvent { floorplan });
+        info!("Fired 2Room FloorPlanEvent");
+    } else {
+        warn!("No 2Room FlooplanEvent");
+    }
 }
 
-fn generate_room2_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
+fn generate_room2_floorplan() -> FloorPlanResult<FloorPlan> {
     let mut floorplan = FloorPlan::new();
     let room1 = Room {
         id: "0".to_string(),
@@ -112,33 +107,32 @@ fn generate_room2_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
         name: "Door 1".to_string(),
     };
     floorplan.add_door(
-        floorplan.get_room_by_id(&room1.id).unwrap(),
-        floorplan.get_room_by_id(&room2.id).unwrap(),
+        floorplan.get_room_by_id(&room1.id)?,
+        floorplan.get_room_by_id(&room2.id)?,
         door1.clone(),
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room2.id).unwrap(),
-        floorplan.get_room_by_id(&room1.id).unwrap(),
+        floorplan.get_room_by_id(&room2.id)?,
+        floorplan.get_room_by_id(&room1.id)?,
         door1,
     );
     if let Err(e) = floorplan.set_start_room(&room1.id) {
         error!("Failed to set start room: {:?}", e);
-        exit.send(AppExit::error());
     }
 
-    floorplan
+    Ok(floorplan)
 }
 
-pub fn fire_room5_floorplan_event(
-    mut events: EventWriter<FloorPlanEvent>,
-    exit: EventWriter<AppExit>,
-) {
-    let floorplan = generate_room5_floorplan(exit);
-    events.send(FloorPlanEvent { floorplan });
-    info!("Fired 5Room FloorPlanEvent");
+pub fn fire_room5_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
+    if let Ok(floorplan) = generate_room5_floorplan() {
+        events.send(FloorPlanEvent { floorplan });
+        info!("Fired 5Room FloorPlanEvent");
+    } else {
+        error!("No 5Room FloorPlanEvent");
+    }
 }
 
-fn generate_room5_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
+fn generate_room5_floorplan() -> FloorPlanResult<FloorPlan> {
     let mut floorplan = FloorPlan::new();
     let room1 = Room {
         id: "0".to_string(),
@@ -200,45 +194,45 @@ fn generate_room5_floorplan(mut exit: EventWriter<AppExit>) -> FloorPlan {
     };
 
     floorplan.add_door(
-        floorplan.get_room_by_id(&room1.id).unwrap(),
-        floorplan.get_room_by_id(&room2.id).unwrap(),
+        floorplan.get_room_by_id(&room1.id)?,
+        floorplan.get_room_by_id(&room2.id)?,
         door1,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room2.id).unwrap(),
-        floorplan.get_room_by_id(&room1.id).unwrap(),
+        floorplan.get_room_by_id(&room2.id)?,
+        floorplan.get_room_by_id(&room1.id)?,
         door2,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room2.id).unwrap(),
-        floorplan.get_room_by_id(&room3.id).unwrap(),
+        floorplan.get_room_by_id(&room2.id)?,
+        floorplan.get_room_by_id(&room3.id)?,
         door3,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room3.id).unwrap(),
-        floorplan.get_room_by_id(&room2.id).unwrap(),
+        floorplan.get_room_by_id(&room3.id)?,
+        floorplan.get_room_by_id(&room2.id)?,
         door4,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room1.id).unwrap(),
-        floorplan.get_room_by_id(&room4.id).unwrap(),
+        floorplan.get_room_by_id(&room1.id)?,
+        floorplan.get_room_by_id(&room4.id)?,
         door5,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room4.id).unwrap(),
-        floorplan.get_room_by_id(&room1.id).unwrap(),
+        floorplan.get_room_by_id(&room4.id)?,
+        floorplan.get_room_by_id(&room1.id)?,
         door6,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room3.id).unwrap(),
-        floorplan.get_room_by_id(&room5.id).unwrap(),
+        floorplan.get_room_by_id(&room3.id)?,
+        floorplan.get_room_by_id(&room5.id)?,
         door7,
     );
     floorplan.add_door(
-        floorplan.get_room_by_id(&room5.id).unwrap(),
-        floorplan.get_room_by_id(&room3.id).unwrap(),
+        floorplan.get_room_by_id(&room5.id)?,
+        floorplan.get_room_by_id(&room3.id)?,
         door8,
     );
 
-    floorplan
+    Ok(floorplan)
 }
