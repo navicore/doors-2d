@@ -10,6 +10,7 @@ use room::RoomPlugin;
 use state::StatePlugin;
 
 mod camera;
+mod cli;
 mod door;
 mod floorplan;
 mod integration;

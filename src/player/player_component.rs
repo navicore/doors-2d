@@ -58,8 +58,8 @@ pub struct Player {
 }
 
 impl Player {
-    fn default() -> Player {
-        Player {
+    const fn default() -> Self {
+        Self {
             walk_speed: PLAYER_MOVE_SPEED,
             state: PlayerState::Stand,
             direction: PlayerDirection::Right,
@@ -73,14 +73,14 @@ pub struct Grounded(pub bool);
 #[derive(Component)]
 pub struct Movable;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum PlayerState {
     Walk,
     Stand,
     Jump,
     Fall,
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum PlayerDirection {
     Up,
     Down,

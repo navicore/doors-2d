@@ -71,11 +71,8 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn player_animation(mut animation_query: Query<(&mut AseSpriteAnimation, &Player)>) {
-    for (mut ase_sprite_animation, player) in animation_query.iter_mut() {
+    for (mut ase_sprite_animation, player) in &mut animation_query {
         match player.state {
-            PlayerState::Stand => {
-                ase_sprite_animation.animation.play_loop("idle");
-            }
             PlayerState::Walk => match player.direction {
                 PlayerDirection::Up => {
                     ase_sprite_animation.animation.play_loop("walk-up");
@@ -90,16 +87,14 @@ pub fn player_animation(mut animation_query: Query<(&mut AseSpriteAnimation, &Pl
                     ase_sprite_animation.animation.play_loop("walk-right");
                 }
             },
-            PlayerState::Jump => {
-                ase_sprite_animation.animation.play_loop("idle");
-            }
-            PlayerState::Fall => {
+            _ => {
                 ase_sprite_animation.animation.play_loop("idle");
             }
         }
     }
 }
 
+#[allow(clippy::useless_let_if_seq)]
 pub fn player_movement(
     mut query: Query<
         (
