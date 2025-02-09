@@ -7,8 +7,6 @@ pub const PLAYER_MOVE_SPEED: f32 = 500.0; // Horizontal movement speed
 pub const PLAYER_JUMP_FORCE: f32 = 25000.0; // Jump force applied when pressing space
 pub const PLAYER_GRAVITY_SCALE: f32 = 25.0; // Gravity multiplier for falling speed
 
-static PLAYER_COLOR: Color = Color::srgb(0.3, 0.6, 1.0); // light blue
-
 #[derive(Bundle)]
 pub struct PlayerBundle {
     pub rigid_body: RigidBody,
@@ -23,11 +21,17 @@ pub struct PlayerBundle {
     pub grounded: Grounded,
 }
 
+//    pub fn from_atlas_image(image: Handle<Image>, atlas: TextureAtlas) -> Self {
 impl PlayerBundle {
-    pub fn new() -> Self {
+    pub fn new(
+        texture: Handle<Image>,
+        texture_atlas_layout: Handle<TextureAtlasLayout>,
+        animation_indices: PlayerAnimationIndices,
+    ) -> Self {
         Self {
             rigid_body: RigidBody::Dynamic,
-            collider: Collider::from(SharedShape::cuboid(40.0, 40.0)),
+            //collider: Collider::from(SharedShape::cuboid(40.0, 40.0)),
+            collider: Collider::from(SharedShape::cuboid(15.0, 15.0)), // todo: base on image
             external_force: ExternalForce::default(),
             gravity: GravityScale(PLAYER_GRAVITY_SCALE),
             mass: Mass(1.0),
@@ -36,11 +40,13 @@ impl PlayerBundle {
                 static_coefficient: 0.5,
                 combine_rule: CoefficientCombine::Average,
             },
-            sprite: Sprite {
-                color: PLAYER_COLOR,
-                custom_size: Some(Vec2::new(40.0, 40.0)),
-                ..default()
-            },
+            sprite: Sprite::from_atlas_image(
+                texture,
+                TextureAtlas {
+                    layout: texture_atlas_layout,
+                    index: animation_indices.first,
+                },
+            ),
             player: Player,
             movable: Movable,
             grounded: Grounded(false),
@@ -64,3 +70,12 @@ pub struct Grounded(pub bool);
 
 #[derive(Component)]
 pub struct Movable;
+
+#[derive(Component, Clone)]
+pub struct PlayerAnimationIndices {
+    pub first: usize,
+    pub last: usize,
+}
+
+#[derive(Component, Deref, DerefMut)]
+pub struct PlayerAnimationTimer(pub Timer);

@@ -1,13 +1,12 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::{prelude::*, text::TextBounds};
 
-use crate::{room::room_component::RoomState, state::GameState};
+use crate::room::room_component::RoomState;
 
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
 #[allow(clippy::type_complexity)]
 pub fn spawn_platforms(
-    mut next_state: ResMut<NextState<GameState>>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     room_state: Res<RoomState>,
