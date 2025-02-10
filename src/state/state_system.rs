@@ -33,6 +33,9 @@ pub fn update_fade_overlay(
     room_state: Res<RoomState>,
     mut query: Query<(&mut Sprite, &mut Transform), With<FadeOverlay>>,
 ) {
+    if !room_state.is_changed() {
+        return;
+    }
     for (mut sprite, mut transform) in &mut query {
         sprite.custom_size = Some(Vec2::new(room_state.floor_ceiling_width, WINDOW_HEIGHT));
         transform.translation.z = 10.0; // Ensure it stays on top
