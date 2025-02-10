@@ -90,35 +90,38 @@ pub fn fire_room2_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
     }
 }
 
+fn create_rooms(lim: u8) -> Vec<Room> {
+    (0..lim)
+        .map(|i| Room {
+            id: i.to_string(),
+            name: format!("Room {}", i + 1),
+        })
+        .collect()
+}
+
+fn create_doors(lim: u8) -> Vec<Door> {
+    (0..lim)
+        .map(|i| Door {
+            id: i.to_string(),
+            name: format!("Door {}", i + 1),
+        })
+        .collect()
+}
+
+// create a 2 room floorplan
 fn generate_room2_floorplan() -> FloorPlanResult<FloorPlan> {
     let mut floorplan = FloorPlan::new();
-    let room1 = Room {
-        id: "0".to_string(),
-        name: "Room 1".to_string(),
-    };
-    let room2 = Room {
-        id: "1".to_string(),
-        name: "Room 2".to_string(),
-    };
+    let rooms = create_rooms(2);
+    let room1 = &rooms[0];
+    let room2 = &rooms[1];
+
     floorplan.add_room(room1.clone());
     floorplan.add_room(room2.clone());
-    let door1 = Door {
-        id: "0".to_string(),
-        name: "Door 1".to_string(),
-    };
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room1.id)?,
-        floorplan.get_room_by_id(&room2.id)?,
-        door1.clone(),
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room2.id)?,
-        floorplan.get_room_by_id(&room1.id)?,
-        door1,
-    );
-    if let Err(e) = floorplan.set_start_room(&room1.id) {
-        error!("Failed to set start room: {:?}", e);
-    }
+
+    let doors = create_doors(2);
+
+    door_adder(&mut floorplan, room1, room2, &doors[0].clone())?;
+    door_adder(&mut floorplan, room2, room1, &doors[1].clone())?;
 
     Ok(floorplan)
 }
@@ -132,107 +135,69 @@ pub fn fire_room5_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
     }
 }
 
+// create a 2 room floorplan
 fn generate_room5_floorplan() -> FloorPlanResult<FloorPlan> {
     let mut floorplan = FloorPlan::new();
-    let room1 = Room {
-        id: "0".to_string(),
-        name: "Room 1".to_string(),
-    };
-    let room2 = Room {
-        id: "1".to_string(),
-        name: "Room 2".to_string(),
-    };
-    let room3 = Room {
-        id: "2".to_string(),
-        name: "Room 3".to_string(),
-    };
-    let room4 = Room {
-        id: "3".to_string(),
-        name: "Room 4".to_string(),
-    };
-    let room5 = Room {
-        id: "4".to_string(),
-        name: "Room 5".to_string(),
-    };
+
+    fn create_rooms(lim: u8) -> Vec<Room> {
+        (0..lim)
+            .map(|i| Room {
+                id: i.to_string(),
+                name: format!("Room {}", i + 1),
+            })
+            .collect()
+    }
+    let rooms = create_rooms(5);
+    let room1 = &rooms[0];
+    let room2 = &rooms[1];
+    let room3 = &rooms[2];
+    let room4 = &rooms[3];
+    let room5 = &rooms[4];
+
     floorplan.add_room(room1.clone());
     floorplan.add_room(room2.clone());
     floorplan.add_room(room3.clone());
     floorplan.add_room(room4.clone());
     floorplan.add_room(room5.clone());
 
-    let door1 = Door {
-        id: "0".to_string(),
-        name: "Door 1".to_string(),
-    };
-    let door2 = Door {
-        id: "1".to_string(),
-        name: "Door 2".to_string(),
-    };
-    let door3 = Door {
-        id: "2".to_string(),
-        name: "Door 3".to_string(),
-    };
-    let door4 = Door {
-        id: "3".to_string(),
-        name: "Door 4".to_string(),
-    };
-    let door5 = Door {
-        id: "4".to_string(),
-        name: "Door 5".to_string(),
-    };
-    let door6 = Door {
-        id: "5".to_string(),
-        name: "Door 6".to_string(),
-    };
-    let door7 = Door {
-        id: "6".to_string(),
-        name: "Door 7".to_string(),
-    };
-    let door8 = Door {
-        id: "7".to_string(),
-        name: "Door 8".to_string(),
-    };
+    fn create_doors(lim: u8) -> Vec<Door> {
+        (0..lim)
+            .map(|i| Door {
+                id: i.to_string(),
+                name: format!("Door {}", i + 1),
+            })
+            .collect()
+    }
+    let doors = create_doors(10);
 
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room1.id)?,
-        floorplan.get_room_by_id(&room2.id)?,
-        door1,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room2.id)?,
-        floorplan.get_room_by_id(&room1.id)?,
-        door2,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room2.id)?,
-        floorplan.get_room_by_id(&room3.id)?,
-        door3,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room3.id)?,
-        floorplan.get_room_by_id(&room2.id)?,
-        door4,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room1.id)?,
-        floorplan.get_room_by_id(&room4.id)?,
-        door5,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room4.id)?,
-        floorplan.get_room_by_id(&room1.id)?,
-        door6,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room3.id)?,
-        floorplan.get_room_by_id(&room5.id)?,
-        door7,
-    );
-    floorplan.add_door(
-        floorplan.get_room_by_id(&room5.id)?,
-        floorplan.get_room_by_id(&room3.id)?,
-        door8,
-    );
+    door_adder(&mut floorplan, room1, room2, &doors[0].clone())?;
+    door_adder(&mut floorplan, room2, room1, &doors[1].clone())?;
+
+    door_adder(&mut floorplan, room2, room3, &doors[2].clone())?;
+    door_adder(&mut floorplan, room3, room2, &doors[3].clone())?;
+
+    door_adder(&mut floorplan, room1, room4, &doors[4].clone())?;
+    door_adder(&mut floorplan, room4, room1, &doors[5].clone())?;
+
+    door_adder(&mut floorplan, room3, room5, &doors[6].clone())?;
+    door_adder(&mut floorplan, room5, room3, &doors[7].clone())?;
+
+    door_adder(&mut floorplan, room3, room4, &doors[8].clone())?;
+    door_adder(&mut floorplan, room4, room3, &doors[9].clone())?;
 
     Ok(floorplan)
+}
+
+fn door_adder(
+    plan: &mut FloorPlan,
+    room1: &Room,
+    room2: &Room,
+    door: &Door,
+) -> FloorPlanResult<()> {
+    plan.add_door(
+        plan.get_room_by_id(&room1.id)?,
+        plan.get_room_by_id(&room2.id)?,
+        door.clone(),
+    );
+    Ok(())
 }

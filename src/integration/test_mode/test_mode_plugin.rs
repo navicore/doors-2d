@@ -15,7 +15,7 @@ impl Plugin for TestModeIntegrationPlugin {
 
         if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms2) {
             app.add_systems(Startup, fire_room2_floorplan_event);
-        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms5) {
+        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms25) {
             app.add_systems(Startup, fire_room25_floorplan_event);
         } else {
             app.add_systems(Startup, fire_room5_floorplan_event);
