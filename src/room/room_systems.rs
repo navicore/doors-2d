@@ -5,19 +5,19 @@ use super::room_component::{
     Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
 };
 use crate::{
-    floorplan::{Door, FloorPlan, FloorPlanEvent, Room},
+    floorplan,
     room::room_component::DoorState,
     state::{state_component::FadeEffect, GameState},
 };
 
 const PLATFORM_X_SEPARATOR: f32 = 450.0;
 const PLATFORM_Y_SEPARATOR: &[f32] = &[
-    0.0, -150.0, 250.0, -100.0, -210.0, 100.0, -200.0, -50.0, 175.0, 25.0,
+    0.0, -150.0, 120.0, -100.0, -180.0, 100.0, -200.0, -50.0, 165.0, 25.0,
 ];
 
 pub fn handle_floor_plan_changes(
     mut next_state: ResMut<NextState<GameState>>,
-    mut floorplan_events: EventReader<FloorPlanEvent>,
+    mut floorplan_events: EventReader<floorplan::FloorPlanEvent>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
     mut fade: ResMut<FadeEffect>,
 ) {
@@ -42,7 +42,7 @@ pub fn handle_floor_plan_changes(
 
 /// if there is no current room location, then it is the start room of the new floor plan
 fn determine_current_location(
-    new_floorplan: &FloorPlan,
+    new_floorplan: &floorplan::FloorPlan,
     current_floorplan: &CurrentFloorPlan,
 ) -> (Option<String>, Option<String>) {
     current_floorplan.you_are_here.as_ref().map_or_else(
@@ -91,7 +91,10 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
 }
 
 #[allow(clippy::cast_precision_loss)]
-fn update_room_state_with_doors(room_state: &mut RoomState, doors_and_rooms: Vec<(&Door, &Room)>) {
+fn update_room_state_with_doors(
+    room_state: &mut RoomState,
+    doors_and_rooms: Vec<(&floorplan::DoorData, &floorplan::RoomData)>,
+) {
     let number_of_doors = doors_and_rooms.len();
     let room_width = PLATFORM_X_SEPARATOR * (number_of_doors + 1) as f32;
     room_state.wall_distance_from_center = room_width / 2.0;

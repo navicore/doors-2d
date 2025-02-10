@@ -1,11 +1,11 @@
-use crate::floorplan::{Door, FloorPlan, FloorPlanEvent, FloorPlanResult, Room};
+use crate::floorplan::{DoorData, FloorPlan, FloorPlanEvent, FloorPlanResult, RoomData};
 use bevy::prelude::*;
 
 fn door_adder(
     plan: &mut FloorPlan,
-    room1: &Room,
-    room2: &Room,
-    door: &Door,
+    room1: &RoomData,
+    room2: &RoomData,
+    door: &DoorData,
 ) -> FloorPlanResult<()> {
     plan.add_door(
         plan.get_room_by_id(&room1.id)?,
@@ -15,20 +15,20 @@ fn door_adder(
     Ok(())
 }
 
-fn create_rooms(lim: u8) -> Vec<Room> {
+fn create_rooms(lim: u8) -> Vec<RoomData> {
     (0..lim)
-        .map(|i| Room {
+        .map(|i| RoomData {
             id: i.to_string(),
-            name: format!("Room {i}"),
+            name: format!("RoomData {i}"),
         })
         .collect()
 }
 
-fn create_doors(lim: u8) -> Vec<Door> {
+fn create_doors(lim: u8) -> Vec<DoorData> {
     (0..lim)
-        .map(|i| Door {
+        .map(|i| DoorData {
             id: i.to_string(),
-            name: format!("Door {i}"),
+            name: format!("DoorData {i}"),
         })
         .collect()
 }
@@ -37,26 +37,24 @@ pub fn fire_room2_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
     if let Ok(floorplan) = generate_room2_floorplan() {
         events.send(FloorPlanEvent { floorplan });
     } else {
-        warn!("No 2Room FlooplanEvent");
+        warn!("No 2RoomData FlooplanEvent");
     }
 }
 
 // create a 2 room floorplan
 fn generate_room2_floorplan() -> FloorPlanResult<FloorPlan> {
-    info!("generating 2Room FloorPlanEvent");
+    info!("generating 2RoomData FloorPlanEvent");
 
     let mut floorplan = FloorPlan::new();
     let rooms = create_rooms(2);
-    let room1 = &rooms[0];
-    let room2 = &rooms[1];
 
-    floorplan.add_room(room1.clone());
-    floorplan.add_room(room2.clone());
+    floorplan.add_room(rooms[0].clone());
+    floorplan.add_room(rooms[1].clone());
 
     let doors = create_doors(2);
 
-    door_adder(&mut floorplan, room1, room2, &doors[0].clone())?;
-    door_adder(&mut floorplan, room2, room1, &doors[1].clone())?;
+    door_adder(&mut floorplan, &rooms[0], &rooms[1], &doors[0].clone())?;
+    door_adder(&mut floorplan, &rooms[1], &rooms[0], &doors[1].clone())?;
 
     Ok(floorplan)
 }
@@ -65,45 +63,37 @@ pub fn fire_room5_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
     if let Ok(floorplan) = generate_room5_floorplan() {
         events.send(FloorPlanEvent { floorplan });
     } else {
-        error!("No 5Room FloorPlanEvent");
+        error!("No 5RoomData FloorPlanEvent");
     }
 }
 
 // create a 5 room floorplan
 fn generate_room5_floorplan() -> FloorPlanResult<FloorPlan> {
-    info!("generating 5Room FloorPlanEvent");
+    info!("generating 5RoomData FloorPlanEvent");
 
     let mut floorplan = FloorPlan::new();
 
     let rooms = create_rooms(5);
-    let room1 = &rooms[0];
-    let room2 = &rooms[1];
-    let room3 = &rooms[2];
-    let room4 = &rooms[3];
-    let room5 = &rooms[4];
 
-    floorplan.add_room(room1.clone());
-    floorplan.add_room(room2.clone());
-    floorplan.add_room(room3.clone());
-    floorplan.add_room(room4.clone());
-    floorplan.add_room(room5.clone());
+    floorplan.add_room(rooms[0].clone());
+    floorplan.add_room(rooms[1].clone());
+    floorplan.add_room(rooms[2].clone());
+    floorplan.add_room(rooms[3].clone());
+    floorplan.add_room(rooms[4].clone());
 
     let doors = create_doors(10);
 
-    door_adder(&mut floorplan, room1, room2, &doors[0].clone())?;
-    door_adder(&mut floorplan, room2, room1, &doors[1].clone())?;
+    door_adder(&mut floorplan, &rooms[0], &rooms[1], &doors[0])?;
+    door_adder(&mut floorplan, &rooms[1], &rooms[0], &doors[1])?;
 
-    door_adder(&mut floorplan, room2, room3, &doors[2].clone())?;
-    door_adder(&mut floorplan, room3, room2, &doors[3].clone())?;
+    door_adder(&mut floorplan, &rooms[1], &rooms[2], &doors[2])?;
+    door_adder(&mut floorplan, &rooms[2], &rooms[1], &doors[3])?;
 
-    door_adder(&mut floorplan, room1, room4, &doors[4].clone())?;
-    door_adder(&mut floorplan, room4, room1, &doors[5].clone())?;
+    door_adder(&mut floorplan, &rooms[1], &rooms[3], &doors[4])?;
+    door_adder(&mut floorplan, &rooms[3], &rooms[1], &doors[5])?;
 
-    door_adder(&mut floorplan, room3, room5, &doors[6].clone())?;
-    door_adder(&mut floorplan, room5, room3, &doors[7].clone())?;
-
-    door_adder(&mut floorplan, room3, room4, &doors[8].clone())?;
-    door_adder(&mut floorplan, room4, room3, &doors[9].clone())?;
+    door_adder(&mut floorplan, &rooms[3], &rooms[4], &doors[6])?;
+    door_adder(&mut floorplan, &rooms[4], &rooms[3], &doors[7])?;
 
     Ok(floorplan)
 }
@@ -112,18 +102,18 @@ pub fn fire_room25_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
     if let Ok(floorplan) = generate_room25_floorplan() {
         events.send(FloorPlanEvent { floorplan });
     } else {
-        error!("No 25Room FloorPlanEvent");
+        error!("No 25RoomData FloorPlanEvent");
     }
 }
 
 // create a 25 room floorplan
 fn generate_room25_floorplan() -> FloorPlanResult<FloorPlan> {
-    info!("generating 25Room FloorPlanEvent");
+    info!("generating 25RoomData FloorPlanEvent");
     let mut floorplan = FloorPlan::new();
 
     let rooms = create_rooms(25);
 
-    for room in rooms.iter() {
+    for room in &rooms {
         floorplan.add_room(room.clone());
     }
 
