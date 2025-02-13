@@ -14,4 +14,3 @@ bevy_lunex = "0.2.4"
 petgraph = "0.7.1"
 bevy_aseprite_ultra = "0.4.1"
 clap = { version = "4", features = ["derive"] }
-triples = "0.2.5"
