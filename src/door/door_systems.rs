@@ -1,5 +1,5 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::{prelude::*, text::TextBounds};
+use bevy::{color::palettes::tailwind::GRAY_900, prelude::*, text::TextBounds};
 use bevy_lit::prelude::LightOccluder2d;
 
 use crate::room::room_component::RoomState;
@@ -12,6 +12,8 @@ pub fn spawn_platforms(
     asset_server: Res<AssetServer>,
     room_state: Res<RoomState>,
     query: Query<Entity, With<Platform>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     if !room_state.is_changed() {
         return;
@@ -30,7 +32,15 @@ pub fn spawn_platforms(
             door_state.room_id,
         )
     }) {
-        spawn_platform(&mut commands, position, &text_font, room_name, room_id);
+        spawn_platform(
+            &mut commands,
+            position,
+            &text_font,
+            room_name,
+            room_id,
+            &mut meshes,
+            &mut materials,
+        );
     }
 }
 
@@ -55,8 +65,15 @@ fn spawn_platform(
     text_font: &TextFont,
     room_name: String,
     room_id: String,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
 ) {
-    let platform_components = (
+    let shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
+    let color = Color::from(GRAY_900);
+
+    let platform_component = (
+        Mesh2d(shape),
+        MeshMaterial2d(materials.add(color)),
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
             PLATFORM_WIDTH / 2.0,
@@ -81,7 +98,7 @@ fn spawn_platform(
         },
     );
 
-    let text_components = (
+    let text_component = (
         Text2d::new(room_name.clone()),
         text_font.clone(),
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
@@ -89,7 +106,7 @@ fn spawn_platform(
         Transform::from_translation(Vec3::Z),
     );
 
-    let door_components = (
+    let door_component = (
         Door { room_id, room_name },
         Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.1),
         LightOccluder2d::default(),
@@ -100,10 +117,8 @@ fn spawn_platform(
         },
     );
 
-    commands
-        .spawn(platform_components)
-        .with_children(|builder| {
-            builder.spawn(text_components);
-            builder.spawn(door_components);
-        });
+    commands.spawn(platform_component).with_children(|builder| {
+        builder.spawn(text_component);
+        builder.spawn(door_component);
+    });
 }

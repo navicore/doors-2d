@@ -37,7 +37,7 @@ pub fn spawn_camera(mut commands: Commands) {
         .spawn((MovingLights, Transform::default(), Visibility::default()))
         .with_children(|builder| {
             let point_light = PointLight2d {
-                intensity: 2.0,
+                intensity: 3.0,
                 radius: 1100.0,
                 falloff: 3.0,
                 ..default()
