@@ -19,7 +19,7 @@ fn create_rooms(lim: u8) -> Vec<RoomData> {
     (0..lim)
         .map(|i| RoomData {
             id: i.to_string(),
-            name: format!("RoomData {i}"),
+            name: format!("Room {i}"),
         })
         .collect()
 }
