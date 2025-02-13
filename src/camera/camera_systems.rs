@@ -1,5 +1,6 @@
 use crate::camera::camera_component::MainCamera;
-use bevy::prelude::*;
+use bevy::{color::palettes::tailwind::BLUE_300, prelude::*};
+use bevy_lit::prelude::{AmbientLight2d, Lighting2dSettings, RaymarchSettings};
 
 const CAMERA_MOVE_SPEED: f32 = 10.0; // Speed at which the camera moves
 const SCREEN_HALF_WIDTH: f32 = 600.0; // Half of window width (assuming 1200x800 resolution)
@@ -10,7 +11,21 @@ type CameraQuery<'a> = Query<'a, 'a, &'a mut Transform, With<MainCamera>>;
 
 pub fn spawn_camera(mut commands: Commands) {
     commands.spawn((
-        Camera2d, MainCamera, // Mark the camera for easy querying
+        Camera2d,
+        MainCamera, // Mark the camera for easy querying
+        Lighting2dSettings {
+            blur: 32.,
+            raymarch: RaymarchSettings {
+                max_steps: 64,
+                jitter_contrib: 0.5,
+                sharpness: 10.,
+            },
+            ..default()
+        },
+        AmbientLight2d {
+            brightness: 0.1,
+            color: Color::from(BLUE_300),
+        },
     ));
 }
 
