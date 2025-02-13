@@ -3,15 +3,24 @@ name = "doors"
 version = "0.2.0"
 edition = "2021"
 
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
 [dependencies]
 bevy = "0.15"
 bevy_embedded_assets = "0.12"
 leafwing-input-manager = "0.16"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-avian2d = "0.2.1"
-bevy_lunex = "0.2.4"
-petgraph = "0.7.1"
-bevy_aseprite_ultra = "0.4.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+avian2d = "0.2"
+bevy_lunex = "0.2"
+petgraph = "0.7"
+bevy_aseprite_ultra = "0.4"
 clap = { version = "4", features = ["derive"] }
-bevy_lit = "0.6.0"
+bevy_lit = "0.6"
+
+[dev-dependencies]
+bevy_dylib = "0.15"
