@@ -104,6 +104,7 @@ fn spawn_platform(
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
         TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
         Transform::from_translation(Vec3::Z),
+        //Transform::from_xyz(0.0, 0.0, 1.1), // Set z position higher than the platform
     );
 
     let door_component = (
