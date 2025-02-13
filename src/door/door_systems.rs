@@ -103,7 +103,8 @@ fn spawn_platform(
         text_font.clone(),
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
         TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-        Transform::from_translation(Vec3::Z),
+        //Transform::from_translation(Vec3::Z),
+        Transform::from_xyz(0.0, 0.0, 2.0),
     );
 
     let door_component = (
