@@ -10,7 +10,7 @@ use crate::room::Floor;
 use crate::state::state_component::FadeEffect;
 use crate::state::GameState;
 use avian2d::prelude::*;
-use bevy::color::palettes::tailwind::BLUE_300;
+use bevy::color::palettes::tailwind::BLUE_600;
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_lit::prelude::PointLight2d;
@@ -66,14 +66,14 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Transform::default()
             .with_scale(Vec3::new(4.0, 4.0, 1.0))
-            .with_translation(Vec3::new(0.0, 0.0, 1.0)), //needed for player to be in front of the door
+            .with_translation(Vec3::new(0.0, 0.0, 2.0)), //needed for player to be in front of the door
         InputManagerBundle::with_map(input_map),
         PlayerBundle::new(),
         PointLight2d {
             intensity: 0.5,
             radius: 300.0,
             falloff: 2.0,
-            color: Color::from(BLUE_300),
+            color: Color::from(BLUE_600),
             ..default()
         },
     ));
