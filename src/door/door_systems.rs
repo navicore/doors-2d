@@ -1,5 +1,6 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::{prelude::*, text::TextBounds};
+use bevy_lit::prelude::LightOccluder2d;
 
 use crate::room::room_component::RoomState;
 
@@ -72,6 +73,7 @@ fn spawn_platform(
             combine_rule: CoefficientCombine::Max,
         },
         Platform {},
+        LightOccluder2d::default(),
         Sprite {
             color: Color::srgb(0.5, 0.5, 0.5),
             custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
@@ -90,6 +92,7 @@ fn spawn_platform(
     let door_components = (
         Door { room_id, room_name },
         Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.1),
+        LightOccluder2d::default(),
         Sprite {
             color: Color::srgb(0.3, 0.3, 0.3),
             custom_size: Some(Vec2::new(PLATFORM_WIDTH / 4.0, PLATFORM_WIDTH / 2.0)),
