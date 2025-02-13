@@ -7,7 +7,7 @@ use door::DoorPlugin;
 use integration::TestModeIntegrationPlugin;
 use pause::PausePlugin;
 use player::PlayerPlugin;
-use room::RoomPlugin;
+use room::{room_component::WINDOW_WIDTH, RoomPlugin, WINDOW_HEIGHT};
 use state::StatePlugin;
 
 mod camera;
@@ -28,6 +28,14 @@ fn main() {
             EmbeddedAssetPlugin {
                 mode: PluginMode::ReplaceDefault,
             },
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Doors".to_string(),
+                    resolution: bevy::window::WindowResolution::from((WINDOW_WIDTH, WINDOW_HEIGHT)),
+                    ..default()
+                }),
+                ..default()
+            }),
             PhysicsPlugins::default(),
             CameraPlugin,
             RoomPlugin,

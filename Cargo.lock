@@ -1293,6 +1293,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_lit"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "801daa2c2242690f462d9996e05c54b524ed34efff2200c6e9d0e453784a6123"
+dependencies = [
+ "bevy 0.15.1",
+ "bevy_voronoi",
+]
+
+[[package]]
 name = "bevy_log"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2217,6 +2227,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_voronoi"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "615dcf02c48c059463dfa1506785dc51d60d1f19c7e06f9b6c46df7b5841e31d"
+dependencies = [
+ "bevy 0.15.1",
+]
+
+[[package]]
 name = "bevy_window"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2991,6 +3010,7 @@ dependencies = [
  "bevy 0.15.1",
  "bevy_aseprite_ultra",
  "bevy_embedded_assets",
+ "bevy_lit",
  "bevy_lunex",
  "clap",
  "leafwing-input-manager",
