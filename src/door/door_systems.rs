@@ -68,12 +68,13 @@ fn spawn_platform(
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<ColorMaterial>>,
 ) {
-    let shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
     let color = Color::from(GRAY_900);
+    let platform_shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
 
     let platform_component = (
-        Mesh2d(shape),
+        Mesh2d(platform_shape),
         MeshMaterial2d(materials.add(color)),
+        LightOccluder2d::default(),
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(
             PLATFORM_WIDTH / 2.0,
@@ -90,7 +91,6 @@ fn spawn_platform(
             combine_rule: CoefficientCombine::Max,
         },
         Platform {},
-        LightOccluder2d::default(),
         Sprite {
             color: Color::srgb(0.5, 0.5, 0.5),
             custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
@@ -109,8 +109,7 @@ fn spawn_platform(
 
     let door_component = (
         Door { room_id, room_name },
-        Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.1),
-        LightOccluder2d::default(),
+        Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.0),
         Sprite {
             color: Color::srgb(0.3, 0.3, 0.3),
             custom_size: Some(Vec2::new(PLATFORM_WIDTH / 4.0, PLATFORM_WIDTH / 2.0)),

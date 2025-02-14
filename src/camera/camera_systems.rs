@@ -28,7 +28,7 @@ pub fn spawn_camera(mut commands: Commands) {
             ..default()
         },
         AmbientLight2d {
-            brightness: 0.1,
+            brightness: 0.5,
             color: Color::from(BLUE_300),
         },
     ));
