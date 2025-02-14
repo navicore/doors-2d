@@ -1,5 +1,5 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::{color::palettes::tailwind::BLUE_600, prelude::*, text::TextBounds};
+use bevy::{color::palettes::tailwind::BLUE_600, prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
 use crate::room::room_component::RoomState;
@@ -96,10 +96,10 @@ fn spawn_platform(
     let text_component = (
         Text2d::new(room_name.clone()),
         text_font.clone(),
+        Anchor::Center,
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
         TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-        //Transform::from_translation(Vec3::Z),
-        Transform::from_xyz(0.0, 0.0, 2.0),
+        Transform::from_translation(Vec3::Z),
     );
 
     let door_component = (
