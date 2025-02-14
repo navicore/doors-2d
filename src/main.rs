@@ -1,8 +1,5 @@
 use avian2d::PhysicsPlugins;
-use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
-    prelude::*,
-};
+use bevy::{diagnostic::LogDiagnosticsPlugin, prelude::*};
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
 use clap::Parser;
