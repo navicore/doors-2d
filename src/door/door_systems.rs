@@ -1,5 +1,5 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::{color::palettes::tailwind::GRAY_900, prelude::*, text::TextBounds};
+use bevy::{prelude::*, text::TextBounds};
 use bevy_lit::prelude::LightOccluder2d;
 
 use crate::room::room_component::RoomState;
@@ -13,7 +13,6 @@ pub fn spawn_platforms(
     room_state: Res<RoomState>,
     query: Query<Entity, With<Platform>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     if !room_state.is_changed() {
         return;
@@ -39,7 +38,6 @@ pub fn spawn_platforms(
             room_name,
             room_id,
             &mut meshes,
-            &mut materials,
         );
     }
 }
@@ -66,14 +64,11 @@ fn spawn_platform(
     room_name: String,
     room_id: String,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<ColorMaterial>>,
 ) {
-    let color = Color::from(GRAY_900);
     let platform_shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
 
     let platform_component = (
         Mesh2d(platform_shape),
-        MeshMaterial2d(materials.add(color)),
         LightOccluder2d::default(),
         RigidBody::Static,
         Collider::from(SharedShape::cuboid(

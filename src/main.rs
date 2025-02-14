@@ -1,5 +1,8 @@
 use avian2d::PhysicsPlugins;
-use bevy::prelude::*;
+use bevy::{
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    prelude::*,
+};
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
 use clap::Parser;
@@ -36,6 +39,8 @@ fn main() {
                 }),
                 ..default()
             }),
+            //FrameTimeDiagnosticsPlugin,
+            LogDiagnosticsPlugin::default(),
             PhysicsPlugins::default(),
             CameraPlugin,
             RoomPlugin,

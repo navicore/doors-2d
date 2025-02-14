@@ -10,7 +10,6 @@ use crate::room::Floor;
 use crate::state::state_component::FadeEffect;
 use crate::state::GameState;
 use avian2d::prelude::*;
-use bevy::color::palettes::tailwind::GRAY_900;
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_lit::prelude::LightOccluder2d;
@@ -53,7 +52,6 @@ pub fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let input_map = InputMap::new([
         (Action::Jump, KeyCode::Space),
@@ -62,12 +60,10 @@ pub fn spawn_player(
         (Action::Enter, KeyCode::ArrowUp),
     ]);
 
-    let color = Color::from(GRAY_900);
-    let player_shape = meshes.add(Rectangle::new(4.0, 4.0));
+    let player_shape = meshes.add(Rectangle::new(8.0, 16.0));
 
     commands.spawn((
         Mesh2d(player_shape),
-        MeshMaterial2d(materials.add(color)),
         LightOccluder2d::default(),
         AseSpriteAnimation {
             animation: Animation::tag("walk-up")
