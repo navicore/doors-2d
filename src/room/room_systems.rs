@@ -90,13 +90,14 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
     }
 }
 
-#[allow(clippy::cast_precision_loss)]
 fn update_room_state_with_doors(
     room_state: &mut RoomState,
     doors_and_rooms: Vec<(&floorplan::DoorData, &floorplan::RoomData)>,
 ) {
     let number_of_doors = doors_and_rooms.len();
+    #[allow(clippy::cast_precision_loss)]
     let room_width = PLATFORM_X_SEPARATOR * (number_of_doors + 1) as f32;
+
     room_state.wall_distance_from_center = room_width / 2.0;
     room_state.floor_ceiling_width = room_width;
 
@@ -111,6 +112,7 @@ fn update_room_state_with_doors(
             room_seq += 1;
 
             Vec2 {
+                #[allow(clippy::cast_precision_loss)]
                 x: PLATFORM_X_SEPARATOR.mul_add(i as f32, PLATFORM_X_SEPARATOR)
                     - room_state.wall_distance_from_center,
                 y: PLATFORM_Y_SEPARATOR[y_index],
