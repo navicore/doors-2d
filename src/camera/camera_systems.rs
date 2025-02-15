@@ -1,11 +1,6 @@
 use crate::camera::camera_component::MainCamera;
-use bevy::{
-    color::palettes::tailwind::{BLUE_300, BLUE_600},
-    prelude::*,
-};
-use bevy_lit::prelude::{AmbientLight2d, Lighting2dSettings, PointLight2d, RaymarchSettings};
-
-use super::camera_component::{MovingLights, X_EXTENT};
+use bevy::{color::palettes::tailwind::BLUE_300, prelude::*};
+use bevy_lit::prelude::{AmbientLight2d, Lighting2dSettings, RaymarchSettings};
 
 const CAMERA_MOVE_SPEED: f32 = 10.0; // Speed at which the camera moves
 const SCREEN_HALF_WIDTH: f32 = 600.0; // Half of window width (assuming 1200x800 resolution)
@@ -32,33 +27,6 @@ pub fn spawn_camera(mut commands: Commands) {
             color: Color::from(BLUE_300),
         },
     ));
-
-    commands
-        .spawn((MovingLights, Transform::default(), Visibility::default()))
-        .with_children(|builder| {
-            let point_light = PointLight2d {
-                intensity: 3.0,
-                radius: 1100.0,
-                falloff: 3.0,
-                ..default()
-            };
-
-            builder.spawn((
-                PointLight2d {
-                    color: Color::from(BLUE_600),
-                    ..point_light
-                },
-                Transform::from_xyz(-X_EXTENT + 50. / 2., 0.0, 0.0),
-            ));
-
-            builder.spawn((
-                PointLight2d {
-                    color: Color::from(BLUE_600),
-                    ..point_light
-                },
-                Transform::from_xyz(X_EXTENT + 50. / 2., 0.0, 0.0),
-            ));
-        });
 }
 
 pub fn follow_player(mut query_set: ParamSet<(PlayerQuery<'_>, CameraQuery<'_>)>) {
@@ -77,14 +45,5 @@ pub fn follow_player(mut query_set: ParamSet<(PlayerQuery<'_>, CameraQuery<'_>)>
                 camera_transform.translation.x -= CAMERA_MOVE_SPEED;
             }
         }
-    }
-}
-
-pub fn update_moving_lights(
-    time: Res<Time>,
-    mut point_light_query: Query<&mut Transform, With<MovingLights>>,
-) {
-    for mut transform in &mut point_light_query {
-        transform.rotation *= Quat::from_rotation_z(time.delta_secs() / 12.0);
     }
 }

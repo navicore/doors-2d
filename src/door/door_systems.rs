@@ -1,6 +1,6 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::{prelude::*, text::TextBounds};
-use bevy_lit::prelude::LightOccluder2d;
+use bevy::{color::palettes::tailwind::BLUE_600, prelude::*, sprite::Anchor, text::TextBounds};
+use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
 use crate::room::room_component::RoomState;
 
@@ -96,10 +96,10 @@ fn spawn_platform(
     let text_component = (
         Text2d::new(room_name.clone()),
         text_font.clone(),
+        Anchor::Center,
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
         TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-        //Transform::from_translation(Vec3::Z),
-        Transform::from_xyz(0.0, 0.0, 2.0),
+        Transform::from_translation(Vec3::Z),
     );
 
     let door_component = (
@@ -111,9 +111,20 @@ fn spawn_platform(
             ..default()
         },
     );
+    let light_component = (
+        PointLight2d {
+            intensity: 1.5,
+            radius: 600.0,
+            falloff: 2.0,
+            color: Color::from(BLUE_600),
+            ..default()
+        },
+        Transform::from_xyz(0.0, PLATFORM_HEIGHT.mul_add(-2.0, PLATFORM_WIDTH), 0.0),
+    );
 
     commands.spawn(platform_component).with_children(|builder| {
         builder.spawn(text_component);
         builder.spawn(door_component);
+        builder.spawn(light_component);
     });
 }

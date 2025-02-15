@@ -28,14 +28,7 @@ pub fn handle_floor_plan_changes(
 
         let (you_are_here, you_were_here) =
             determine_current_location(&new_floorplan, &current_floorplan);
-
-        // only update the current floor plan if it is different from the new one
-        if current_floorplan
-            .floorplan
-            .as_ref()
-            .map(|fp| fp != &new_floorplan)
-            .unwrap_or(true)
-        {
+        if current_floorplan.floorplan.as_ref() != Some(&new_floorplan) {
             *current_floorplan = CurrentFloorPlan {
                 floorplan: Some(new_floorplan),
                 you_are_here,
