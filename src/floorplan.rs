@@ -60,6 +60,16 @@ impl FloorPlan {
         }
     }
 
+    pub fn get_room(&self, room_index: NodeIndex) -> FloorPlanResult<&RoomData> {
+        self.graph
+            .node_weight(room_index)
+            .ok_or_else(|| FloorPlanError::RoomDataNotFound(room_index.index().to_string()))
+    }
+
+    pub fn get_all_room_ids(&self) -> Vec<String> {
+        self.room_index_map.keys().cloned().collect()
+    }
+
     pub fn add_room(&mut self, room: RoomData) -> NodeIndex {
         let room_index = self.graph.add_node(room.clone());
         self.room_index_map.insert(room.id.clone(), room_index);
@@ -81,7 +91,7 @@ impl FloorPlan {
     pub fn get_start_room(&self) -> FloorPlanResult<&RoomData> {
         match &self.start_room_id {
             Some(room_id) => {
-                let room_index = self.get_room_by_id(room_id)?;
+                let room_index = self.get_room_idx_by_id(room_id)?;
                 self.graph
                     .node_weight(room_index)
                     .ok_or_else(|| FloorPlanError::RoomDataNotFound(room_id.clone()))
@@ -120,7 +130,7 @@ impl FloorPlan {
         Err(FloorPlanError::DoorNotFound(door_id.to_string()))
     }
 
-    pub fn get_room_by_id(&self, room_id: &str) -> FloorPlanResult<NodeIndex> {
+    pub fn get_room_idx_by_id(&self, room_id: &str) -> FloorPlanResult<NodeIndex> {
         self.room_index_map
             .get(room_id)
             .copied()
@@ -131,7 +141,7 @@ impl FloorPlan {
         &self,
         room_id: &str,
     ) -> FloorPlanResult<Vec<(&DoorData, &RoomData)>> {
-        let room_index = self.get_room_by_id(room_id)?;
+        let room_index = self.get_room_idx_by_id(room_id)?;
         let result = self
             .graph
             .edges(room_index)
@@ -261,13 +271,13 @@ mod tests {
         };
 
         floor_plan.add_door(
-            floor_plan.get_room_by_id(&room1.id).unwrap(),
-            floor_plan.get_room_by_id(&room2.id).unwrap(),
+            floor_plan.get_room_idx_by_id(&room1.id).unwrap(),
+            floor_plan.get_room_idx_by_id(&room2.id).unwrap(),
             door1.clone(),
         );
         floor_plan.add_door(
-            floor_plan.get_room_by_id(&room2.id).unwrap(),
-            floor_plan.get_room_by_id(&room3.id).unwrap(),
+            floor_plan.get_room_idx_by_id(&room2.id).unwrap(),
+            floor_plan.get_room_idx_by_id(&room3.id).unwrap(),
             door2.clone(),
         );
 

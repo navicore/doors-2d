@@ -8,8 +8,8 @@ fn door_adder(
     door: &DoorData,
 ) -> FloorPlanResult<()> {
     plan.add_door(
-        plan.get_room_by_id(&room1.id)?,
-        plan.get_room_by_id(&room2.id)?,
+        plan.get_room_idx_by_id(&room1.id)?,
+        plan.get_room_idx_by_id(&room2.id)?,
         door.clone(),
     );
     Ok(())

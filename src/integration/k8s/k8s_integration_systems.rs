@@ -19,8 +19,8 @@ fn connect_rooms_with_doors(
     };
     *door_id += 1;
     plan.add_door(
-        plan.get_room_by_id(&room1.id)?,
-        plan.get_room_by_id(&room2.id)?,
+        plan.get_room_idx_by_id(&room1.id)?,
+        plan.get_room_idx_by_id(&room2.id)?,
         door1,
     );
 
@@ -30,8 +30,8 @@ fn connect_rooms_with_doors(
     };
     *door_id += 1;
     plan.add_door(
-        plan.get_room_by_id(&room2.id)?,
-        plan.get_room_by_id(&room1.id)?,
+        plan.get_room_idx_by_id(&room2.id)?,
+        plan.get_room_idx_by_id(&room1.id)?,
         door2,
     );
 
@@ -39,24 +39,42 @@ fn connect_rooms_with_doors(
 }
 
 fn add_rooms(
-    floorplan: &mut FloorPlan,
+    plan: &mut FloorPlan,
     json_value: &serde_json::Value,
     namespace: &str,
     outer_room: &RoomData,
     door_id_generator: &mut usize,
     kind: &str,
 ) -> FloorPlanResult<()> {
-    if let Ok(names) = get_names(json_value, kind, namespace) {
-        for name in names {
+    if let Ok(resources) = get_names(json_value, kind, namespace) {
+        for r in resources {
             let room = RoomData {
-                id: name.clone(),
-                name: name.clone(),
+                id: format!("{namespace}-{}-{}", r.kind, r.name),
+                name: r.name.clone(),
             };
-            floorplan.add_room(room.clone());
-            connect_rooms_with_doors(floorplan, &room, outer_room, door_id_generator)?;
+            plan.add_room(room.clone());
+            connect_rooms_with_doors(plan, &room, outer_room, door_id_generator)?;
+
+            // if there is any owner, connect the room to the owner
+            if let Some(owner) = r.owner {
+                let owner_room_id = format!("{namespace}-{}-{}", owner.kind, owner.name);
+                if let Ok(owner_room_idx) = plan.get_room_idx_by_id(&owner_room_id) {
+                    if let Ok(owner_room) = plan.clone().get_room(owner_room_idx) {
+                        //TODO: clone
+                        //is expensive
+                        connect_rooms_with_doors(plan, &room, owner_room, door_id_generator)?;
+                    }
+                } else {
+                    warn!("Owner room not found: {owner_room_id}");
+                }
+            }
         }
+        Ok(())
+    } else {
+        Err(crate::floorplan::FloorPlanError::RoomDataNotFound(
+            "no resources".to_string(),
+        ))
     }
-    Ok(())
 }
 
 fn setup_hallway_and_rooms(
@@ -112,12 +130,12 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
                     )?;
 
                     for kind in &[
-                        "Pod",
                         "Deployment",
                         "DaemonSet",
-                        "Replicaset",
+                        "ReplicaSet",
                         "Service",
                         "ConfigMap",
+                        "Pod",
                     ] {
                         setup_hallway_and_rooms(
                             &mut floorplan,
