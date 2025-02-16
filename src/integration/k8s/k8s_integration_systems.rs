@@ -2,6 +2,8 @@ use std::fs;
 
 use crate::floorplan::{DoorData, FloorPlan, FloorPlanEvent, FloorPlanResult, RoomData};
 use bevy::prelude::*;
+use serde_json::json;
+use serde_yaml::Value;
 
 use super::k8s_utils::{get_names, get_namespaces};
 
@@ -38,13 +40,13 @@ fn connect_rooms_with_doors(
 
 fn add_rooms(
     floorplan: &mut FloorPlan,
-    yaml_content: &str,
+    json_value: &serde_json::Value,
     namespace: &str,
     outer_room: &RoomData,
     door_id_generator: &mut usize,
     kind: &str,
 ) -> FloorPlanResult<()> {
-    if let Ok(names) = get_names(yaml_content, kind, namespace) {
+    if let Ok(names) = get_names(json_value, kind, namespace) {
         for name in names {
             let room = RoomData {
                 id: name.clone(),
@@ -57,59 +59,79 @@ fn add_rooms(
     Ok(())
 }
 
-fn setup_rooms(
+fn setup_hallway_and_rooms(
     plan: &mut FloorPlan,
-    yaml_content: String,
+    json_value: &serde_json::Value, // might want to pass this in a pre-parsed format: TODO
     namespace: &str,
-    namespace_room: &RoomData,
-    door_id: &mut usize,
-    kind: &str,
+    outer_room: &RoomData, // will often be the cluster lobby
+    door_id_generator: &mut usize,
+    kind: &str, // hallways collect similar resources
 ) -> FloorPlanResult<()> {
-    let room = RoomData {
+    let hallway = RoomData {
         id: format!("{namespace}-{kind}s"),
         name: format!("{namespace} {kind}s Hallway"),
     };
-    plan.add_room(room.clone());
-    connect_rooms_with_doors(plan, namespace_room, &room, door_id)?;
-    add_rooms(plan, &yaml_content, namespace, &room, door_id, kind)?;
+    plan.add_room(hallway.clone());
+    connect_rooms_with_doors(plan, outer_room, &hallway, door_id_generator)?;
+    add_rooms(
+        plan,
+        json_value,
+        namespace,
+        &hallway,
+        door_id_generator,
+        kind,
+    )?;
     Ok(())
 }
 
 fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
     let mut floorplan = FloorPlan::new();
     if let Ok(yaml_content) = fs::read_to_string("assets/k8s.yaml") {
-        let cluster_room = RoomData {
-            id: "cluster".to_string(),
-            name: "Cluster Lobby".to_string(),
-        };
-        floorplan.add_room(cluster_room.clone());
+        if let Ok(yaml_value) = serde_yaml::from_str::<Value>(&yaml_content) {
+            let json_value = json!(yaml_value);
 
-        let mut door_id = 0;
-        if let Ok(namespaces) = get_namespaces(&yaml_content) {
-            for namespace in namespaces {
-                let namespace_room = RoomData {
-                    id: namespace.clone(),
-                    name: format!("{namespace} NS Hallway"),
-                };
-                floorplan.add_room(namespace_room.clone());
-                connect_rooms_with_doors(
-                    &mut floorplan,
-                    &cluster_room,
-                    &namespace_room,
-                    &mut door_id,
-                )?;
+            let cluster_room = RoomData {
+                id: "cluster".to_string(),
+                name: "Cluster Lobby".to_string(),
+            };
+            floorplan.add_room(cluster_room.clone());
 
-                for kind in &["Pod", "Deployment", "Replicaset", "Service", "ConfigMap"] {
-                    setup_rooms(
+            let mut door_id = 0;
+            if let Ok(namespaces) = get_namespaces(&json_value) {
+                for namespace in namespaces {
+                    let namespace_room = RoomData {
+                        id: namespace.clone(),
+                        name: format!("{namespace} NS Hallway"),
+                    };
+                    floorplan.add_room(namespace_room.clone());
+                    connect_rooms_with_doors(
                         &mut floorplan,
-                        yaml_content.clone(),
-                        &namespace,
+                        &cluster_room,
                         &namespace_room,
                         &mut door_id,
-                        kind,
                     )?;
+
+                    for kind in &[
+                        "Pod",
+                        "Deployment",
+                        "DaemonSet",
+                        "Replicaset",
+                        "Service",
+                        "ConfigMap",
+                    ] {
+                        setup_hallway_and_rooms(
+                            &mut floorplan,
+                            &json_value,
+                            &namespace,
+                            &namespace_room,
+                            &mut door_id,
+                            kind,
+                        )?;
+                    }
                 }
             }
+        } else {
+            panic!("Failed to parse k8s yaml content");
         }
 
         Ok(floorplan)
