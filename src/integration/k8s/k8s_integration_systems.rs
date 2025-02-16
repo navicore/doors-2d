@@ -36,69 +36,50 @@ fn connect_rooms_with_doors(
     Ok(())
 }
 
-fn handle_pods(
+fn add_rooms(
     floorplan: &mut FloorPlan,
     yaml_content: &str,
-    namespace_room: &RoomData,
-    door_id: &mut usize,
+    namespace: &str,
+    outer_room: &RoomData,
+    door_id_generator: &mut usize,
+    kind: &str,
 ) -> FloorPlanResult<()> {
-    if let Ok(pods) = get_names(yaml_content, "Pod", &namespace_room.name) {
-        for pod in pods {
-            let pod_room = RoomData {
-                id: pod.clone(),
-                name: pod.clone(),
+    if let Ok(names) = get_names(yaml_content, kind, namespace) {
+        for name in names {
+            let room = RoomData {
+                id: name.clone(),
+                name: name.clone(),
             };
-            floorplan.add_room(pod_room.clone());
-            connect_rooms_with_doors(floorplan, namespace_room, &pod_room, door_id)?;
+            floorplan.add_room(room.clone());
+            connect_rooms_with_doors(floorplan, &room, outer_room, door_id_generator)?;
         }
     }
     Ok(())
 }
 
-fn handle_replicasets(
-    floorplan: &mut FloorPlan,
-    yaml_content: &str,
+fn setup_rooms(
+    plan: &mut FloorPlan,
+    yaml_content: String,
+    namespace: &str,
     namespace_room: &RoomData,
     door_id: &mut usize,
+    kind: &str,
 ) -> FloorPlanResult<()> {
-    if let Ok(replicasets) = get_names(yaml_content, "ReplicaSet", &namespace_room.name) {
-        for replicaset in replicasets {
-            let replicaset_room = RoomData {
-                id: replicaset.clone(),
-                name: replicaset.clone(),
-            };
-            floorplan.add_room(replicaset_room.clone());
-            connect_rooms_with_doors(floorplan, namespace_room, &replicaset_room, door_id)?;
-        }
-    }
+    let deployment_room = RoomData {
+        id: format!("{namespace}-{kind}s"),
+        name: format!("{namespace} {kind}s"),
+    };
+    plan.add_room(deployment_room.clone());
+    connect_rooms_with_doors(plan, namespace_room, &deployment_room, door_id)?;
+    add_rooms(
+        plan,
+        &yaml_content,
+        namespace,
+        &deployment_room,
+        door_id,
+        kind,
+    )?;
     Ok(())
-}
-
-fn handle_deployments(
-    floorplan: &mut FloorPlan,
-    yaml_content: &str,
-    namespace_room: &RoomData,
-    door_id: &mut usize,
-) -> FloorPlanResult<()> {
-    if let Ok(deployments) = get_names(yaml_content, "Deployment", &namespace_room.name) {
-        for deployment in deployments {
-            let deployment_room = RoomData {
-                id: deployment.clone(),
-                name: deployment.clone(),
-            };
-            floorplan.add_room(deployment_room.clone());
-            connect_rooms_with_doors(floorplan, namespace_room, &deployment_room, door_id)?;
-        }
-    }
-    Ok(())
-}
-
-pub fn fire_k8s_file_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
-    if let Ok(floorplan) = generate_k8s_floorplan_from_file() {
-        events.send(FloorPlanEvent { floorplan });
-    } else {
-        warn!("No K8S FloorPlanEvent");
-    }
 }
 
 fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
@@ -125,52 +106,23 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
                     &mut door_id,
                 )?;
 
-                let deployment_room = RoomData {
-                    id: format!("{}-deployments", namespace),
-                    name: format!("{} Deployments", namespace),
-                };
-                floorplan.add_room(deployment_room.clone());
-                connect_rooms_with_doors(
+                setup_rooms(
                     &mut floorplan,
+                    yaml_content.clone(),
+                    &namespace,
                     &namespace_room,
-                    &deployment_room,
                     &mut door_id,
-                )?;
-                handle_deployments(
-                    &mut floorplan,
-                    &yaml_content,
-                    &deployment_room,
-                    &mut door_id,
+                    "Deployment",
                 )?;
 
-                let replicaset_room = RoomData {
-                    id: format!("{}-replicasets", namespace),
-                    name: format!("{} ReplicaSets", namespace),
-                };
-                floorplan.add_room(replicaset_room.clone());
-                connect_rooms_with_doors(
+                setup_rooms(
                     &mut floorplan,
+                    yaml_content.clone(),
+                    &namespace,
                     &namespace_room,
-                    &replicaset_room,
                     &mut door_id,
+                    "ReplicaSet",
                 )?;
-                handle_replicasets(
-                    &mut floorplan,
-                    &yaml_content,
-                    &replicaset_room,
-                    &mut door_id,
-                )?;
-
-                let pod_room = RoomData {
-                    id: format!("{}-pods", namespace),
-                    name: format!("{} pods", namespace),
-                };
-                floorplan.add_room(pod_room.clone());
-                connect_rooms_with_doors(&mut floorplan, &namespace_room, &pod_room, &mut door_id)?;
-
-                //TODO: bug replicaset and pods don't create any rooms
-                handle_pods(&mut floorplan, &yaml_content, &pod_room, &mut door_id)?;
-                // Add similar functions for replicasets, pods, and containers here
             }
         }
 
@@ -180,5 +132,13 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
         Err(crate::floorplan::FloorPlanError::RoomDataNotFound(
             "no file".to_string(),
         ))
+    }
+}
+
+pub fn fire_k8s_file_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
+    if let Ok(floorplan) = generate_k8s_floorplan_from_file() {
+        events.send(FloorPlanEvent { floorplan });
+    } else {
+        warn!("No K8S FloorPlanEvent");
     }
 }

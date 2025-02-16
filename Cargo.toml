@@ -10,7 +10,7 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = "0.15"
+bevy = { version = "0.15", features = [] }
 bevy_embedded_assets = "0.12"
 leafwing-input-manager = "0.16"
 serde = { version = "1", features = ["derive"] }
@@ -19,7 +19,7 @@ avian2d = "0.2"
 bevy_lunex = "0.2"
 petgraph = "0.7"
 bevy_aseprite_ultra = "0.4"
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive", "color"] }
 bevy_lit = "0.6"
 serde_yaml = "0.9.34"
 jsonpath_lib = "0.3.0"
