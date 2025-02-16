@@ -65,20 +65,13 @@ fn setup_rooms(
     door_id: &mut usize,
     kind: &str,
 ) -> FloorPlanResult<()> {
-    let deployment_room = RoomData {
+    let room = RoomData {
         id: format!("{namespace}-{kind}s"),
-        name: format!("{namespace} {kind}s"),
+        name: format!("{namespace} {kind}s Hallway"),
     };
-    plan.add_room(deployment_room.clone());
-    connect_rooms_with_doors(plan, namespace_room, &deployment_room, door_id)?;
-    add_rooms(
-        plan,
-        &yaml_content,
-        namespace,
-        &deployment_room,
-        door_id,
-        kind,
-    )?;
+    plan.add_room(room.clone());
+    connect_rooms_with_doors(plan, namespace_room, &room, door_id)?;
+    add_rooms(plan, &yaml_content, namespace, &room, door_id, kind)?;
     Ok(())
 }
 
@@ -87,7 +80,7 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
     if let Ok(yaml_content) = fs::read_to_string("assets/k8s.yaml") {
         let cluster_room = RoomData {
             id: "cluster".to_string(),
-            name: "Cluster".to_string(),
+            name: "Cluster Lobby".to_string(),
         };
         floorplan.add_room(cluster_room.clone());
 
@@ -96,7 +89,7 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
             for namespace in namespaces {
                 let namespace_room = RoomData {
                     id: namespace.clone(),
-                    name: namespace.clone(),
+                    name: format!("{namespace} NS Hallway"),
                 };
                 floorplan.add_room(namespace_room.clone());
                 connect_rooms_with_doors(
@@ -106,23 +99,16 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
                     &mut door_id,
                 )?;
 
-                setup_rooms(
-                    &mut floorplan,
-                    yaml_content.clone(),
-                    &namespace,
-                    &namespace_room,
-                    &mut door_id,
-                    "Deployment",
-                )?;
-
-                setup_rooms(
-                    &mut floorplan,
-                    yaml_content.clone(),
-                    &namespace,
-                    &namespace_room,
-                    &mut door_id,
-                    "ReplicaSet",
-                )?;
+                for kind in &["Pod", "Deployment", "Replicaset", "Service", "ConfigMap"] {
+                    setup_rooms(
+                        &mut floorplan,
+                        yaml_content.clone(),
+                        &namespace,
+                        &namespace_room,
+                        &mut door_id,
+                        kind,
+                    )?;
+                }
             }
         }
 

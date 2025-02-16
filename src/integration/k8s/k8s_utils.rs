@@ -22,8 +22,6 @@ pub fn get_names(
     kind: &str,
     namespace: &str,
 ) -> Result<Vec<String>, Box<dyn Error>> {
-    warn!("kind: {}, namespace: {}", kind, namespace);
-
     let yaml_value: Value = serde_yaml::from_str(yaml_str)?;
     let json_value = json!(yaml_value);
 
