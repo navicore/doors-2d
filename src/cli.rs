@@ -18,9 +18,8 @@ pub enum PlayerType {
 #[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Default)]
 pub enum RoomGeneratorType {
     Rooms2,
-    Rooms5,
     #[default]
+    Rooms5,
     Rooms25,
+    K8sFile,
 }
-
-// todo: let player and room_generator code find these

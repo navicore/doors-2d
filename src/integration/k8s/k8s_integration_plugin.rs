@@ -1,28 +1,16 @@
-use crate::cli;
+use crate::{cli, floorplan::FloorPlanEvent};
 
 use bevy::prelude::*;
 use clap::Parser;
 
-use super::test_mode_systems::{
-    fire_room25_floorplan_event, fire_room2_floorplan_event, fire_room5_floorplan_event,
-};
+use super::k8s_integration_systems::fire_k8s_file_floorplan_event;
 
-pub struct TestModeIntegrationPlugin;
+pub struct K8sIntegrationPlugin;
 
-impl Plugin for TestModeIntegrationPlugin {
-    #[allow(clippy::branches_sharing_code)]
+impl Plugin for K8sIntegrationPlugin {
     fn build(&self, app: &mut App) {
-        if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms2) {
-            app.add_systems(Startup, fire_room2_floorplan_event);
-        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms25) {
-            app.add_systems(Startup, fire_room25_floorplan_event);
-        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms5) {
-            app.add_systems(Startup, fire_room5_floorplan_event);
-        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::K8sFile) {
-            // noop
-            debug!("No test mode room generator specified");
-        } else {
-            app.add_systems(Startup, fire_room5_floorplan_event);
+        if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::K8sFile) {
+            app.add_systems(Startup, fire_k8s_file_floorplan_event);
         }
     }
 }
@@ -36,7 +24,7 @@ mod tests {
     fn test_fire_floorplan_event() {
         // Create a new Bevy app and add the necessary plugins and events
         let mut app = App::new();
-        app.add_plugins(TestModeIntegrationPlugin);
+        app.add_plugins(K8sIntegrationPlugin);
         app.add_event::<FloorPlanEvent>();
 
         // Run the startup systems

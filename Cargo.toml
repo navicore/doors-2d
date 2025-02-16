@@ -21,6 +21,8 @@ petgraph = "0.7"
 bevy_aseprite_ultra = "0.4"
 clap = { version = "4", features = ["derive"] }
 bevy_lit = "0.6"
+serde_yaml = "0.9.34"
+jsonpath_lib = "0.3.0"
 
 [dev-dependencies]
 bevy_dylib = "0.15"
