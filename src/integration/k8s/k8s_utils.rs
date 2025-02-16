@@ -1,6 +1,5 @@
 use std::{collections::HashSet, error::Error};
 
-use bevy::prelude::*;
 use jsonpath_lib::select;
 use serde_json::json;
 use serde_yaml::Value;
