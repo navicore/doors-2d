@@ -19,6 +19,7 @@ pub struct RoomData {
 pub struct DoorData {
     pub id: String,
     pub name: String,
+    pub is_exit: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
@@ -191,6 +192,7 @@ mod tests {
         let door = DoorData {
             id: "1".to_string(),
             name: "Door 1".to_string(),
+            is_exit: false,
         };
         floor_plan.add_door(room1_index, room2_index, door);
 
@@ -228,10 +230,12 @@ mod tests {
         let door1 = DoorData {
             id: "1".to_string(),
             name: "Door 1".to_string(),
+            is_exit: false,
         };
         let door2 = DoorData {
             id: "2".to_string(),
             name: "Door 2".to_string(),
+            is_exit: false,
         };
 
         floor_plan.add_door(room1_index, room2_index, door1);
@@ -275,10 +279,12 @@ mod tests {
         let door1 = DoorData {
             id: "1".to_string(),
             name: "Door 1".to_string(),
+            is_exit: false,
         };
         let door2 = DoorData {
             id: "2".to_string(),
             name: "Door 2".to_string(),
+            is_exit: false,
         };
 
         floor_plan.add_door(

@@ -27,6 +27,7 @@ pub struct DoorState {
     pub room_id: String,
     pub room_name: String,
     pub position: Vec2,
+    pub is_exit: bool,
 }
 
 #[derive(Resource, Clone)]

@@ -29,6 +29,7 @@ fn create_doors(lim: u8) -> Vec<DoorData> {
         .map(|i| DoorData {
             id: i.to_string(),
             name: format!("DoorData {i}"),
+            is_exit: false,
         })
         .collect()
 }

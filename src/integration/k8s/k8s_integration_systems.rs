@@ -16,6 +16,7 @@ fn connect_rooms_with_doors(
     let door1 = DoorData {
         id: door_id.to_string(),
         name: format!("Door to {}", room2.name),
+        is_exit: false,
     };
     *door_id += 1;
     plan.add_door(
@@ -27,6 +28,7 @@ fn connect_rooms_with_doors(
     let door2 = DoorData {
         id: door_id.to_string(),
         name: format!("Door to {}", room1.name),
+        is_exit: true, // second door is always the way out
     };
     *door_id += 1;
     plan.add_door(

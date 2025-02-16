@@ -120,12 +120,13 @@ fn update_room_state_with_doors(
         })
         .collect();
 
-    for (_, room) in doors_and_rooms {
+    for (door_data, room) in doors_and_rooms {
         if let Some(position) = room_positions.pop() {
             let door_state = DoorState {
                 room_id: room.id.clone(),
                 room_name: room.name.clone(),
                 position,
+                is_exit: door_data.is_exit,
             };
             room_state.doors.push(door_state);
         }

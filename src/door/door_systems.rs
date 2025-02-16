@@ -2,7 +2,7 @@ use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::{color::palettes::tailwind::BLUE_600, prelude::*, sprite::Anchor, text::TextBounds};
 use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
-use crate::room::room_component::RoomState;
+use crate::room::room_component::{CurrentFloorPlan, DoorState, RoomState};
 
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
@@ -13,10 +13,13 @@ pub fn spawn_platforms(
     room_state: Res<RoomState>,
     query: Query<Entity, With<Platform>>,
     mut meshes: ResMut<Assets<Mesh>>,
+    plan: Res<CurrentFloorPlan>,
 ) {
     if !room_state.is_changed() {
         return;
     }
+
+    let room_name = plan.you_are_here.clone().unwrap_or("unknown".to_string());
 
     debug!("Room state changed, respawning platforms...");
 
@@ -24,20 +27,13 @@ pub fn spawn_platforms(
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let text_font = create_text_font(font);
 
-    for (position, room_name, room_id) in room_state.clone().doors.into_iter().map(|door_state| {
-        (
-            door_state.position,
-            door_state.room_name,
-            door_state.room_id,
-        )
-    }) {
+    for door_state in room_state.clone().doors {
         spawn_platform(
             &mut commands,
-            position,
+            door_state,
             &text_font,
-            room_name,
-            room_id,
             &mut meshes,
+            room_name.clone(),
         );
     }
 }
@@ -57,13 +53,13 @@ fn create_text_font(font: Handle<Font>) -> TextFont {
     }
 }
 
+//        spawn_platform(&mut commands, door_state, &text_font, &mut meshes);
 fn spawn_platform(
     commands: &mut Commands,
-    position: Vec2,
+    door_state: DoorState,
     text_font: &TextFont,
-    room_name: String,
-    room_id: String,
     meshes: &mut ResMut<Assets<Mesh>>,
+    room_name: String,
 ) {
     let platform_shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
 
@@ -75,7 +71,7 @@ fn spawn_platform(
             PLATFORM_WIDTH / 2.0,
             PLATFORM_HEIGHT / 2.0,
         )),
-        Transform::from_xyz(position.x, position.y, 0.0),
+        Transform::from_xyz(door_state.position.x, door_state.position.y, 0.0),
         Friction {
             dynamic_coefficient: 0.6,
             static_coefficient: 0.8,
@@ -94,7 +90,7 @@ fn spawn_platform(
     );
 
     let text_component = (
-        Text2d::new(room_name.clone()),
+        Text2d::new(door_state.room_name.clone()),
         text_font.clone(),
         Anchor::Center,
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
@@ -102,8 +98,24 @@ fn spawn_platform(
         Transform::from_translation(Vec3::Z),
     );
 
+    let exit_text_component = if door_state.is_exit {
+        Some((
+            Text2d::new(format!("You are here: {}", room_name)),
+            text_font.clone(),
+            Anchor::Center,
+            TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
+            TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
+            Transform::from_xyz(0.0, -50.0, 1.0),
+        ))
+    } else {
+        None
+    };
+
     let door_component = (
-        Door { room_id, room_name },
+        Door {
+            room_id: door_state.room_id,
+            room_name: door_state.room_name,
+        },
         Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.0),
         Sprite {
             color: Color::srgb(0.3, 0.3, 0.3),
@@ -126,5 +138,8 @@ fn spawn_platform(
         builder.spawn(text_component);
         builder.spawn(door_component);
         builder.spawn(light_component);
+        if let Some(exit_text_component) = exit_text_component {
+            builder.spawn(exit_text_component);
+        }
     });
 }

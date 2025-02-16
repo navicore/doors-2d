@@ -11,15 +11,11 @@ impl Plugin for K8sIntegrationPlugin {
     fn build(&self, app: &mut App) {
         let generator_choise = cli::Cli::parse().room_generator;
         match generator_choise {
-            Some(cli::RoomGeneratorType::Rooms2) => {
-                //todo: don't double check this in each
-                //integration plugin :(
-                //noop
-            }
-            Some(cli::RoomGeneratorType::Rooms5) => {
-                //noop
-            }
-            Some(cli::RoomGeneratorType::Rooms25) => {
+            Some(
+                cli::RoomGeneratorType::Rooms2
+                | cli::RoomGeneratorType::Rooms5
+                | cli::RoomGeneratorType::Rooms25,
+            ) => {
                 //noop
             }
             _ => {
