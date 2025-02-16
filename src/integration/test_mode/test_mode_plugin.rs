@@ -1,5 +1,4 @@
-use crate::{cli, floorplan::FloorPlanEvent};
-
+use crate::cli;
 use bevy::prelude::*;
 use clap::Parser;
 
@@ -10,14 +9,26 @@ use super::test_mode_systems::{
 pub struct TestModeIntegrationPlugin;
 
 impl Plugin for TestModeIntegrationPlugin {
+    #[allow(clippy::branches_sharing_code)]
     fn build(&self, app: &mut App) {
-        app.add_event::<FloorPlanEvent>();
+        let room_generator = cli::Cli::parse().room_generator;
+        add_room_generator_system(app, room_generator);
+    }
+}
 
-        if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms2) {
+fn add_room_generator_system(app: &mut App, room_generator: Option<cli::RoomGeneratorType>) {
+    match room_generator {
+        Some(cli::RoomGeneratorType::Rooms2) => {
             app.add_systems(Startup, fire_room2_floorplan_event);
-        } else if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::Rooms25) {
+        }
+        Some(cli::RoomGeneratorType::Rooms25) => {
             app.add_systems(Startup, fire_room25_floorplan_event);
-        } else {
+        }
+        Some(cli::RoomGeneratorType::K8sFile) => {
+            // noop
+            debug!("No test mode room generator specified");
+        }
+        _ => {
             app.add_systems(Startup, fire_room5_floorplan_event);
         }
     }

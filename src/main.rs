@@ -4,7 +4,8 @@ use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use camera::CameraPlugin;
 use clap::Parser;
 use door::DoorPlugin;
-use integration::TestModeIntegrationPlugin;
+//use integration::TestModeIntegrationPlugin;
+use integration::{test_mode::TestModeIntegrationPlugin, K8sIntegrationPlugin};
 use pause::PausePlugin;
 use player::PlayerPlugin;
 use room::{room_component::WINDOW_WIDTH, RoomPlugin, WINDOW_HEIGHT};
@@ -45,6 +46,7 @@ fn main() {
             DoorPlugin,
             StatePlugin,
             PausePlugin,
+            K8sIntegrationPlugin,
             TestModeIntegrationPlugin,
         ))
         .run();
