@@ -24,12 +24,11 @@ fn add_room_generator_system(app: &mut App, room_generator: Option<cli::RoomGene
         Some(cli::RoomGeneratorType::Rooms25) => {
             app.add_systems(Startup, fire_room25_floorplan_event);
         }
-        Some(cli::RoomGeneratorType::K8sFile) => {
-            // noop
-            debug!("No test mode room generator specified");
+        Some(cli::RoomGeneratorType::Rooms5) => {
+            app.add_systems(Startup, fire_room5_floorplan_event);
         }
         _ => {
-            app.add_systems(Startup, fire_room5_floorplan_event);
+            //noop - you are not the default
         }
     }
 }

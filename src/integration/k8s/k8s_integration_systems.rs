@@ -58,12 +58,10 @@ fn add_rooms(
             // if there is any owner, connect the room to the owner
             if let Some(owner) = r.owner {
                 let owner_room_id = format!("{namespace}-{}-{}", owner.kind, owner.name);
-                if let Ok(owner_room_idx) = plan.get_room_idx_by_id(&owner_room_id) {
-                    if let Ok(owner_room) = plan.clone().get_room(owner_room_idx) {
-                        //TODO: clone
-                        //is expensive
-                        connect_rooms_with_doors(plan, &room, owner_room, door_id_generator)?;
-                    }
+                let cplan = plan.clone(); //todo: is this really necessary?
+                let owner_room = cplan.get_room_by_id(&owner_room_id);
+                if let Ok(owner_room) = owner_room {
+                    connect_rooms_with_doors(plan, &room, owner_room, door_id_generator)?;
                 } else {
                     warn!("Owner room not found: {owner_room_id}");
                 }

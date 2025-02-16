@@ -137,6 +137,17 @@ impl FloorPlan {
             .ok_or_else(|| FloorPlanError::RoomDataNotFound(room_id.to_string()))
     }
 
+    pub fn get_room_by_id(&self, room_id: &str) -> FloorPlanResult<&RoomData> {
+        self.get_room_idx_by_id(room_id).map_or_else(
+            |_| Err(FloorPlanError::RoomDataNotFound(room_id.to_string())),
+            |room_index| {
+                self.graph
+                    .node_weight(room_index)
+                    .ok_or_else(|| FloorPlanError::RoomDataNotFound(room_index.index().to_string()))
+            },
+        )
+    }
+
     pub fn get_doors_and_connected_rooms(
         &self,
         room_id: &str,
