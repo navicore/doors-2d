@@ -16,15 +16,16 @@ pub fn get_namespaces(yaml_str: &str) -> Result<Vec<String>, Box<dyn Error>> {
     Ok(namespaces.into_iter().collect())
 }
 
-pub fn get_deployment_names(
+pub fn get_names(
     yaml_str: &str,
+    kind: &str,
     namespace: &str,
 ) -> Result<Vec<String>, Box<dyn Error>> {
     let yaml_value: Value = serde_yaml::from_str(yaml_str)?;
     let json_value = json!(yaml_value);
 
     let query = format!(
-        "$..[?(@.kind == 'Deployment' && @.metadata.namespace == '{namespace}')].metadata.name"
+        "$..[?(@.kind == '{kind}' && @.metadata.namespace == '{namespace}')].metadata.name"
     );
 
     let deployments: Vec<String> = select(&json_value, &query)?
