@@ -23,10 +23,10 @@ pub struct CurrentFloorPlan {
 
 #[derive(Resource, Clone)]
 pub struct DoorState {
-    #[allow(dead_code)]
     pub room_id: String,
     pub room_name: String,
     pub position: Vec2,
+    #[allow(dead_code)]
     pub is_exit: bool,
 }
 
@@ -37,7 +37,6 @@ pub struct RoomState {
     pub boundary_thickness: f32,
     pub bounce_effect: f32,
     pub doors: Vec<DoorState>,
-    #[allow(dead_code)]
     pub room_id: Option<String>,
     pub previous_room_id: Option<String>,
 }

@@ -1,8 +1,13 @@
 use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::{color::palettes::tailwind::BLUE_600, prelude::*, sprite::Anchor, text::TextBounds};
+use bevy::{
+    color::palettes::{css::GREY, tailwind::BLUE_600},
+    prelude::*,
+    sprite::Anchor,
+    text::TextBounds,
+};
 use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
-use crate::room::room_component::{CurrentFloorPlan, DoorState, RoomState};
+use crate::room::room_component::{DoorState, RoomState};
 
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
@@ -13,25 +18,31 @@ pub fn spawn_platforms(
     room_state: Res<RoomState>,
     query: Query<Entity, With<Platform>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    plan: Res<CurrentFloorPlan>,
 ) {
     if !room_state.is_changed() {
         return;
     }
 
-    let room_name = plan.you_are_here.clone().unwrap_or("unknown".to_string());
+    //let room_name = plan.you_are_here.clone().unwrap_or("unknown".to_string());
+    let room_name = room_state
+        .room_id
+        .clone()
+        .unwrap_or_else(|| "unknown".to_string());
 
     debug!("Room state changed, respawning platforms...");
 
     despawn_existing_platforms(&mut commands, query);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    let text_font = create_text_font(font);
+    let text_font = create_text_font(font.clone());
+    let sign_font = create_sign_font(font);
 
     for door_state in room_state.clone().doors {
         spawn_platform(
             &mut commands,
+            room_state.clone(),
             door_state,
             &text_font,
+            &sign_font,
             &mut meshes,
             room_name.clone(),
         );
@@ -53,11 +64,20 @@ fn create_text_font(font: Handle<Font>) -> TextFont {
     }
 }
 
-//        spawn_platform(&mut commands, door_state, &text_font, &mut meshes);
+fn create_sign_font(font: Handle<Font>) -> TextFont {
+    TextFont {
+        font,
+        font_size: 18.0,
+        ..default()
+    }
+}
+
 fn spawn_platform(
     commands: &mut Commands,
+    room_state: RoomState,
     door_state: DoorState,
     text_font: &TextFont,
+    sign_font: &TextFont,
     meshes: &mut ResMut<Assets<Mesh>>,
     room_name: String,
 ) {
@@ -98,15 +118,20 @@ fn spawn_platform(
         Transform::from_translation(Vec3::Z),
     );
 
-    let exit_text_component = if door_state.is_exit {
-        Some((
-            Text2d::new(format!("You are here: {}", room_name)),
-            text_font.clone(),
-            Anchor::Center,
-            TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
-            TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-            Transform::from_xyz(0.0, -50.0, 1.0),
-        ))
+    let exit_text_component = if let Some(previous_room_id) = room_state.previous_room_id {
+        if door_state.room_id == previous_room_id {
+            Some((
+                Text2d::new(format!("You are in the {room_name} room.")),
+                TextColor(bevy::prelude::Color::Srgba(GREY)),
+                sign_font.clone(),
+                Anchor::Center,
+                TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
+                TextBounds::from(Vec2::new(PLATFORM_WIDTH * 2.0, PLATFORM_HEIGHT * 2.0)),
+                Transform::from_xyz(0.0, -50.0, 1.0),
+            ))
+        } else {
+            None
+        }
     } else {
         None
     };

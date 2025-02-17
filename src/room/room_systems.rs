@@ -77,6 +77,9 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
     room_state
         .previous_room_id
         .clone_from(&current_floorplan.you_were_here);
+    room_state
+        .room_id
+        .clone_from(&current_floorplan.you_are_here);
 
     if let Some(floorplan) = current_floorplan.floorplan.as_ref() {
         if let Some(room_id) = &current_floorplan.you_are_here {

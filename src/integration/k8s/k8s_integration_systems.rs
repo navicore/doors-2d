@@ -52,7 +52,7 @@ fn add_rooms(
         for r in resources {
             let room = RoomData {
                 id: format!("{namespace}-{}-{}", r.kind, r.name),
-                name: r.name.clone(),
+                name: format!("{} {}", r.kind, r.name),
             };
             plan.add_room(room.clone());
             connect_rooms_with_doors(plan, &room, outer_room, door_id_generator)?;
