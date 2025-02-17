@@ -69,8 +69,6 @@ fn add_rooms(
                 }
             }
 
-            // todo: use the kind to determine if there are any containers vs other children like
-            // volume mounts or env vars
             for container in r.children {
                 let container_room = RoomData {
                     id: format!("{namespace}-{}-{}-{}", r.kind, "container", container.name),
@@ -78,6 +76,22 @@ fn add_rooms(
                 };
                 plan.add_room(container_room.clone());
                 connect_rooms_with_doors(plan, &container_room, &room, door_id_generator)?;
+                for volume_mount in container.children {
+                    let volume_mount_room = RoomData {
+                        id: format!(
+                            "{namespace}-{}-{}-{}-{}",
+                            r.kind, "container", container.name, volume_mount.name
+                        ),
+                        name: format!("{} {}", "volume mount", volume_mount.name),
+                    };
+                    plan.add_room(volume_mount_room.clone());
+                    connect_rooms_with_doors(
+                        plan,
+                        &volume_mount_room,
+                        &container_room,
+                        door_id_generator,
+                    )?;
+                }
             }
         }
         Ok(())

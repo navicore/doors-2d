@@ -13,6 +13,60 @@ pub fn get_namespaces(json_value: &serde_json::Value) -> Result<Vec<String>, Box
     Ok(namespaces.into_iter().collect())
 }
 
+fn get_owner_reference(v: &serde_json::Value) -> Option<(String, String)> {
+    v["metadata"]["ownerReferences"]
+        .as_array()
+        .and_then(|refs| refs.first())
+        .and_then(|owner_ref| {
+            let owner_kind = owner_ref["kind"].as_str().map(String::from);
+            let owner_name = owner_ref["name"].as_str().map(String::from);
+            match (owner_kind, owner_name) {
+                (Some(kind), Some(name)) => Some((kind, name)),
+                _ => None,
+            }
+        })
+}
+
+fn get_volume_mounts(container: &serde_json::Value) -> Vec<IntegrationResource> {
+    container["volumeMounts"]
+        .as_array()
+        .map(|volume_mounts| {
+            volume_mounts
+                .iter()
+                .filter_map(|volume_mount| {
+                    volume_mount["name"].as_str().map(|n| IntegrationResource {
+                        name: n.to_string(),
+                        kind: "VolumeMount".to_string(),
+                        parent: None,
+                        children: Vec::new(),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn get_containers(v: &serde_json::Value) -> Vec<IntegrationResource> {
+    v["spec"]["containers"]
+        .as_array()
+        .map(|containers| {
+            containers
+                .iter()
+                .filter_map(|container| {
+                    let container_name = container["name"].as_str().map(String::from);
+                    let volume_mounts = get_volume_mounts(container);
+                    container_name.map(|n| IntegrationResource {
+                        name: n,
+                        kind: "Container".to_string(),
+                        parent: None,
+                        children: volume_mounts,
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
 pub fn get_names(
     json_value: &serde_json::Value,
     kind: &str,
@@ -24,33 +78,8 @@ pub fn get_names(
         .iter()
         .filter_map(|v| {
             let name = v["metadata"]["name"].as_str().map(String::from);
-            let owner_reference = v["metadata"]["ownerReferences"]
-                .as_array()
-                .and_then(|refs| refs.first())
-                .and_then(|owner_ref| {
-                    let owner_kind = owner_ref["kind"].as_str().map(String::from);
-                    let owner_name = owner_ref["name"].as_str().map(String::from);
-                    match (owner_kind, owner_name) {
-                        (Some(kind), Some(name)) => Some((kind, name)),
-                        _ => None,
-                    }
-                });
-            let containers = v["spec"]["containers"]
-                .as_array()
-                .map(|containers| {
-                    containers
-                        .iter()
-                        .filter_map(|container| {
-                            container["name"].as_str().map(|n| IntegrationResource {
-                                name: n.to_string(),
-                                kind: "Container".to_string(),
-                                parent: None,
-                                children: Vec::new(),
-                            })
-                        })
-                        .collect()
-                })
-                .unwrap_or_default();
+            let owner_reference = get_owner_reference(v);
+            let containers = get_containers(v);
             let owner = owner_reference
                 .map(|(kind, name)| IntegrationResource::new(name, kind, None, Vec::new()));
             name.map(|n| IntegrationResource::new(n, kind.to_string(), owner, containers))
