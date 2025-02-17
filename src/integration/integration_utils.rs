@@ -1,17 +1,23 @@
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IntegrationResource {
     pub name: String,
     pub kind: String,
-    pub owner: Option<Box<Self>>,
-    pub containers: Vec<String>,
+    pub parent: Option<Box<Self>>,
+    pub children: Vec<IntegrationResource>,
 }
 
 impl IntegrationResource {
-    pub fn new(name: String, kind: String, owner: Option<Self>, containers: Vec<String>) -> Self {
+    pub fn new(
+        name: String,
+        kind: String,
+        parent: Option<Self>,
+        children: Vec<IntegrationResource>,
+    ) -> Self {
         Self {
             name,
             kind,
-            owner: owner.map(Box::new),
-            containers,
+            parent: parent.map(Box::new),
+            children,
         }
     }
 }

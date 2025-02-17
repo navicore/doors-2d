@@ -20,7 +20,7 @@ pub fn get_names(
 ) -> Result<Vec<IntegrationResource>, Box<dyn Error>> {
     let query = format!("$..[?(@.kind == '{kind}' && @.metadata.namespace == '{namespace}')]");
 
-    let deployments: Vec<IntegrationResource> = select(json_value, &query)?
+    let resource: Vec<IntegrationResource> = select(json_value, &query)?
         .iter()
         .filter_map(|v| {
             let name = v["metadata"]["name"].as_str().map(String::from);
@@ -40,7 +40,14 @@ pub fn get_names(
                 .map(|containers| {
                     containers
                         .iter()
-                        .filter_map(|container| container["name"].as_str().map(String::from))
+                        .filter_map(|container| {
+                            container["name"].as_str().map(|n| IntegrationResource {
+                                name: n.to_string(),
+                                kind: "Container".to_string(),
+                                parent: None,
+                                children: Vec::new(),
+                            })
+                        })
                         .collect()
                 })
                 .unwrap_or_default();
@@ -50,7 +57,7 @@ pub fn get_names(
         })
         .collect();
 
-    Ok(deployments)
+    Ok(resource)
 }
 
 #[cfg(test)]
@@ -59,7 +66,7 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn test_get_names_with_owner_and_containers() {
+    fn test_get_names_with_parent_and_containers() {
         let json_value = json!({
             "items": [
                 {
@@ -108,21 +115,45 @@ mod tests {
         let pod1 = &result[0];
         assert_eq!(pod1.name, "pod1");
         assert_eq!(pod1.kind, "Pod");
-        assert!(pod1.owner.is_some());
-        let owner = pod1.owner.as_ref().unwrap();
-        assert_eq!(owner.name, "rs1");
-        assert_eq!(owner.kind, "ReplicaSet");
-        assert_eq!(pod1.containers, vec!["container1", "container2"]);
+        assert!(pod1.parent.is_some());
+        let parent = pod1.parent.as_ref().unwrap();
+        assert_eq!(parent.name, "rs1");
+        assert_eq!(parent.kind, "ReplicaSet");
+        assert_eq!(
+            pod1.children,
+            vec![
+                IntegrationResource::new(
+                    "container1".to_string(),
+                    "Container".to_string(),
+                    None,
+                    Vec::new()
+                ),
+                IntegrationResource::new(
+                    "container2".to_string(),
+                    "Container".to_string(),
+                    None,
+                    Vec::new()
+                ),
+            ]
+        );
 
         let pod2 = &result[1];
         assert_eq!(pod2.name, "pod2");
         assert_eq!(pod2.kind, "Pod");
-        assert!(pod2.owner.is_none());
-        assert_eq!(pod2.containers, vec!["container3"]);
+        assert!(pod2.parent.is_none());
+        assert_eq!(
+            pod2.children,
+            vec![IntegrationResource::new(
+                "container3".to_string(),
+                "Container".to_string(),
+                None,
+                Vec::new()
+            ),]
+        );
     }
 
     #[test]
-    fn test_get_names_without_owner_and_containers() {
+    fn test_get_names_without_parent_and_containers() {
         let json_value = json!({
             "items": [
                 {
@@ -141,7 +172,7 @@ mod tests {
         let service = &result[0];
         assert_eq!(service.name, "service1");
         assert_eq!(service.kind, "Service");
-        assert!(service.owner.is_none());
-        assert!(service.containers.is_empty());
+        assert!(service.parent.is_none());
+        assert!(service.children.is_empty());
     }
 }
