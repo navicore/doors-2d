@@ -68,6 +68,15 @@ fn add_rooms(
                     warn!("Owner room not found: {owner_room_id}");
                 }
             }
+
+            for container in r.containers {
+                let container_room = RoomData {
+                    id: format!("{namespace}-{}-{}-{}", r.kind, "container", container),
+                    name: format!("{} {}", "container", container),
+                };
+                plan.add_room(container_room.clone());
+                connect_rooms_with_doors(plan, &container_room, &room, door_id_generator)?;
+            }
         }
         Ok(())
     } else {
