@@ -28,7 +28,7 @@ fn add_room_generator_system(app: &mut App, room_generator: Option<cli::RoomGene
             app.add_systems(Startup, fire_room5_floorplan_event);
         }
         _ => {
-            //noop - you are not the default
+            panic!("Invalid room generator type");
         }
     }
 }

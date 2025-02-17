@@ -57,22 +57,24 @@ fn add_rooms(
             plan.add_room(room.clone());
             connect_rooms_with_doors(plan, &room, outer_room, door_id_generator)?;
 
-            // if there is any owner, connect the room to the owner
-            if let Some(owner) = r.owner {
-                let owner_room_id = format!("{namespace}-{}-{}", owner.kind, owner.name);
+            // if there is any parent, connect the room to the parent
+            if let Some(parent) = r.parent {
+                let parent_room_id = format!("{namespace}-{}-{}", parent.kind, parent.name);
                 let cplan = plan.clone(); //todo: is this really necessary?
-                let owner_room = cplan.get_room_by_id(&owner_room_id);
-                if let Ok(owner_room) = owner_room {
-                    connect_rooms_with_doors(plan, &room, owner_room, door_id_generator)?;
+                let parent_room = cplan.get_room_by_id(&parent_room_id);
+                if let Ok(parent_room) = parent_room {
+                    connect_rooms_with_doors(plan, &room, parent_room, door_id_generator)?;
                 } else {
-                    warn!("Owner room not found: {owner_room_id}");
+                    warn!("Owner room not found: {parent_room_id}");
                 }
             }
 
-            for container in r.containers {
+            // todo: use the kind to determine if there are any containers vs other children like
+            // volume mounts or env vars
+            for container in r.children {
                 let container_room = RoomData {
-                    id: format!("{namespace}-{}-{}-{}", r.kind, "container", container),
-                    name: format!("{} {}", "container", container),
+                    id: format!("{namespace}-{}-{}-{}", r.kind, "container", container.name),
+                    name: format!("{} {}", "container", container.name),
                 };
                 plan.add_room(container_room.clone());
                 connect_rooms_with_doors(plan, &container_room, &room, door_id_generator)?;
