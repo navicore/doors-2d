@@ -19,6 +19,7 @@ pub struct RoomData {
 pub struct DoorData {
     pub id: String,
     pub name: String,
+    pub is_exit: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
@@ -137,6 +138,17 @@ impl FloorPlan {
             .ok_or_else(|| FloorPlanError::RoomDataNotFound(room_id.to_string()))
     }
 
+    pub fn get_room_by_id(&self, room_id: &str) -> FloorPlanResult<&RoomData> {
+        self.get_room_idx_by_id(room_id).map_or_else(
+            |_| Err(FloorPlanError::RoomDataNotFound(room_id.to_string())),
+            |room_index| {
+                self.graph
+                    .node_weight(room_index)
+                    .ok_or_else(|| FloorPlanError::RoomDataNotFound(room_index.index().to_string()))
+            },
+        )
+    }
+
     pub fn get_doors_and_connected_rooms(
         &self,
         room_id: &str,
@@ -180,6 +192,7 @@ mod tests {
         let door = DoorData {
             id: "1".to_string(),
             name: "Door 1".to_string(),
+            is_exit: false,
         };
         floor_plan.add_door(room1_index, room2_index, door);
 
@@ -217,10 +230,12 @@ mod tests {
         let door1 = DoorData {
             id: "1".to_string(),
             name: "Door 1".to_string(),
+            is_exit: false,
         };
         let door2 = DoorData {
             id: "2".to_string(),
             name: "Door 2".to_string(),
+            is_exit: false,
         };
 
         floor_plan.add_door(room1_index, room2_index, door1);
@@ -264,10 +279,12 @@ mod tests {
         let door1 = DoorData {
             id: "1".to_string(),
             name: "Door 1".to_string(),
+            is_exit: false,
         };
         let door2 = DoorData {
             id: "2".to_string(),
             name: "Door 2".to_string(),
+            is_exit: false,
         };
 
         floor_plan.add_door(

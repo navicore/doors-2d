@@ -25,7 +25,6 @@ impl PlayerBundle {
     ) -> Self {
         Self {
             rigid_body: RigidBody::Dynamic,
-            //collider: Collider::from(SharedShape::cuboid(40.0, 40.0)),
             collider: Collider::from(SharedShape::cuboid(15.0, 15.0)), // todo: base on image
             external_force: ExternalForce::default(),
             gravity: GravityScale(PLAYER_GRAVITY_SCALE),

@@ -1,11 +1,9 @@
-use bevy::prelude::*;
-
-use crate::room::{room_component::RoomState, WINDOW_HEIGHT};
-
 use super::{
     state_component::{FadeEffect, FadeOverlay},
     GameState,
 };
+use crate::room::{room_component::RoomState, WINDOW_HEIGHT};
+use bevy::prelude::*;
 
 const FADE_OUT_DURATION: f32 = 1.5;
 const CURTAIN_DURATION: f32 = 1.1;

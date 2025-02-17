@@ -9,8 +9,19 @@ pub struct K8sIntegrationPlugin;
 
 impl Plugin for K8sIntegrationPlugin {
     fn build(&self, app: &mut App) {
-        if cli::Cli::parse().room_generator == Some(cli::RoomGeneratorType::K8sFile) {
-            app.add_systems(Startup, fire_k8s_file_floorplan_event);
+        let generator_choise = cli::Cli::parse().room_generator;
+        match generator_choise {
+            Some(
+                cli::RoomGeneratorType::Rooms2
+                | cli::RoomGeneratorType::Rooms5
+                | cli::RoomGeneratorType::Rooms25,
+            ) => {
+                //noop
+            }
+            _ => {
+                // default across all plugins
+                app.add_systems(Startup, fire_k8s_file_floorplan_event);
+            }
         }
     }
 }

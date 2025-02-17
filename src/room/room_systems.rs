@@ -1,6 +1,3 @@
-use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::prelude::*;
-
 use super::room_component::{
     Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
 };
@@ -9,6 +6,8 @@ use crate::{
     room::room_component::DoorState,
     state::{state_component::FadeEffect, GameState},
 };
+use avian2d::{parry::shape::SharedShape, prelude::*};
+use bevy::prelude::*;
 
 const PLATFORM_X_SEPARATOR: f32 = 450.0;
 const PLATFORM_Y_SEPARATOR: &[f32] = &[
@@ -77,6 +76,9 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
     room_state
         .previous_room_id
         .clone_from(&current_floorplan.you_were_here);
+    room_state
+        .room_id
+        .clone_from(&current_floorplan.you_are_here);
 
     if let Some(floorplan) = current_floorplan.floorplan.as_ref() {
         if let Some(room_id) = &current_floorplan.you_are_here {
@@ -120,12 +122,13 @@ fn update_room_state_with_doors(
         })
         .collect();
 
-    for (_, room) in doors_and_rooms {
+    for (door_data, room) in doors_and_rooms {
         if let Some(position) = room_positions.pop() {
             let door_state = DoorState {
                 room_id: room.id.clone(),
                 room_name: room.name.clone(),
                 position,
+                is_exit: door_data.is_exit,
             };
             room_state.doors.push(door_state);
         }

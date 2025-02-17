@@ -1,10 +1,13 @@
-use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::{color::palettes::tailwind::BLUE_600, prelude::*, sprite::Anchor, text::TextBounds};
-use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
-
-use crate::room::room_component::RoomState;
-
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
+use crate::room::room_component::{DoorState, RoomState};
+use avian2d::{parry::shape::SharedShape, prelude::*};
+use bevy::{
+    color::palettes::{css::GREY, tailwind::BLUE_600},
+    prelude::*,
+    sprite::Anchor,
+    text::TextBounds,
+};
+use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
 #[allow(clippy::type_complexity)]
 pub fn spawn_platforms(
@@ -18,26 +21,28 @@ pub fn spawn_platforms(
         return;
     }
 
+    //let room_name = plan.you_are_here.clone().unwrap_or("unknown".to_string());
+    let room_name = room_state
+        .room_id
+        .clone()
+        .unwrap_or_else(|| "unknown".to_string());
+
     debug!("Room state changed, respawning platforms...");
 
     despawn_existing_platforms(&mut commands, query);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    let text_font = create_text_font(font);
+    let text_font = create_text_font(font.clone());
+    let sign_font = create_sign_font(font);
 
-    for (position, room_name, room_id) in room_state.clone().doors.into_iter().map(|door_state| {
-        (
-            door_state.position,
-            door_state.room_name,
-            door_state.room_id,
-        )
-    }) {
+    for door_state in room_state.clone().doors {
         spawn_platform(
             &mut commands,
-            position,
+            room_state.clone(),
+            door_state,
             &text_font,
-            room_name,
-            room_id,
+            &sign_font,
             &mut meshes,
+            room_name.clone(),
         );
     }
 }
@@ -57,13 +62,22 @@ fn create_text_font(font: Handle<Font>) -> TextFont {
     }
 }
 
+fn create_sign_font(font: Handle<Font>) -> TextFont {
+    TextFont {
+        font,
+        font_size: 18.0,
+        ..default()
+    }
+}
+
 fn spawn_platform(
     commands: &mut Commands,
-    position: Vec2,
+    room_state: RoomState,
+    door_state: DoorState,
     text_font: &TextFont,
-    room_name: String,
-    room_id: String,
+    sign_font: &TextFont,
     meshes: &mut ResMut<Assets<Mesh>>,
+    room_name: String,
 ) {
     let platform_shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
 
@@ -75,7 +89,7 @@ fn spawn_platform(
             PLATFORM_WIDTH / 2.0,
             PLATFORM_HEIGHT / 2.0,
         )),
-        Transform::from_xyz(position.x, position.y, 0.0),
+        Transform::from_xyz(door_state.position.x, door_state.position.y, 0.0),
         Friction {
             dynamic_coefficient: 0.6,
             static_coefficient: 0.8,
@@ -94,7 +108,7 @@ fn spawn_platform(
     );
 
     let text_component = (
-        Text2d::new(room_name.clone()),
+        Text2d::new(door_state.room_name.clone()),
         text_font.clone(),
         Anchor::Center,
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
@@ -102,8 +116,26 @@ fn spawn_platform(
         Transform::from_translation(Vec3::Z),
     );
 
+    let exit_text_component = room_state.previous_room_id.and_then(|previous_room_id| {
+        if door_state.room_id == previous_room_id {
+            Some((
+                Text2d::new(format!("You are in the {room_name} room.")),
+                TextColor(bevy::prelude::Color::Srgba(GREY)),
+                sign_font.clone(),
+                Anchor::Center,
+                TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
+                TextBounds::from(Vec2::new(PLATFORM_WIDTH * 2.0, PLATFORM_HEIGHT * 2.0)),
+                Transform::from_xyz(0.0, -50.0, 1.0),
+            ))
+        } else {
+            None
+        }
+    });
+
     let door_component = (
-        Door { room_id, room_name },
+        Door {
+            room_id: door_state.room_id,
+        },
         Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.0),
         Sprite {
             color: Color::srgb(0.3, 0.3, 0.3),
@@ -111,6 +143,7 @@ fn spawn_platform(
             ..default()
         },
     );
+
     let light_component = (
         PointLight2d {
             intensity: 1.5,
@@ -126,5 +159,8 @@ fn spawn_platform(
         builder.spawn(text_component);
         builder.spawn(door_component);
         builder.spawn(light_component);
+        if let Some(exit_text_component) = exit_text_component {
+            builder.spawn(exit_text_component);
+        }
     });
 }

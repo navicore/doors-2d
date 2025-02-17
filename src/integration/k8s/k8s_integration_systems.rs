@@ -16,6 +16,7 @@ fn connect_rooms_with_doors(
     let door1 = DoorData {
         id: door_id.to_string(),
         name: format!("Door to {}", room2.name),
+        is_exit: false,
     };
     *door_id += 1;
     plan.add_door(
@@ -27,6 +28,7 @@ fn connect_rooms_with_doors(
     let door2 = DoorData {
         id: door_id.to_string(),
         name: format!("Door to {}", room1.name),
+        is_exit: true, // second door is always the way out
     };
     *door_id += 1;
     plan.add_door(
@@ -50,7 +52,7 @@ fn add_rooms(
         for r in resources {
             let room = RoomData {
                 id: format!("{namespace}-{}-{}", r.kind, r.name),
-                name: r.name.clone(),
+                name: format!("{} {}", r.kind, r.name),
             };
             plan.add_room(room.clone());
             connect_rooms_with_doors(plan, &room, outer_room, door_id_generator)?;
@@ -58,15 +60,22 @@ fn add_rooms(
             // if there is any owner, connect the room to the owner
             if let Some(owner) = r.owner {
                 let owner_room_id = format!("{namespace}-{}-{}", owner.kind, owner.name);
-                if let Ok(owner_room_idx) = plan.get_room_idx_by_id(&owner_room_id) {
-                    if let Ok(owner_room) = plan.clone().get_room(owner_room_idx) {
-                        //TODO: clone
-                        //is expensive
-                        connect_rooms_with_doors(plan, &room, owner_room, door_id_generator)?;
-                    }
+                let cplan = plan.clone(); //todo: is this really necessary?
+                let owner_room = cplan.get_room_by_id(&owner_room_id);
+                if let Ok(owner_room) = owner_room {
+                    connect_rooms_with_doors(plan, &room, owner_room, door_id_generator)?;
                 } else {
                     warn!("Owner room not found: {owner_room_id}");
                 }
+            }
+
+            for container in r.containers {
+                let container_room = RoomData {
+                    id: format!("{namespace}-{}-{}-{}", r.kind, "container", container),
+                    name: format!("{} {}", "container", container),
+                };
+                plan.add_room(container_room.clone());
+                connect_rooms_with_doors(plan, &container_room, &room, door_id_generator)?;
             }
         }
         Ok(())

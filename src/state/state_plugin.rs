@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 use super::{
     state_component::GameState,
     state_component::GameState::{RoomChange, TransitioningIn, TransitioningOut},
@@ -7,6 +5,7 @@ use super::{
         fade_in, fade_out, room_change_curtain, setup_fade_overlay, update_fade_overlay,
     },
 };
+use bevy::prelude::*;
 
 pub struct StatePlugin;
 
