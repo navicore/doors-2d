@@ -1,6 +1,3 @@
-use avian2d::{parry::shape::SharedShape, prelude::*};
-use bevy::prelude::*;
-
 use super::room_component::{
     Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
 };
@@ -9,6 +6,8 @@ use crate::{
     room::room_component::DoorState,
     state::{state_component::FadeEffect, GameState},
 };
+use avian2d::{parry::shape::SharedShape, prelude::*};
+use bevy::prelude::*;
 
 const PLATFORM_X_SEPARATOR: f32 = 450.0;
 const PLATFORM_Y_SEPARATOR: &[f32] = &[

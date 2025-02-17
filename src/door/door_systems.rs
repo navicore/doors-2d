@@ -1,3 +1,5 @@
+use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
+use crate::room::room_component::{DoorState, RoomState};
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::{
     color::palettes::{css::GREY, tailwind::BLUE_600},
@@ -6,10 +8,6 @@ use bevy::{
     text::TextBounds,
 };
 use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
-
-use crate::room::room_component::{DoorState, RoomState};
-
-use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
 
 #[allow(clippy::type_complexity)]
 pub fn spawn_platforms(
@@ -118,7 +116,7 @@ fn spawn_platform(
         Transform::from_translation(Vec3::Z),
     );
 
-    let exit_text_component = if let Some(previous_room_id) = room_state.previous_room_id {
+    let exit_text_component = room_state.previous_room_id.and_then(|previous_room_id| {
         if door_state.room_id == previous_room_id {
             Some((
                 Text2d::new(format!("You are in the {room_name} room.")),
@@ -132,14 +130,11 @@ fn spawn_platform(
         } else {
             None
         }
-    } else {
-        None
-    };
+    });
 
     let door_component = (
         Door {
             room_id: door_state.room_id,
-            room_name: door_state.room_name,
         },
         Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.0),
         Sprite {
@@ -148,6 +143,7 @@ fn spawn_platform(
             ..default()
         },
     );
+
     let light_component = (
         PointLight2d {
             intensity: 1.5,
