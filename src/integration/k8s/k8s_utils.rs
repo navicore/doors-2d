@@ -68,3 +68,96 @@ pub fn get_names(
 
     Ok(deployments)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_get_names_with_owner_and_containers() {
+        let json_value = json!({
+            "items": [
+                {
+                    "kind": "Pod",
+                    "metadata": {
+                        "name": "pod1",
+                        "namespace": "default",
+                        "ownerReferences": [
+                            {
+                                "kind": "ReplicaSet",
+                                "name": "rs1"
+                            }
+                        ]
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "container1"
+                            },
+                            {
+                                "name": "container2"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "kind": "Pod",
+                    "metadata": {
+                        "name": "pod2",
+                        "namespace": "default"
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "container3"
+                            }
+                        ]
+                    }
+                }
+            ]
+        });
+
+        let result = get_names(&json_value, "Pod", "default").unwrap();
+        assert_eq!(result.len(), 2);
+
+        let pod1 = &result[0];
+        assert_eq!(pod1.name, "pod1");
+        assert_eq!(pod1.kind, "Pod");
+        assert!(pod1.owner.is_some());
+        let owner = pod1.owner.as_ref().unwrap();
+        assert_eq!(owner.name, "rs1");
+        assert_eq!(owner.kind, "ReplicaSet");
+        assert_eq!(pod1.containers, vec!["container1", "container2"]);
+
+        let pod2 = &result[1];
+        assert_eq!(pod2.name, "pod2");
+        assert_eq!(pod2.kind, "Pod");
+        assert!(pod2.owner.is_none());
+        assert_eq!(pod2.containers, vec!["container3"]);
+    }
+
+    #[test]
+    fn test_get_names_without_owner_and_containers() {
+        let json_value = json!({
+            "items": [
+                {
+                    "kind": "Service",
+                    "metadata": {
+                        "name": "service1",
+                        "namespace": "default"
+                    }
+                }
+            ]
+        });
+
+        let result = get_names(&json_value, "Service", "default").unwrap();
+        assert_eq!(result.len(), 1);
+
+        let service = &result[0];
+        assert_eq!(service.name, "service1");
+        assert_eq!(service.kind, "Service");
+        assert!(service.owner.is_none());
+        assert!(service.containers.is_empty());
+    }
+}
