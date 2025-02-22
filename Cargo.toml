@@ -29,3 +29,8 @@ tokio = { version = "1", features = ["full", "macros"] }
 
 [dev-dependencies]
 bevy_dylib = "0.15"
+
+[features]
+default = ["k8s"]
+k8s = []
+
