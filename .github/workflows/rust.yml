@@ -22,7 +22,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libx11-dev libasound2-dev libudev-dev libxkbcommon-x11-0
 
     - name: Set up Rust
-      uses: actions-rs/toolchain@v1
+      uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af
       with:
         toolchain: stable
         profile: minimal
