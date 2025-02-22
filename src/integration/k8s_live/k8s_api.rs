@@ -1,5 +1,5 @@
 use crate::integration::integration_utils::IntegrationResource;
-use kube::core::{ApiResource, DynamicObject, GroupVersionKind};
+use kube::core::{ApiResource, DynamicObject};
 use kube::{
     api::{Api, ListParams},
     Client,
@@ -11,8 +11,13 @@ pub async fn get_names(
     kind: &str,
     namespace: &str,
 ) -> Result<Vec<IntegrationResource>, Box<dyn Error>> {
-    let gvk = GroupVersionKind::gvk("v1", "", kind);
-    let resource = ApiResource::from_gvk(&gvk);
+    let resource = ApiResource {
+        group: String::new(),
+        version: "v1".to_string(),
+        api_version: "v1".to_string(),
+        kind: kind.to_string(),
+        plural: format!("{}s", kind.to_lowercase()),
+    };
     let api: Api<DynamicObject> = Api::namespaced_with(client.clone(), namespace, &resource);
     let lp = ListParams::default();
     let resource_list = api
@@ -86,4 +91,97 @@ fn get_volume_mounts(container: &serde_json::Value) -> Vec<IntegrationResource> 
                 .collect()
         })
         .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use kube::Client;
+
+    #[tokio::test]
+    async fn test_list_namespaces() {
+        let client = Client::try_default()
+            .await
+            .expect("Failed to create client");
+        let namespaces: Api<k8s_openapi::api::core::v1::Namespace> = Api::all(client);
+
+        match namespaces.list(&ListParams::default()).await {
+            Ok(ns_list) => {
+                println!("Found {} namespaces", ns_list.items.len());
+                for ns in ns_list {
+                    println!("Namespace: {}", ns.metadata.name.unwrap_or_default());
+                }
+            }
+            Err(e) => {
+                eprintln!("Error fetching namespaces: {}", e);
+                panic!("Failed to fetch namespaces");
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_names_pods() {
+        let client = Client::try_default()
+            .await
+            .expect("Failed to create client");
+        let namespace = "kube-system";
+        let kind = "Pod";
+
+        match get_names(&client, kind, namespace).await {
+            Ok(resources) => {
+                println!("Found {} Pods", resources.len());
+                for resource in resources {
+                    println!("Pod: {}", resource.name);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error fetching Pods: {}", e);
+                panic!("Failed to fetch Pods");
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_names_services() {
+        let client = Client::try_default()
+            .await
+            .expect("Failed to create client");
+        let namespace = "kube-system";
+        let kind = "Service";
+
+        match get_names(&client, kind, namespace).await {
+            Ok(resources) => {
+                println!("Found {} Services", resources.len());
+                for resource in resources {
+                    println!("Service: {}", resource.name);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error fetching Services: {}", e);
+                panic!("Failed to fetch Services");
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_names_configmaps() {
+        let client = Client::try_default()
+            .await
+            .expect("Failed to create client");
+        let namespace = "kube-system";
+        let kind = "ConfigMap";
+
+        match get_names(&client, kind, namespace).await {
+            Ok(resources) => {
+                println!("Found {} ConfigMaps", resources.len());
+                for resource in resources {
+                    println!("ConfigMap: {}", resource.name);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error fetching ConfigMaps: {}", e);
+                panic!("Failed to fetch ConfigMaps");
+            }
+        }
+    }
 }

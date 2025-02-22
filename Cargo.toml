@@ -25,7 +25,7 @@ serde_yaml = "0.9.34"
 jsonpath_lib = "0.3.0"
 kube = { version = "0.98", features = ["runtime", "derive"] }
 k8s-openapi = { version = "0.24", features = ["latest"] }
-tokio = "1.43.0"
+tokio = { version = "1", features = ["full", "macros"] }
 
 [dev-dependencies]
 bevy_dylib = "0.15"

@@ -10,17 +10,20 @@ use tokio::runtime::Builder;
 use super::k8s_api::get_names;
 
 pub fn fire_k8s_live_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
-    let rt = Builder::new_current_thread().enable_all().build().unwrap();
-    rt.block_on(async {
-        match generate_k8s_floorplan_from_live().await {
-            Ok(floorplan) => {
-                events.send(FloorPlanEvent { floorplan });
+    if let Ok(rt) = Builder::new_current_thread().enable_all().build() {
+        rt.block_on(async {
+            match generate_k8s_floorplan_from_live().await {
+                Ok(floorplan) => {
+                    events.send(FloorPlanEvent { floorplan });
+                }
+                Err(e) => {
+                    warn!("No K8S FloorPlanEvent: {e:?}");
+                }
             }
-            Err(e) => {
-                warn!("No K8S FloorPlanEvent: {:?}", e);
-            }
-        }
-    });
+        });
+    } else {
+        error!("No K8S runtime created");
+    }
 }
 
 async fn generate_k8s_floorplan_from_live() -> FloorPlanResult<FloorPlan> {

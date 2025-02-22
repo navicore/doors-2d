@@ -11,6 +11,10 @@ run:
 test:
 	cargo test
 
+debug-test:
+	#cargo test -- --nocapture
+	cargo test integration::k8s_live::k8s_api::tests::test_get_names_pods -- --nocapture
+
 build:
 	cargo build
 
