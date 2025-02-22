@@ -7,7 +7,7 @@ use serde_yaml::Value;
 
 use super::k8s_utils::{get_names, get_namespaces};
 
-fn connect_rooms_with_doors(
+pub fn connect_rooms_with_doors(
     plan: &mut FloorPlan,
     room1: &RoomData,
     room2: &RoomData,

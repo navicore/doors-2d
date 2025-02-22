@@ -22,4 +22,5 @@ pub enum RoomGeneratorType {
     Rooms5,
     Rooms25,
     K8sFile,
+    K8sLive,
 }
