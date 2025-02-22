@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use serde_json::json;
 use serde_yaml::Value;
 
-use super::k8s_utils::{get_names, get_namespaces};
+use super::k8s_json::{get_names, get_namespaces};
 
 pub fn connect_rooms_with_doors(
     plan: &mut FloorPlan,
@@ -13,7 +13,7 @@ pub fn connect_rooms_with_doors(
     room2: &RoomData,
     door_id: &mut usize,
 ) -> FloorPlanResult<()> {
-    info!("Connecting rooms with doors");
+    debug!("Connecting rooms with doors");
     let door1 = DoorData {
         id: door_id.to_string(),
         name: format!("Door to {}", room2.name),
@@ -38,7 +38,7 @@ pub fn connect_rooms_with_doors(
         door2,
     );
 
-    info!("Connected rooms with doors");
+    debug!("Connected rooms with doors");
     Ok(())
 }
 
@@ -157,11 +157,11 @@ fn generate_k8s_floorplan_from_file() -> FloorPlanResult<FloorPlan> {
                     )?;
 
                     for kind in &[
-                        "Deployment",
-                        "DaemonSet",
-                        "ReplicaSet",
-                        "Service",
-                        "ConfigMap",
+                        "Deployments",
+                        "DaemonSets",
+                        "ReplicaSets",
+                        "Services",
+                        "ConfigMaps",
                         "Pod",
                     ] {
                         setup_hallway_and_rooms(

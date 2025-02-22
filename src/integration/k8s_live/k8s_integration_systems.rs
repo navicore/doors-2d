@@ -49,7 +49,7 @@ async fn generate_k8s_floorplan_from_live() -> FloorPlanResult<FloorPlan> {
     let mut door_id = 0;
     for ns in ns_list {
         if let Some(namespace) = ns.metadata.name {
-            info!("processing namespace {namespace}");
+            debug!("processing namespace {namespace}");
             let namespace_room = RoomData {
                 id: namespace.clone(),
                 name: format!("{namespace} NS Hallway"),
@@ -88,7 +88,7 @@ async fn setup_hallway_and_rooms(
     door_id_generator: &mut usize,
     kind: &str,
 ) -> FloorPlanResult<()> {
-    info!("Setting up {kind} hallway and rooms");
+    debug!("Setting up {kind} hallway and rooms");
     let client = Client::try_default()
         .await
         .map_err(|e| crate::floorplan::FloorPlanError::ServiceError(e.to_string()))?;
@@ -101,7 +101,7 @@ async fn setup_hallway_and_rooms(
     connect_rooms_with_doors(plan, outer_room, &hallway, door_id_generator)?;
 
     let _ = add_rooms(plan, &client, namespace, &hallway, door_id_generator, kind).await;
-    info!("Finished setting up {kind} hallway and rooms");
+    debug!("Finished setting up {kind} hallway and rooms");
     Ok(())
 }
 
@@ -113,7 +113,7 @@ async fn add_rooms(
     door_id_generator: &mut usize,
     kind: &str,
 ) -> FloorPlanResult<()> {
-    info!("Adding {kind} rooms");
+    debug!("Adding {kind} rooms");
     if let Ok(resources) = get_names(client, kind, namespace).await {
         for r in resources {
             let room = RoomData {
@@ -159,10 +159,10 @@ async fn add_rooms(
                 }
             }
         }
-        info!("Finished adding {kind} rooms");
+        debug!("Finished adding {kind} rooms");
         Ok(())
     } else {
-        warn!("No {kind} found in {namespace}");
+        debug!("No {kind} found in {namespace}");
         Err(crate::floorplan::FloorPlanError::RoomDataNotFound(format!(
             "No {kind} found in {namespace}"
         )))

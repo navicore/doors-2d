@@ -1,4 +1,5 @@
 use crate::integration::integration_utils::IntegrationResource;
+use bevy::log::debug;
 use kube::core::{ApiResource, DynamicObject};
 use kube::{
     api::{Api, ListParams},
@@ -6,18 +7,37 @@ use kube::{
 };
 use std::error::Error;
 
+fn get_api_params(kind: &str) -> (&str, &str) {
+    match kind {
+        "DaemonSet" | "ReplicaSet" | "Deployment" => ("apps", "v1"),
+        "Ingress" => ("networking.k8s.io", "v1"),
+        _ => ("", "v1"),
+    }
+}
+
 pub async fn get_names(
     client: &Client,
     kind: &str,
     namespace: &str,
 ) -> Result<Vec<IntegrationResource>, Box<dyn Error>> {
+    debug!("Getting names for {kind} in {namespace}");
+
+    let (group, version) = get_api_params(kind);
+
+    let api_version = if group.is_empty() {
+        version.to_string()
+    } else {
+        format!("{group}/{version}")
+    };
+
     let resource = ApiResource {
-        group: String::new(),
-        version: "v1".to_string(),
-        api_version: "v1".to_string(),
+        group: group.to_string(),
+        version: version.to_string(),
+        api_version,
         kind: kind.to_string(),
         plural: format!("{}s", kind.to_lowercase()),
     };
+
     let api: Api<DynamicObject> = Api::namespaced_with(client.clone(), namespace, &resource);
     let lp = ListParams::default();
     let resource_list = api
@@ -33,6 +53,7 @@ pub async fn get_names(
         let owner = owner_reference
             .map(|(kind, name)| IntegrationResource::new(name, kind, None, Vec::new()));
         if let Some(name) = name {
+            debug!("Found {kind} {name}");
             resources.push(IntegrationResource::new(
                 name,
                 kind.to_string(),
@@ -96,6 +117,7 @@ fn get_volume_mounts(container: &serde_json::Value) -> Vec<IntegrationResource> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bevy::log::{debug, info};
     use kube::Client;
 
     #[tokio::test]
@@ -129,6 +151,7 @@ mod tests {
 
         match get_names(&client, kind, namespace).await {
             Ok(resources) => {
+                assert!(!resources.is_empty());
                 println!("Found {} Pods", resources.len());
                 for resource in resources {
                     println!("Pod: {}", resource.name);
@@ -137,6 +160,31 @@ mod tests {
             Err(e) => {
                 eprintln!("Error fetching Pods: {}", e);
                 panic!("Failed to fetch Pods");
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_names_replicasets() {
+        info!("info");
+        debug!("debug");
+        let client = Client::try_default()
+            .await
+            .expect("Failed to create client");
+        let namespace = "kube-system";
+        let kind = "ReplicaSet";
+
+        match get_names(&client, kind, namespace).await {
+            Ok(resources) => {
+                assert!(!resources.is_empty());
+                println!("Found {} ReplicaSets", resources.len());
+                for resource in resources {
+                    println!("ReplicaSet: {}", resource.name);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error fetching {kind}: {e}");
+                panic!("Failed to fetch {kind}");
             }
         }
     }
@@ -151,6 +199,7 @@ mod tests {
 
         match get_names(&client, kind, namespace).await {
             Ok(resources) => {
+                assert!(!resources.is_empty());
                 println!("Found {} Services", resources.len());
                 for resource in resources {
                     println!("Service: {}", resource.name);
@@ -173,6 +222,7 @@ mod tests {
 
         match get_names(&client, kind, namespace).await {
             Ok(resources) => {
+                assert!(!resources.is_empty());
                 println!("Found {} ConfigMaps", resources.len());
                 for resource in resources {
                     println!("ConfigMap: {}", resource.name);

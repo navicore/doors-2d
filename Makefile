@@ -13,7 +13,9 @@ test:
 
 debug-test:
 	#cargo test -- --nocapture
-	cargo test integration::k8s_live::k8s_api::tests::test_get_names_pods -- --nocapture
+	#cargo test integration::k8s_live::k8s_api::tests::test_get_names_pods -- --nocapture
+	RUST_LOG=debug
+	cargo test integration::k8s_live::k8s_api::tests::test_get_names_replicasets -- --nocapture
 
 build:
 	cargo build
