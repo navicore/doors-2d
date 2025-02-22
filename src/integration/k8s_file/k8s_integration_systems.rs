@@ -13,6 +13,7 @@ pub fn connect_rooms_with_doors(
     room2: &RoomData,
     door_id: &mut usize,
 ) -> FloorPlanResult<()> {
+    info!("Connecting rooms with doors");
     let door1 = DoorData {
         id: door_id.to_string(),
         name: format!("Door to {}", room2.name),
@@ -37,6 +38,7 @@ pub fn connect_rooms_with_doors(
         door2,
     );
 
+    info!("Connected rooms with doors");
     Ok(())
 }
 
