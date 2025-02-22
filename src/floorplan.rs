@@ -26,6 +26,7 @@ pub struct DoorData {
 pub enum FloorPlanError {
     RoomDataNotFound(String),
     DoorNotFound(String),
+    ServiceError(String),
 }
 
 pub type FloorPlanResult<T> = Result<T, FloorPlanError>;
