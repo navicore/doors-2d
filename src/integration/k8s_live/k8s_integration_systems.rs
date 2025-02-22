@@ -62,6 +62,7 @@ async fn generate_k8s_floorplan_from_live() -> FloorPlanResult<FloorPlan> {
                 "ReplicaSet",
                 "Service",
                 "ConfigMap",
+                "Ingress",
                 "Pod",
             ] {
                 setup_hallway_and_rooms(
