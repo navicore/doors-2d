@@ -11,8 +11,11 @@ run:
 test:
 	cargo test --features k8s
 
+debug-run:
+	RUST_LOG=debug cargo run --features "bevy/dynamic_linking, k8s" -- --room-generator=k8s-live
+
 debug-test:
-	cargo test --features k8s -- --nocapture
+	RUST_LOG=debug cargo test --features k8s -- --nocapture
 	#cargo test integration::k8s_live::k8s_api::tests::test_get_names_pods -- --nocapture
 	#cargo test integration::k8s_live::k8s_api::tests::test_get_names_replicasets -- --nocapture
 

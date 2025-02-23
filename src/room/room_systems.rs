@@ -27,14 +27,25 @@ pub fn handle_floor_plan_changes(
 
         let (you_are_here, you_were_here) =
             determine_current_location(&new_floorplan, &current_floorplan);
+
         if current_floorplan.floorplan.as_ref() != Some(&new_floorplan) {
+            let mut should_transition = true;
+
+            if let Some(current_room_id) = current_floorplan.you_are_here.clone() {
+                if new_floorplan.get_room_by_id(&current_room_id).is_ok() {
+                    should_transition = false; // don't transition if the room we're in still exists
+                }
+            }
+
             *current_floorplan = CurrentFloorPlan {
                 floorplan: Some(new_floorplan),
                 you_are_here,
                 you_were_here,
             };
-            next_state.set(GameState::TransitioningOut);
-            fade.fading_out = true;
+            if should_transition {
+                next_state.set(GameState::TransitioningOut);
+                fade.fading_out = true;
+            }
         }
     }
 }

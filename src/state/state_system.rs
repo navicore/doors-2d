@@ -2,7 +2,10 @@ use super::{
     state_component::{FadeEffect, FadeOverlay},
     GameState,
 };
-use crate::room::{room_component::RoomState, WINDOW_HEIGHT};
+use crate::room::{
+    room_component::{CurrentFloorPlan, RoomState},
+    WINDOW_HEIGHT,
+};
 use bevy::prelude::*;
 
 const FADE_OUT_DURATION: f32 = 1.5;
@@ -45,7 +48,19 @@ pub fn fade_out(
     mut fade: ResMut<FadeEffect>,
     mut fade_query: Query<&mut Sprite, With<FadeOverlay>>,
     time: Res<Time>,
+    current_floor_plan: Res<CurrentFloorPlan>,
 ) {
+    // Check if we're at the start room - don't do fade if we are
+    if let Some(plan) = &current_floor_plan.floorplan {
+        if let Ok(start_room) = plan.get_start_room() {
+            if current_floor_plan.you_are_here == Some(start_room.id.clone()) {
+                fade.fading_out = false; // Switch to fading in
+                next_state.set(GameState::RoomChange);
+                return;
+            }
+        }
+    }
+
     let mut sprite = fade_query.single_mut();
 
     if fade.fading_out {
