@@ -18,6 +18,10 @@ use leafwing_input_manager::{
     InputManagerBundle,
 };
 
+// player unstable at player z 10, 15, 16, 18, 17
+// text unstable at player z 200, 20, 19, 17
+const PLAYER_LAYER: f32 = 1.5; // A high value to ensure it renders on top
+
 pub fn player_enters_new_room(
     mut commands: Commands,
     room_state: Res<RoomState>,
@@ -74,7 +78,7 @@ pub fn spawn_player(
         },
         Transform::default()
             .with_scale(Vec3::new(4.0, 4.0, 1.0))
-            .with_translation(Vec3::new(0.0, 0.0, 2.0)), //needed for player to be in front of the door
+            .with_translation(Vec3::new(0.0, 0.0, PLAYER_LAYER)), //needed for player to be in front of the door
         InputManagerBundle::with_map(input_map),
         PlayerBundle::new(),
     ));
