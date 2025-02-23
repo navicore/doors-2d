@@ -3177,7 +3177,7 @@ dependencies = [
 
 [[package]]
 name = "doors"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "avian2d",
  "bevy 0.15.2",
