@@ -17,7 +17,9 @@ impl Plugin for IntegrationPlugin {
             #[cfg(feature = "k8s")]
             Some(cli::RoomGeneratorType::K8sLive) => app
                 .insert_resource(IntegrationTimers {
-                    k8s: Timer::from_seconds(10.0, TimerMode::Repeating),
+                    // BUG! seems when a larger cluster with logs of objects is present the game
+                    // freezes while we scrape the info
+                    k8s: Timer::from_seconds(60.0, TimerMode::Repeating),
                 })
                 .add_plugins(k8s_live::K8sIntegrationPlugin),
             #[cfg(feature = "k8s")]
