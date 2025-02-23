@@ -9,16 +9,18 @@ programming](https://github.com/bevyengine/bevy).
 # UNDER CONSTRUCTION - Alpha Alpha
 ------------
 
-My interest in this learning exercise is exploring the [ECS - Entity Component
+This learning exercise is exploring the [ECS - Entity Component
 System](https://en.wikipedia.org/wiki/Entity_component_system) programming
 paradigm. Game programming can teach us a lot about software architectures that
 coordinate huge numbers of lively objects all advancing their state at different
-rates.
+rates.  The game will evolve into a POC of using ECS to create `digital twin`
+runtimes (in contrast to `actor-based` runtimes) for `IOT` and knowledge base
+applications.
 
 The world in this game is a graph of rooms connected by doors.  Every door is on
 a platform.  The player moves left and right with arrow keys and jumps with the
 space bar.  Once on a platform, the player enters the next room through the door
-by using the up arrow.
+by pressing the up arrow key.
 
 | key | description | action |
 | --- | --- | --- |
@@ -27,6 +29,10 @@ by using the up arrow.
 | sp | space bar | jump |
 | ^ | up arrow | enter a room |
 | q | 'q' key| end the game |
+
+Game-play is enhanced by the [Avian](https://github.com/Jondolf/avian) physics
+engine and the [Bevy Lit](https://github.com/malbernaz/bevy_lit) lighting
+crates.
 
 The rooms and their connections via doors are a directed graph.  The world of
 doors and rooms is built from external data converted into triples stored in a
@@ -47,6 +53,7 @@ results (normally seen as yaml by devops engineers).
 Roadmap
 ==========
 
+* a UI to overlay text details from the rooms' real-world analog
 * proper player graphics and animation
 * animate the doors
 * read RDF for world generation
