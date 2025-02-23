@@ -42,10 +42,10 @@ The graph naturally uses `nodes` as rooms and `edges` as doors.  It decides to p
 door between two rooms based on their relationship found in the Kubernetes API
 results (normally seen as yaml by devops engineers).
 
+![a demo of the player jumping on platforms](docs/doors-demo-1-feb-25.gif)
+
 Roadmap
 ==========
-
-![a demo of the player jumping on platforms](docs/doors-demo-1-feb-25.gif)
 
 * proper player graphics and animation
 * animate the doors
