@@ -34,7 +34,7 @@ doors and rooms is built from external data converted into triples stored in a
 graph implemented by the [petgraph](https://github.com/petgraph/petgraph) crate.
 
 The initial world is generated from your live Kubernetes cluster.  Make sure you
-have access to a cluster via [kubectl]() and `doors` will use the same
+have access to a cluster via [kubectl](https://kubernetes.io/docs/reference/kubectl/) and `doors` will use the same
 authentication to query your cluster and build the game world using [kube-rs
 crate](https://github.com/kube-rs/kube) API results.  Rooms are `namespace`s,
 `deployment`s, `replicaset`s, `pod`s, and containers - all connected by doors.
