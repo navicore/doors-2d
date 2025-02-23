@@ -1,3 +1,5 @@
+use bevy::{prelude::Resource, time::Timer};
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IntegrationResource {
     pub name: String,
@@ -15,4 +17,9 @@ impl IntegrationResource {
             children,
         }
     }
+}
+
+#[derive(Default, Resource)]
+pub struct IntegrationTimers {
+    pub k8s: Timer,
 }

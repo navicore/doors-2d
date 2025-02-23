@@ -76,7 +76,7 @@ fn extract_integration_resources(
 }
 
 /**
- * an owner_references could be a replicaset to a pod or a deployment to a replicaset
+ * an `owner_references` could be a replicaset to a pod or a deployment to a replicaset
 */
 fn get_owner_reference(v: &DynamicObject) -> Option<(String, String)> {
     v.metadata

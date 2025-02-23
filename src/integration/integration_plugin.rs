@@ -6,7 +6,7 @@ use clap::Parser;
 #[cfg(feature = "k8s")]
 use super::{k8s_file, k8s_live};
 
-use super::test_mode;
+use super::{integration_utils::IntegrationTimers, test_mode};
 
 pub struct IntegrationPlugin;
 
@@ -15,9 +15,11 @@ impl Plugin for IntegrationPlugin {
         let generator_choise = cli::Cli::parse().room_generator;
         match generator_choise {
             #[cfg(feature = "k8s")]
-            Some(cli::RoomGeneratorType::K8sLive) => {
-                app.add_plugins(k8s_live::K8sIntegrationPlugin)
-            }
+            Some(cli::RoomGeneratorType::K8sLive) => app
+                .insert_resource(IntegrationTimers {
+                    k8s: Timer::from_seconds(10.0, TimerMode::Repeating),
+                })
+                .add_plugins(k8s_live::K8sIntegrationPlugin),
             #[cfg(feature = "k8s")]
             None | Some(cli::RoomGeneratorType::K8sFile) => {
                 app.add_plugins(k8s_file::K8sIntegrationPlugin)

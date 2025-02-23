@@ -21,7 +21,7 @@ pub fn handle_floor_plan_changes(
     mut fade: ResMut<FadeEffect>,
 ) {
     for event in floorplan_events.read() {
-        info!("Floor plan event received.");
+        debug!("Floor plan event received.");
 
         let new_floorplan = event.floorplan.clone();
 

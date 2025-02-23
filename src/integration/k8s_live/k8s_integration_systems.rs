@@ -1,5 +1,5 @@
 use crate::floorplan::{FloorPlan, FloorPlanEvent, FloorPlanResult, RoomData};
-use crate::integration::integration_utils::IntegrationResource;
+use crate::integration::integration_utils::{IntegrationResource, IntegrationTimers};
 use crate::integration::k8s_file::k8s_integration_systems::connect_rooms_with_doors;
 use bevy::prelude::*;
 use kube::{
@@ -145,7 +145,7 @@ fn connect_to_parent_room(
     if let Ok(parent_room) = parent_room {
         connect_rooms_with_doors(plan, room, parent_room, door_id_generator)?;
     } else {
-        warn!("Owner room not found: {parent_room_id}");
+        debug!("Owner room not found: {parent_room_id}");
     }
     Ok(())
 }
@@ -253,5 +253,16 @@ pub fn fire_k8s_live_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
         });
     } else {
         error!("No K8S runtime created");
+    }
+}
+
+pub fn timed_k8s_live_floorplan_event(
+    events: EventWriter<FloorPlanEvent>,
+    time: Res<Time>,
+    mut timer: ResMut<IntegrationTimers>,
+) {
+    if timer.k8s.tick(time.delta()).just_finished() {
+        debug!("K8S Timer fired");
+        fire_k8s_live_floorplan_event(events);
     }
 }
