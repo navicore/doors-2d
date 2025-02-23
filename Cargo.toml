@@ -1,6 +1,6 @@
 [package]
 name = "doors"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 
 [profile.dev]
@@ -10,21 +10,21 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
+avian2d = "0.2"
 bevy = { version = "0.15" }
+bevy_aseprite_ultra = "0.4"
 bevy_embedded_assets = "0.12"
+bevy_lit = "0.6"
+bevy_lunex = "0.2"
+clap = { version = "4", features = ["derive", "color"] }
+jsonpath_lib = "0.3"
+k8s-openapi = { version = "0.24", features = ["latest"] }
+kube = { version = "0.98", features = ["runtime", "derive"] }
 leafwing-input-manager = "0.16"
+petgraph = "0.7"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-avian2d = "0.2"
-bevy_lunex = "0.2"
-petgraph = "0.7"
-bevy_aseprite_ultra = "0.4"
-clap = { version = "4", features = ["derive", "color"] }
-bevy_lit = "0.6"
-serde_yaml = "0.9.34"
-jsonpath_lib = "0.3.0"
-kube = { version = "0.98", features = ["runtime", "derive"] }
-k8s-openapi = { version = "0.24", features = ["latest"] }
+serde_yaml = "0.9"
 tokio = { version = "1", features = ["full", "macros"] }
 
 [dev-dependencies]
