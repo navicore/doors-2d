@@ -1,12 +1,56 @@
 Doors
 ==========
 
-A fun Platformer UI to Kubernetes and other data as I learn Bevy and game programming.
+A Platformer Game UI to Kubernetes and other data as I learn [Bevy 2D and 3D game
+programming](https://github.com/bevyengine/bevy).
 
-# UNDER CONSTRUCTION
-# UNDER CONSTRUCTION
+------------
+# UNDER CONSTRUCTION - Alpha Quality
+------------
+
+My interest in this learning exercise is exploring the [ECS - Entity
+Component System](https://en.wikipedia.org/wiki/Entity_component_system)
+programming paradigm. Game programming can teach us a lot about software
+architectures that coordinate huge numbers of lively objects all advancing their
+state at different rates.
+
+The world in this game is a graph of rooms connected by doors.  Every door is on
+a platform.  The player moves left and right with arrow keys and jumps with the
+space bar.  Once on a platform, the player enters the next room through the door
+by using the up arrow.
+
+| key | description | action |
+| --- | --- | --- |
+| -> | right arrow | run to the right |
+| <- | left arrow | run to the left |
+| sp | space bar | jump |
+| ^ | up arrow | enter a room |
+| q | 'q' key| end the game |
+
+The rooms and their connections via doors are a directed graph.  The world of
+doors and rooms is built from external data converted into triples stored in a
+graph implemented by the [petgraph](https://github.com/petgraph/petgraph) crate.
+
+The initial world is generated from Kubernetes [kube-rs
+crate](https://github.com/kube-rs/kube) API results - rooms are namespaces,
+deployments, replicasets, pods, containers - all connected by doors. The graph
+naturally uses nodes as rooms and edges as doors.  It decides to put a door
+between two rooms based on their relationship found in the Kubernetes API
+results (normally seen as yaml by devops engineers).
+
+Roadmap
+==========
 
 ![a demo of the player jumping on platforms](docs/doors-demo-1-feb-25.gif)
+
+* proper player graphics and animation
+* animate the doors
+* read RDF for world generation
+* sound
+* swag and power-ups
+* multi-player
+* re-implement in isometric style
+* re-re-implement in 3D
 
 install
 --------
