@@ -84,6 +84,7 @@ fn spawn_platform(
     meshes: &mut ResMut<Assets<Mesh>>,
     room_name: String,
 ) {
+    debug!("Spawning platform for room: {room_name}");
     let platform_shape = meshes.add(Rectangle::new(PLATFORM_WIDTH, PLATFORM_HEIGHT));
 
     let platform_component = (
