@@ -6,7 +6,7 @@ learn [Rust](https://www.rust-lang.org) [Bevy game
 programming](https://github.com/bevyengine/bevy).
 
 ------------
-# UNDER CONSTRUCTION - Alpha Alpha Alpha
+# UNDER CONSTRUCTION - Alpha Alpha
 ------------
 
 My interest in this learning exercise is exploring the [ECS - Entity
