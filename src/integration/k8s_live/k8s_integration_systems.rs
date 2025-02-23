@@ -35,6 +35,10 @@ fn create_cluster_room() -> RoomData {
     }
 }
 
+/**
+* for a given namespace, walk through the resources and create rooms for each and add them to the
+* floorplan
+*/
 async fn process_namespace(
     floorplan: &mut FloorPlan,
     cluster_room: &RoomData,
