@@ -16,8 +16,8 @@ pub fn setup_fade_overlay(mut commands: Commands, room_state: Res<RoomState>) {
             custom_size: Some(Vec2::new(room_state.floor_ceiling_width, WINDOW_HEIGHT)), // Cover screen
             ..default()
         },
-        Transform::from_xyz(0.0, 0.0, 10.0), // Render on top
-        FadeOverlay,                         // Add this tag so our query finds it
+        Transform::from_xyz(0.0, 0.0, 1000.0), // Render on top with a high z value
+        FadeOverlay,                           // Add this tag so our query finds it
     ));
 
     commands.insert_resource(FadeEffect {
@@ -36,7 +36,7 @@ pub fn update_fade_overlay(
     }
     for (mut sprite, mut transform) in &mut query {
         sprite.custom_size = Some(Vec2::new(room_state.floor_ceiling_width, WINDOW_HEIGHT));
-        transform.translation.z = 10.0; // Ensure it stays on top
+        transform.translation.z = 1000.0; // Ensure it stays on top with a high z value
     }
 }
 

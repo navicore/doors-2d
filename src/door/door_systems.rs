@@ -9,6 +9,11 @@ use bevy::{
 };
 use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
+const PLATFORM_LAYER: f32 = 0.0;
+const TEXT_LAYER: f32 = 100.0;
+const DOOR_LAYER: f32 = 0.0;
+const LIGHT_LAYER: f32 = 0.0;
+
 #[allow(clippy::type_complexity)]
 pub fn spawn_platforms(
     mut commands: Commands,
@@ -89,7 +94,7 @@ fn spawn_platform(
             PLATFORM_WIDTH / 2.0,
             PLATFORM_HEIGHT / 2.0,
         )),
-        Transform::from_xyz(door_state.position.x, door_state.position.y, 0.0),
+        Transform::from_xyz(door_state.position.x, door_state.position.y, PLATFORM_LAYER),
         Friction {
             dynamic_coefficient: 0.6,
             static_coefficient: 0.8,
@@ -113,7 +118,7 @@ fn spawn_platform(
         Anchor::Center,
         TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
         TextBounds::from(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
-        Transform::from_translation(Vec3::Z),
+        Transform::from_translation(Vec3::new(0.0, 0.0, TEXT_LAYER)), // Set a high z value
     );
 
     let exit_text_component = room_state.previous_room_id.and_then(|previous_room_id| {
@@ -125,7 +130,7 @@ fn spawn_platform(
                 Anchor::Center,
                 TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
                 TextBounds::from(Vec2::new(PLATFORM_WIDTH * 2.0, PLATFORM_HEIGHT * 2.0)),
-                Transform::from_xyz(0.0, -50.0, 1.0),
+                Transform::from_translation(Vec3::new(0.0, -50.0, TEXT_LAYER)), // Set a high z value
             ))
         } else {
             None
@@ -136,7 +141,11 @@ fn spawn_platform(
         Door {
             room_id: door_state.room_id,
         },
-        Transform::from_xyz(0.0, PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0, 0.0),
+        Transform::from_xyz(
+            0.0,
+            PLATFORM_HEIGHT / 2.0 + PLATFORM_WIDTH / 4.0,
+            DOOR_LAYER,
+        ),
         Sprite {
             color: Color::srgb(0.3, 0.3, 0.3),
             custom_size: Some(Vec2::new(PLATFORM_WIDTH / 4.0, PLATFORM_WIDTH / 2.0)),
@@ -152,7 +161,11 @@ fn spawn_platform(
             color: Color::from(BLUE_600),
             ..default()
         },
-        Transform::from_xyz(0.0, PLATFORM_HEIGHT.mul_add(-2.0, PLATFORM_WIDTH), 0.0),
+        Transform::from_xyz(
+            0.0,
+            PLATFORM_HEIGHT.mul_add(-2.0, PLATFORM_WIDTH),
+            LIGHT_LAYER,
+        ),
     );
 
     commands.spawn(platform_component).with_children(|builder| {
