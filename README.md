@@ -9,12 +9,11 @@ programming](https://github.com/bevyengine/bevy).
 # UNDER CONSTRUCTION - Alpha Alpha
 ------------
 
-My interest in this learning exercise is exploring the [ECS - Entity
-Component System](https://en.wikipedia.org/wiki/Entity_component_system)
-
-programming paradigm. Game programming can teach us a lot about software
-architectures that coordinate huge numbers of lively objects all advancing their
-state at different rates.
+My interest in this learning exercise is exploring the [ECS - Entity Component
+System](https://en.wikipedia.org/wiki/Entity_component_system) programming
+paradigm. Game programming can teach us a lot about software architectures that
+coordinate huge numbers of lively objects all advancing their state at different
+rates.
 
 The world in this game is a graph of rooms connected by doors.  Every door is on
 a platform.  The player moves left and right with arrow keys and jumps with the
