@@ -7,6 +7,10 @@ use kube::{
 };
 use std::error::Error;
 
+/**
+* keep this updated for any 'kind' you want to support - note that different kinds are in different
+* groups
+*/
 fn get_api_params(kind: &str) -> (&str, &str) {
     match kind {
         "DaemonSet" | "ReplicaSet" | "Deployment" => ("apps", "v1"),
@@ -15,45 +19,51 @@ fn get_api_params(kind: &str) -> (&str, &str) {
     }
 }
 
-pub async fn get_names(
-    client: &Client,
-    kind: &str,
-    namespace: &str,
-) -> Result<Vec<IntegrationResource>, Box<dyn Error>> {
-    debug!("Getting names for {kind} in {namespace}");
-
-    let (group, version) = get_api_params(kind);
-
+fn build_api_resource(kind: &str, group: &str, version: &str) -> ApiResource {
     let api_version = if group.is_empty() {
         version.to_string()
     } else {
         format!("{group}/{version}")
     };
 
-    let resource = ApiResource {
+    ApiResource {
         group: group.to_string(),
         version: version.to_string(),
         api_version,
         kind: kind.to_string(),
         plural: format!("{}s", kind.to_lowercase()),
-    };
+    }
+}
 
-    let api: Api<DynamicObject> = Api::namespaced_with(client.clone(), namespace, &resource);
+async fn fetch_resource_list(
+    client: &Client,
+    namespace: &str,
+    resource: &ApiResource,
+) -> Result<Vec<DynamicObject>, Box<dyn Error>> {
+    let api: Api<DynamicObject> = Api::namespaced_with(client.clone(), namespace, resource);
     let lp = ListParams::default();
     let resource_list = api
         .list(&lp)
         .await
         .map_err(|e| format!("Failed to list resources: {e}"))?;
+    Ok(resource_list.items)
+}
 
+/**
+* call for each resource type or 'kind' to extract the names of the resources
+*/
+fn extract_integration_resources(
+    kind: &str,
+    resource_list: Vec<DynamicObject>,
+) -> Vec<IntegrationResource> {
     let mut resources = Vec::new();
     for resource in resource_list {
-        let name = resource.metadata.name.clone();
-        let owner_reference = get_owner_reference(&resource);
-        let containers = get_containers(&resource);
-        let owner = owner_reference
-            .map(|(kind, name)| IntegrationResource::new(name, kind, None, Vec::new()));
-        if let Some(name) = name {
+        if let Some(name) = resource.metadata.name.clone() {
             debug!("Found {kind} {name}");
+            let owner_reference = get_owner_reference(&resource);
+            let containers = get_containers(&resource);
+            let owner = owner_reference
+                .map(|(kind, name)| IntegrationResource::new(name, kind, None, Vec::new()));
             resources.push(IntegrationResource::new(
                 name,
                 kind.to_string(),
@@ -62,10 +72,12 @@ pub async fn get_names(
             ));
         }
     }
-
-    Ok(resources)
+    resources
 }
 
+/**
+ * an owner_references could be a replicaset to a pod or a deployment to a replicaset
+*/
 fn get_owner_reference(v: &DynamicObject) -> Option<(String, String)> {
     v.metadata
         .owner_references
@@ -112,6 +124,23 @@ fn get_volume_mounts(container: &serde_json::Value) -> Vec<IntegrationResource> 
                 .collect()
         })
         .unwrap_or_default()
+}
+
+/**
+* this is the main API for the k8s api - it fetches the names of resources of a given kind in a
+* given namespace
+*/
+pub async fn get_names(
+    client: &Client,
+    kind: &str,
+    namespace: &str,
+) -> Result<Vec<IntegrationResource>, Box<dyn Error>> {
+    debug!("Getting names for {kind} in {namespace}");
+
+    let (group, version) = get_api_params(kind);
+    let resource = build_api_resource(kind, group, version);
+    let resource_list = fetch_resource_list(client, namespace, &resource).await?;
+    Ok(extract_integration_resources(kind, resource_list))
 }
 
 #[cfg(test)]
