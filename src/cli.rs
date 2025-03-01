@@ -2,9 +2,9 @@ use clap::Parser;
 
 #[derive(Parser)]
 pub struct Cli {
-    #[arg(long, short, default_value = "Demo1")]
+    #[arg(long, short, default_value = "demo1")]
     pub player: Option<PlayerType>,
-    #[arg(long, short, default_value = "Rooms5")]
+    #[arg(long, short, default_value = "rooms5")]
     pub room_generator: Option<RoomGeneratorType>,
     #[arg(long, short, default_value = "60")]
     pub generator_poll_secs: Option<u8>,
