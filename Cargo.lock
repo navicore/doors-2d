@@ -577,6 +577,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-tokio-tasks"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34969107e5990787471137983ac7ff54f4ec3aa8913d13b91d3b5b54a20f11b8"
+dependencies = [
+ "bevy_app 0.15.2",
+ "bevy_ecs 0.15.2",
+ "tokio",
+]
+
+[[package]]
 name = "bevy_a11y"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3181,6 +3192,7 @@ version = "0.2.4"
 dependencies = [
  "avian2d",
  "bevy 0.15.2",
+ "bevy-tokio-tasks",
  "bevy_aseprite_ultra",
  "bevy_dylib",
  "bevy_embedded_assets",

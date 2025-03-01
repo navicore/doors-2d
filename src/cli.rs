@@ -2,10 +2,12 @@ use clap::Parser;
 
 #[derive(Parser)]
 pub struct Cli {
-    #[arg(long)]
+    #[arg(long, short)]
     pub player: Option<PlayerType>,
-    #[arg(long)]
+    #[arg(long, short)]
     pub room_generator: Option<RoomGeneratorType>,
+    #[arg(long, short)]
+    pub generator_poll_secs: Option<u8>,
 }
 
 #[derive(clap::ValueEnum, Clone, Default)]
