@@ -241,7 +241,8 @@ async fn generate() -> FloorPlanResult<FloorPlan> {
     Ok(floorplan)
 }
 
-async fn publish_floorplan(ctx: &mut TaskContext, floorplan: FloorPlan) {
+async fn publish_floorplan(ctx: &mut TaskContext) -> FloorPlanResult<()> {
+    let floorplan = generate().await?;
     ctx.run_on_main_thread(move |ctx| {
         if let Some(mut events) = ctx.world.get_resource_mut::<Events<FloorPlanEvent>>() {
             events.send(FloorPlanEvent { floorplan });
@@ -251,21 +252,16 @@ async fn publish_floorplan(ctx: &mut TaskContext, floorplan: FloorPlan) {
         }
     })
     .await;
-}
-
-async fn generate_and_publish_floorplan(ctx: &mut TaskContext) -> FloorPlanResult<()> {
-    let floorplan = generate().await?;
-    publish_floorplan(ctx, floorplan).await;
     Ok(())
 }
 
 pub fn init_k8s_live_floorplan_publisher(runtime: ResMut<TokioTasksRuntime>) {
     runtime.spawn_background_task(|mut ctx| async move {
         loop {
-            if let Err(e) = generate_and_publish_floorplan(&mut ctx).await {
+            if let Err(e) = publish_floorplan(&mut ctx).await {
                 panic!("No K8S FloorPlanEvent: {e:?}");
             }
-            let generator_poll_secs = Cli::parse().generator_poll_secs.unwrap_or(30);
+            let generator_poll_secs = Cli::parse().generator_poll_secs.unwrap_or(60);
             tokio::time::sleep(Duration::from_secs(generator_poll_secs.into())).await;
             debug!("Generating new floorplan...");
         }
