@@ -1,6 +1,7 @@
 use avian2d::PhysicsPlugins;
 use bevy::{diagnostic::LogDiagnosticsPlugin, prelude::*};
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
+use bevy_tokio_tasks::TokioTasksPlugin;
 use camera::CameraPlugin;
 use clap::Parser;
 use door::DoorPlugin;
@@ -25,6 +26,7 @@ fn main() {
 
     App::new()
         .add_plugins((
+            TokioTasksPlugin::default(),
             EmbeddedAssetPlugin {
                 mode: PluginMode::ReplaceDefault,
             },

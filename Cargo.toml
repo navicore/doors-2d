@@ -12,6 +12,7 @@ opt-level = 3
 [dependencies]
 avian2d = "0.2"
 bevy = { version = "0.15" }
+bevy-tokio-tasks = "0.15.0"
 bevy_aseprite_ultra = "0.4"
 bevy_embedded_assets = "0.12"
 bevy_lit = "0.6"

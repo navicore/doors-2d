@@ -1,14 +1,16 @@
+use super::k8s_api::get_names;
+use crate::cli::Cli;
 use crate::floorplan::{FloorPlan, FloorPlanEvent, FloorPlanResult, RoomData};
-use crate::integration::integration_utils::{IntegrationResource, IntegrationTimers};
+use crate::integration::integration_utils::IntegrationResource;
 use crate::integration::k8s_file::k8s_integration_systems::connect_rooms_with_doors;
 use bevy::prelude::*;
+use bevy_tokio_tasks::{TaskContext, TokioTasksRuntime};
+use clap::Parser;
 use kube::{
     api::{Api, ListParams},
     Client,
 };
-use tokio::runtime::Builder;
-
-use super::k8s_api::get_names;
+use std::time::Duration;
 
 async fn create_k8s_client() -> FloorPlanResult<Client> {
     Client::try_default()
@@ -239,30 +241,33 @@ async fn generate() -> FloorPlanResult<FloorPlan> {
     Ok(floorplan)
 }
 
-pub fn fire_k8s_live_floorplan_event(mut events: EventWriter<FloorPlanEvent>) {
-    if let Ok(rt) = Builder::new_current_thread().enable_all().build() {
-        rt.block_on(async {
-            match generate().await {
-                Ok(floorplan) => {
-                    events.send(FloorPlanEvent { floorplan });
-                }
-                Err(e) => {
-                    panic!("No K8S FloorPlanEvent: {e:?}");
-                }
-            }
-        });
-    } else {
-        error!("No K8S runtime created");
-    }
+async fn publish_floorplan(ctx: &mut TaskContext, floorplan: FloorPlan) {
+    ctx.run_on_main_thread(move |ctx| {
+        if let Some(mut events) = ctx.world.get_resource_mut::<Events<FloorPlanEvent>>() {
+            events.send(FloorPlanEvent { floorplan });
+            debug!("...Generated new floorplan");
+        } else {
+            panic!("No FloorPlanEvent resource found");
+        }
+    })
+    .await;
 }
 
-pub fn timed_k8s_live_floorplan_event(
-    events: EventWriter<FloorPlanEvent>,
-    time: Res<Time>,
-    mut timer: ResMut<IntegrationTimers>,
-) {
-    if timer.k8s.tick(time.delta()).just_finished() {
-        debug!("K8S Timer fired");
-        fire_k8s_live_floorplan_event(events);
-    }
+async fn generate_and_publish_floorplan(ctx: &mut TaskContext) -> FloorPlanResult<()> {
+    let floorplan = generate().await?;
+    publish_floorplan(ctx, floorplan).await;
+    Ok(())
+}
+
+pub fn init_k8s_live_floorplan_publisher(runtime: ResMut<TokioTasksRuntime>) {
+    runtime.spawn_background_task(|mut ctx| async move {
+        loop {
+            if let Err(e) = generate_and_publish_floorplan(&mut ctx).await {
+                panic!("No K8S FloorPlanEvent: {e:?}");
+            }
+            let generator_poll_secs = Cli::parse().generator_poll_secs.unwrap_or(30);
+            tokio::time::sleep(Duration::from_secs(generator_poll_secs.into())).await;
+            debug!("Generating new floorplan...");
+        }
+    });
 }
