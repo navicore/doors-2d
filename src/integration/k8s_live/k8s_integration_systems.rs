@@ -261,7 +261,7 @@ pub fn init_k8s_live_floorplan_publisher(runtime: ResMut<TokioTasksRuntime>) {
             if let Err(e) = publish_floorplan(&mut ctx).await {
                 panic!("No K8S FloorPlanEvent: {e:?}");
             }
-            let generator_poll_secs = Cli::parse().generator_poll_secs.unwrap_or(30);
+            let generator_poll_secs = Cli::parse().generator_poll_secs.unwrap_or(60);
             tokio::time::sleep(Duration::from_secs(generator_poll_secs.into())).await;
             debug!("Generating new floorplan...");
         }
