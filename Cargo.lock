@@ -727,9 +727,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_dylib"
-version = "0.15.2"
+version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a06fd62fbf045ff61555d0879095221c6dcba4e207fb2e70fdb82dded69a31fb"
+checksum = "381b2a0773cfe9d27256fba1e5005a14968b34f751c09397ee4e278f0fb235db"
 dependencies = [
  "bevy_internal",
 ]
