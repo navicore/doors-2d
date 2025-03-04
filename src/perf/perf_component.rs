@@ -1,9 +1,71 @@
+use crate::room::room_component::RoomState;
 use crate::room::CurrentFloorPlan;
 use bevy::ecs::system::lifetimeless::SRes;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use iyes_perf_ui::entry::PerfUiEntry;
 use iyes_perf_ui::prelude::*;
+
+#[derive(Component)]
+#[require(PerfUiRoot)]
+pub struct RoomDoorCount {
+    pub label: String,
+    pub threshold_highlight: Option<u32>,
+    pub color_gradient: ColorGradient,
+    pub sort_key: i32,
+}
+
+impl Default for RoomDoorCount {
+    fn default() -> Self {
+        Self {
+            label: String::new(),
+            threshold_highlight: Some(10),
+            #[allow(clippy::unwrap_used)]
+            color_gradient: ColorGradient::new_preset_gyr(1.0, 5.0, 10.0).unwrap(),
+            sort_key: iyes_perf_ui::utils::next_sort_key(),
+        }
+    }
+}
+
+impl PerfUiEntry for RoomDoorCount {
+    type Value = u32;
+    type SystemParam = SRes<RoomState>;
+
+    fn label(&self) -> &str {
+        if self.label.is_empty() {
+            "Doors in this room"
+        } else {
+            &self.label
+        }
+    }
+
+    fn sort_key(&self) -> i32 {
+        self.sort_key
+    }
+
+    fn update_value(
+        &self,
+        room_state: &mut <Self::SystemParam as SystemParam>::Item<'_, '_>,
+    ) -> Option<Self::Value> {
+        #[allow(clippy::cast_possible_truncation)]
+        Some(room_state.doors.len() as u32)
+    }
+
+    fn format_value(&self, value: &Self::Value) -> String {
+        format!("{value} edges")
+    }
+
+    // (optional) called every frame to determine if a custom color should be used for the value
+    fn value_color(&self, value: &Self::Value) -> Option<Color> {
+        #[allow(clippy::cast_precision_loss)]
+        self.color_gradient.get_color_for_value(*value as f32)
+    }
+
+    // (optional) Called every frame to determine if the value should be highlighted
+    fn value_highlight(&self, value: &Self::Value) -> bool {
+        self.threshold_highlight.is_some_and(|t| (*value) > t)
+    }
+}
 
 #[derive(Component)]
 #[require(PerfUiRoot)]
