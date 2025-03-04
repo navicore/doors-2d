@@ -8,6 +8,9 @@ lint:
 run:
 	cargo run --features "bevy/dynamic_linking, k8s, perfmon" -- --room-generator=k8s-live
 
+static-run:
+	cargo run --features "k8s, perfmon" -- --room-generator=k8s-live
+
 test:
 	cargo test --features k8s
 

@@ -13,7 +13,7 @@ impl Plugin for PerfPlugin {
         app.add_plugins((
             FrameTimeDiagnosticsPlugin,
             EntityCountDiagnosticsPlugin,
-            SystemInformationDiagnosticsPlugin,
+            SystemInformationDiagnosticsPlugin, // does not work with dynamic linking
             RenderDiagnosticsPlugin,
         ))
         .add_plugins(PerfUiPlugin)
