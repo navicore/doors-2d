@@ -19,9 +19,11 @@ pub fn handle_floor_plan_changes(
     mut floorplan_events: EventReader<floorplan::FloorPlanEvent>,
     mut current_floorplan: ResMut<CurrentFloorPlan>,
     mut fade: ResMut<FadeEffect>,
+    time: Res<Time>,
 ) {
     for event in floorplan_events.read() {
         debug!("Floor plan event received.");
+        current_floorplan.refreshed = time.elapsed();
 
         let new_floorplan = event.floorplan.clone();
 
@@ -39,6 +41,8 @@ pub fn handle_floor_plan_changes(
 
             *current_floorplan = CurrentFloorPlan {
                 floorplan: Some(new_floorplan),
+                refreshed: time.elapsed(),
+                modified: time.elapsed(),
                 you_are_here,
                 you_were_here,
             };

@@ -1,4 +1,6 @@
-use super::perf_component::{PerfUiWorldEdgeCount, PerfUiWorldNodeCount};
+use super::perf_component::{
+    TimeSinceLastFloorplanModified, TimeSinceLastFloorplanRefresh, WorldEdgeCount, WorldNodeCount,
+};
 use super::perf_system::toggle;
 use bevy::diagnostic::{
     EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin, SystemInformationDiagnosticsPlugin,
@@ -16,8 +18,10 @@ impl Plugin for PerfPlugin {
             SystemInformationDiagnosticsPlugin, // does not work with dynamic linking
             RenderDiagnosticsPlugin,
         ))
-        .add_perf_ui_simple_entry::<PerfUiWorldNodeCount>()
-        .add_perf_ui_simple_entry::<PerfUiWorldEdgeCount>()
+        .add_perf_ui_simple_entry::<WorldNodeCount>()
+        .add_perf_ui_simple_entry::<WorldEdgeCount>()
+        .add_perf_ui_simple_entry::<TimeSinceLastFloorplanRefresh>()
+        .add_perf_ui_simple_entry::<TimeSinceLastFloorplanModified>()
         .add_plugins(PerfUiPlugin)
         .add_systems(Update, toggle.before(iyes_perf_ui::PerfUiSet::Setup));
     }
