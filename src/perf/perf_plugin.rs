@@ -1,11 +1,11 @@
+use super::perf_component::{PerfUiWorldEdgeCount, PerfUiWorldNodeCount};
+use super::perf_system::toggle;
 use bevy::diagnostic::{
     EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin, SystemInformationDiagnosticsPlugin,
 };
 use bevy::prelude::*;
 use bevy::render::diagnostic::RenderDiagnosticsPlugin;
-use iyes_perf_ui::PerfUiPlugin;
-
-use super::perf_system::toggle;
+use iyes_perf_ui::prelude::*;
 
 pub struct PerfPlugin;
 impl Plugin for PerfPlugin {
@@ -16,6 +16,8 @@ impl Plugin for PerfPlugin {
             SystemInformationDiagnosticsPlugin, // does not work with dynamic linking
             RenderDiagnosticsPlugin,
         ))
+        .add_perf_ui_simple_entry::<PerfUiWorldNodeCount>()
+        .add_perf_ui_simple_entry::<PerfUiWorldEdgeCount>()
         .add_plugins(PerfUiPlugin)
         .add_systems(Update, toggle.before(iyes_perf_ui::PerfUiSet::Setup));
     }
