@@ -1,5 +1,5 @@
 use avian2d::PhysicsPlugins;
-use bevy::{diagnostic::LogDiagnosticsPlugin, prelude::*};
+use bevy::prelude::*;
 use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use bevy_tokio_tasks::TokioTasksPlugin;
 use camera::CameraPlugin;
@@ -7,6 +7,8 @@ use clap::Parser;
 use door::DoorPlugin;
 use integration::integration_plugin::IntegrationPlugin;
 use pause::PausePlugin;
+#[cfg(feature = "perfmon")]
+use perf::PerfPlugin;
 use player::PlayerPlugin;
 use room::{room_component::WINDOW_WIDTH, RoomPlugin, WINDOW_HEIGHT};
 use state::StatePlugin;
@@ -17,6 +19,7 @@ mod door;
 mod floorplan;
 mod integration;
 mod pause;
+mod perf;
 mod player;
 mod room;
 mod state;
@@ -38,8 +41,6 @@ fn main() {
                 }),
                 ..default()
             }),
-            //FrameTimeDiagnosticsPlugin,
-            LogDiagnosticsPlugin::default(),
             PhysicsPlugins::default(),
             CameraPlugin,
             RoomPlugin,
@@ -48,6 +49,8 @@ fn main() {
             StatePlugin,
             PausePlugin,
             IntegrationPlugin,
+            #[cfg(feature = "perfmon")]
+            PerfPlugin,
         ))
         .run();
 }

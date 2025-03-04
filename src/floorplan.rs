@@ -62,6 +62,10 @@ impl FloorPlan {
         }
     }
 
+    pub fn get_world_size(&self) -> (usize, usize) {
+        (self.graph.node_count(), self.graph.edge_count())
+    }
+
     pub fn get_room(&self, room_index: NodeIndex) -> FloorPlanResult<&RoomData> {
         self.graph
             .node_weight(room_index)
