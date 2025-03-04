@@ -2233,7 +2233,7 @@ dependencies = [
 
 [[package]]
 name = "doors"
-version = "0.2.4"
+version = "0.3.1"
 dependencies = [
  "avian2d",
  "bevy",
