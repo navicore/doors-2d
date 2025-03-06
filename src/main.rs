@@ -11,6 +11,7 @@ use pause::PausePlugin;
 use perf::PerfPlugin;
 use player::PlayerPlugin;
 use room::{room_component::WINDOW_WIDTH, RoomPlugin, WINDOW_HEIGHT};
+use schedule::SchedulePlugin;
 use state::StatePlugin;
 
 mod camera;
@@ -22,6 +23,7 @@ mod pause;
 mod perf;
 mod player;
 mod room;
+mod schedule;
 mod state;
 
 fn main() {
@@ -41,6 +43,7 @@ fn main() {
                 }),
                 ..default()
             }),
+            SchedulePlugin,
             PhysicsPlugins::default(),
             CameraPlugin,
             RoomPlugin,

@@ -6,7 +6,7 @@ use crate::door::Door;
 use crate::door::Platform;
 use crate::player::player_component::Grounded;
 use crate::room::room_component::{CurrentFloorPlan, RoomState};
-use crate::room::Floor;
+use crate::room::{Floor, PLAYER_LAYER};
 use crate::state::state_component::FadeEffect;
 use crate::state::GameState;
 use avian2d::prelude::*;
@@ -17,10 +17,6 @@ use leafwing_input_manager::{
     prelude::{ActionState, InputMap},
     InputManagerBundle,
 };
-
-// player unstable at player z 10, 15, 16, 18, 17
-// text unstable at player z 200, 20, 19, 17
-const PLAYER_LAYER: f32 = 1.5; // A high value to ensure it renders on top
 
 pub fn player_enters_new_room(
     mut commands: Commands,

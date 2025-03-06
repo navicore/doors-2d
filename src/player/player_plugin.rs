@@ -1,4 +1,4 @@
-use crate::state::GameState;
+use crate::{schedule::InGameSet, state::GameState};
 use bevy::prelude::*;
 use bevy_aseprite_ultra::AsepriteUltraPlugin;
 use leafwing_input_manager::plugin::InputManagerPlugin;
@@ -19,13 +19,21 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 Update,
                 (player_animation, detect_player_at_door, check_grounded)
+                    .in_set(InGameSet::CollisionDetection)
                     .run_if(in_state(GameState::InGame)),
             )
             .add_systems(
                 Update,
-                player_enters_new_room.run_if(in_state(GameState::RoomChange)),
+                player_enters_new_room
+                    .in_set(InGameSet::UserInput)
+                    .run_if(in_state(GameState::RoomChange)),
             )
-            .add_systems(Update, player_movement.run_if(in_state(GameState::InGame)))
+            .add_systems(
+                Update,
+                player_movement
+                    .in_set(InGameSet::UserInput)
+                    .run_if(in_state(GameState::InGame)),
+            )
             .add_plugins(InputManagerPlugin::<Action>::default());
     }
 }

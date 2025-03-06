@@ -1,5 +1,8 @@
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
-use crate::room::room_component::{DoorState, RoomState};
+use crate::room::{
+    room_component::{DoorState, RoomState},
+    DOOR_LAYER, LIGHT_LAYER, PLATFORM_LAYER, TEXT_LAYER,
+};
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::{
     color::palettes::{css::GREY, tailwind::BLUE_600},
@@ -9,17 +12,11 @@ use bevy::{
 };
 use bevy_lit::prelude::{LightOccluder2d, PointLight2d};
 
-const PLATFORM_LAYER: f32 = 0.0;
-const TEXT_LAYER: f32 = 100.0;
-const DOOR_LAYER: f32 = 0.0;
-const LIGHT_LAYER: f32 = 0.0;
-
 #[allow(clippy::type_complexity)]
 pub fn spawn_platforms(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     room_state: Res<RoomState>,
-    query: Query<Entity, With<Platform>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     if !room_state.is_changed() {
@@ -34,7 +31,7 @@ pub fn spawn_platforms(
 
     debug!("Room state changed, respawning platforms...");
 
-    despawn_existing_platforms(&mut commands, query);
+    //despawn_existing_platforms(&mut commands, query);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let text_font = create_text_font(font.clone());
     let sign_font = create_sign_font(font);
@@ -52,8 +49,7 @@ pub fn spawn_platforms(
     }
 }
 
-#[allow(clippy::type_complexity)]
-fn despawn_existing_platforms(commands: &mut Commands, query: Query<Entity, With<Platform>>) {
+pub fn despawn_existing_platforms(mut commands: Commands, query: Query<Entity, With<Platform>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
@@ -95,7 +91,6 @@ fn spawn_platform(
             PLATFORM_WIDTH / 2.0,
             PLATFORM_HEIGHT / 2.0,
         )),
-        Transform::from_xyz(door_state.position.x, door_state.position.y, PLATFORM_LAYER),
         Friction {
             dynamic_coefficient: 0.6,
             static_coefficient: 0.8,
@@ -106,6 +101,7 @@ fn spawn_platform(
             combine_rule: CoefficientCombine::Max,
         },
         Platform {},
+        Transform::from_xyz(door_state.position.x, door_state.position.y, PLATFORM_LAYER),
         Sprite {
             color: Color::srgb(0.5, 0.5, 0.5),
             custom_size: Some(Vec2::new(PLATFORM_WIDTH, PLATFORM_HEIGHT)),
