@@ -11,9 +11,9 @@ impl Plugin for DoorPlugin {
         app.add_systems(
             OnEnter(RoomChange),
             (despawn_existing_platforms, spawn_platforms)
+                .in_set(InGameSet::Render)
                 .chain()
-                .after(update_room)
-                .in_set(InGameSet::EntityUpdates),
+                .after(update_room),
         );
     }
 }

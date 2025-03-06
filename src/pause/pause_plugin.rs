@@ -11,15 +11,12 @@ impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (pause_game, handle_pause_events).in_set(InGameSet::EntityUpdates),
+            (pause_game, handle_pause_events).in_set(InGameSet::Update),
         )
         .add_systems(
             OnEnter(Paused),
-            display_paused_text.in_set(InGameSet::EntityUpdates),
+            display_paused_text.in_set(InGameSet::Update),
         )
-        .add_systems(
-            OnExit(Paused),
-            remove_pause_text.in_set(InGameSet::EntityUpdates),
-        );
+        .add_systems(OnExit(Paused), remove_pause_text.in_set(InGameSet::Update));
     }
 }

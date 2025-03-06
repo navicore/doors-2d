@@ -14,16 +14,13 @@ impl Plugin for RoomPlugin {
         app.insert_resource(CurrentFloorPlan::default())
             .add_event::<FloorPlanEvent>()
             .insert_resource(RoomState::default())
-            .add_systems(Startup, setup_room)
-            .add_systems(
-                Update,
-                handle_floor_plan_changes.in_set(InGameSet::EntityUpdates),
-            )
+            .add_systems(Startup, setup_room.in_set(InGameSet::Render))
+            .add_systems(Update, handle_floor_plan_changes.in_set(InGameSet::Update))
             .add_systems(
                 OnEnter(RoomChange),
                 (update_doors, update_room)
                     .chain()
-                    .in_set(InGameSet::EntityUpdates),
+                    .in_set(InGameSet::Update),
             );
     }
 }

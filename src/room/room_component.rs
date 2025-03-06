@@ -12,6 +12,7 @@ pub const PLATFORM_LAYER: f32 = 10.0;
 pub const TEXT_LAYER: f32 = 12.0;
 pub const DOOR_LAYER: f32 = 5.0;
 pub const LIGHT_LAYER: f32 = 20.0;
+pub const CAMERA_LAYER: f32 = 25.0;
 
 #[derive(Component)]
 pub struct Floor;
