@@ -1,4 +1,4 @@
-use crate::camera::camera_component::MainCamera;
+use crate::{camera::camera_component::MainCamera, room::CAMERA_LAYER};
 use bevy::{color::palettes::tailwind::BLUE_300, prelude::*};
 use bevy_lit::prelude::{AmbientLight2d, Lighting2dSettings, RaymarchSettings};
 
@@ -6,8 +6,6 @@ const CAMERA_MOVE_SPEED: f32 = 10.0; // Speed at which the camera moves
 const SCREEN_HALF_WIDTH: f32 = 600.0; // Half of window width (assuming 1200x800 resolution)
 const SCROLL_THRESHOLD: f32 = 400.0; // Distance from the screen edge before scrolling
 
-const CAMERA_LAYER: f32 = 500.0; // Ensure this is appropriate for your rendering order
-                                 //
 type PlayerQuery<'a> = Query<'a, 'a, &'a Transform, With<crate::player::Player>>;
 type CameraQuery<'a> = Query<'a, 'a, &'a mut Transform, With<MainCamera>>;
 
