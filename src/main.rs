@@ -4,18 +4,20 @@ use bevy_embedded_assets::{EmbeddedAssetPlugin, PluginMode};
 use bevy_tokio_tasks::TokioTasksPlugin;
 use camera::CameraPlugin;
 use clap::Parser;
+use constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use door::DoorPlugin;
 use integration::integration_plugin::IntegrationPlugin;
 use pause::PausePlugin;
 #[cfg(feature = "perfmon")]
 use perf::PerfPlugin;
 use player::PlayerPlugin;
-use room::{room_component::WINDOW_WIDTH, RoomPlugin, WINDOW_HEIGHT};
+use room::RoomPlugin;
 use schedule::SchedulePlugin;
 use state::StatePlugin;
 
 mod camera;
 mod cli;
+mod constants;
 mod door;
 mod floorplan;
 mod integration;

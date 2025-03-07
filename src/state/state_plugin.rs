@@ -19,19 +19,19 @@ impl Plugin for StatePlugin {
             .add_systems(
                 Update,
                 fade_out
-                    .in_set(InGameSet::Render)
+                    //.in_set(InGameSet::Render)
                     .run_if(in_state(TransitioningOut)),
             )
             .add_systems(
                 Update,
                 room_change_curtain
-                    .in_set(InGameSet::Render)
+                    .in_set(InGameSet::Update)
                     .run_if(in_state(RoomChange)),
             )
             .add_systems(
                 Update,
                 fade_in
-                    .in_set(InGameSet::Render)
+                    //.in_set(InGameSet::Render)
                     .run_if(in_state(TransitioningIn)),
             );
     }

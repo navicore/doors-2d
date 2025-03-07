@@ -1,4 +1,4 @@
-use crate::{camera::camera_component::MainCamera, room::CAMERA_LAYER};
+use crate::{camera::camera_component::MainCamera, constants::CAMERA_LAYER};
 use bevy::{color::palettes::tailwind::BLUE_300, prelude::*};
 use bevy_lit::prelude::{AmbientLight2d, Lighting2dSettings, RaymarchSettings};
 

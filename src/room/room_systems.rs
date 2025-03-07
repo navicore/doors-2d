@@ -1,7 +1,6 @@
-use super::room_component::{
-    Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState, WINDOW_HEIGHT,
-};
+use super::room_component::{Ceiling, CurrentFloorPlan, Floor, LeftWall, RightWall, RoomState};
 use crate::{
+    constants::WINDOW_HEIGHT,
     floorplan,
     room::room_component::DoorState,
     state::{state_component::FadeEffect, GameState},

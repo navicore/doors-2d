@@ -1,7 +1,7 @@
 use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
-use crate::room::{
-    room_component::{DoorState, RoomState},
-    DOOR_LAYER, LIGHT_LAYER, PLATFORM_LAYER, TEXT_LAYER,
+use crate::{
+    constants::{DOOR_LAYER, LIGHT_LAYER, PLATFORM_LAYER, TEXT_LAYER},
+    room::room_component::{DoorState, RoomState},
 };
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::{
