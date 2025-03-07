@@ -2,11 +2,12 @@ use super::player_component::{
     Action, Movable, PlayerBundle, PlayerDirection, PlayerState, PLAYER_JUMP_FORCE,
 };
 use super::Player;
+use crate::constants::PLAYER_LAYER;
 use crate::door::Door;
 use crate::door::Platform;
 use crate::player::player_component::Grounded;
 use crate::room::room_component::{CurrentFloorPlan, RoomState};
-use crate::room::{Floor, PLAYER_LAYER};
+use crate::room::Floor;
 use crate::state::state_component::FadeEffect;
 use crate::state::GameState;
 use avian2d::prelude::*;

@@ -5,7 +5,7 @@ use iyes_perf_ui::prelude::PerfUiRoot;
 use super::perf_component::RoomDoorCount;
 use super::perf_component::TimeSinceLastFloorplanModified;
 use super::perf_component::TimeSinceLastFloorplanRefresh;
-use super::perf_component::{WorldEdgeCount, WorldNodeCount};
+use super::{WorldEdgeCount, WorldNodeCount};
 
 pub fn toggle_builtins(
     mut commands: Commands,
