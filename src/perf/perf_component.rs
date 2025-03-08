@@ -5,7 +5,6 @@ use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use iyes_perf_ui::entry::PerfUiEntry;
 use iyes_perf_ui::prelude::*;
-use iyes_perf_ui::ui::root::PerfUiPosition;
 
 #[derive(Component)]
 pub struct GameWorldMonitor;
