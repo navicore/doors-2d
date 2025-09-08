@@ -32,10 +32,10 @@ pub fn handle_floor_plan_changes(
         if current_floorplan.floorplan.as_ref() != Some(&new_floorplan) {
             let mut should_transition = true;
 
-            if let Some(current_room_id) = current_floorplan.you_are_here.clone() {
-                if new_floorplan.get_room_by_id(&current_room_id).is_ok() {
-                    should_transition = false; // don't transition if the room we're in still exists
-                }
+            if let Some(current_room_id) = current_floorplan.you_are_here.clone()
+                && new_floorplan.get_room_by_id(&current_room_id).is_ok()
+            {
+                should_transition = false; // don't transition if the room we're in still exists
             }
 
             *current_floorplan = CurrentFloorPlan {
@@ -94,14 +94,14 @@ pub fn update_doors(current_floorplan: Res<CurrentFloorPlan>, mut room_state: Re
         .room_id
         .clone_from(&current_floorplan.you_are_here);
 
-    if let Some(floorplan) = current_floorplan.floorplan.as_ref() {
-        if let Some(room_id) = &current_floorplan.you_are_here {
-            match floorplan.get_doors_and_connected_rooms(room_id) {
-                Ok(doors_and_rooms) => {
-                    update_room_state_with_doors(&mut room_state, doors_and_rooms);
-                }
-                _ => panic!("Failed to get doors and connected rooms"),
+    if let Some(floorplan) = current_floorplan.floorplan.as_ref()
+        && let Some(room_id) = &current_floorplan.you_are_here
+    {
+        match floorplan.get_doors_and_connected_rooms(room_id) {
+            Ok(doors_and_rooms) => {
+                update_room_state_with_doors(&mut room_state, doors_and_rooms);
             }
+            _ => panic!("Failed to get doors and connected rooms"),
         }
     }
 }
