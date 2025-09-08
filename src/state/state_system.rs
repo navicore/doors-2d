@@ -49,15 +49,14 @@ pub fn fade_out(
     current_floor_plan: Res<CurrentFloorPlan>,
 ) {
     // Check if we're at the start room - don't do fade if we are
-    if let Some(plan) = &current_floor_plan.floorplan {
-        if let Ok(start_room) = plan.get_start_room() {
-            if current_floor_plan.you_are_here == Some(start_room.id.clone()) {
-                fade.fading_out = false; // Switch to fading in
-                next_state.set(GameState::RoomChange);
-                debug!("Skipping fade out for start room");
-                return;
-            }
-        }
+    if let Some(plan) = &current_floor_plan.floorplan
+        && let Ok(start_room) = plan.get_start_room()
+        && current_floor_plan.you_are_here == Some(start_room.id.clone())
+    {
+        fade.fading_out = false; // Switch to fading in
+        next_state.set(GameState::RoomChange);
+        debug!("Skipping fade out for start room");
+        return;
     }
 
     let mut sprite = fade_query.single_mut();
