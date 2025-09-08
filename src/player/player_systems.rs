@@ -222,10 +222,10 @@ pub fn check_grounded(
                     if player_transform.translation.y > ground_transform.translation.y {
                         grounded.0 = true;
                     }
-                } else if let Ok((_, platform_transform)) = platform_query.get(*entity) {
-                    if player_transform.translation.y > platform_transform.translation.y {
-                        grounded.0 = true;
-                    }
+                } else if let Ok((_, platform_transform)) = platform_query.get(*entity)
+                    && player_transform.translation.y > platform_transform.translation.y
+                {
+                    grounded.0 = true;
                 }
             }
         }

@@ -10,6 +10,7 @@ use bevy::prelude::*;
 use bevy::render::diagnostic::RenderDiagnosticsPlugin;
 use iyes_perf_ui::prelude::*;
 
+#[allow(dead_code)]
 pub struct PerfPlugin;
 impl Plugin for PerfPlugin {
     fn build(&self, app: &mut App) {

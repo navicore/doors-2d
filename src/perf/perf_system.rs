@@ -10,6 +10,7 @@ use super::perf_component::TimeSinceLastFloorplanModified;
 use super::perf_component::TimeSinceLastFloorplanRefresh;
 use super::{WorldEdgeCount, WorldNodeCount};
 
+#[allow(dead_code)]
 pub fn toggle_builtins(
     mut commands: Commands,
     q_root: Query<Entity, With<SystemMonitor>>,
@@ -24,6 +25,7 @@ pub fn toggle_builtins(
     }
 }
 
+#[allow(dead_code)]
 pub fn toggle_customs(
     mut commands: Commands,
     q_root: Query<Entity, With<GameWorldMonitor>>,
