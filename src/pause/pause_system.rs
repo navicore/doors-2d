@@ -6,7 +6,7 @@ use bevy::text::TextBounds;
 use super::pause_component::PausedText;
 
 static PAUSED_TEXT_COLOR: Color = Color::srgb(1.0, 0.4, 0.3); // red / orange
-                                                              //
+//
 pub fn remove_pause_text(mut commands: Commands, query: Query<Entity, With<PausedText>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();

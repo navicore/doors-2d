@@ -1,22 +1,22 @@
-use super::player_component::{
-    Action, Movable, PlayerBundle, PlayerDirection, PlayerState, PLAYER_JUMP_FORCE,
-};
 use super::Player;
+use super::player_component::{
+    Action, Movable, PLAYER_JUMP_FORCE, PlayerBundle, PlayerDirection, PlayerState,
+};
 use crate::constants::PLAYER_LAYER;
 use crate::door::Door;
 use crate::door::Platform;
 use crate::player::player_component::Grounded;
-use crate::room::room_component::{CurrentFloorPlan, RoomState};
 use crate::room::Floor;
-use crate::state::state_component::FadeEffect;
+use crate::room::room_component::{CurrentFloorPlan, RoomState};
 use crate::state::GameState;
+use crate::state::state_component::FadeEffect;
 use avian2d::prelude::*;
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_lit::prelude::LightOccluder2d;
 use leafwing_input_manager::{
-    prelude::{ActionState, InputMap},
     InputManagerBundle,
+    prelude::{ActionState, InputMap},
 };
 
 pub fn player_enters_new_room(

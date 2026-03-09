@@ -1,6 +1,6 @@
 use super::{
-    state_component::{FadeEffect, FadeOverlay},
     GameState,
+    state_component::{FadeEffect, FadeOverlay},
 };
 use crate::{
     constants::{
@@ -69,7 +69,7 @@ pub fn fade_out(
         if fade.alpha >= 1.0 {
             debug!("Fade out complete");
             fade.fading_out = false; // Switch to fading in
-                                     //next_state.set(GameState::RoomChange);
+            //next_state.set(GameState::RoomChange);
             next_state.set(GameState::RoomChange);
         }
     }

@@ -1,4 +1,4 @@
-use super::door_component::{Door, Platform, BOUNCE_EFFECT, PLATFORM_HEIGHT, PLATFORM_WIDTH};
+use super::door_component::{BOUNCE_EFFECT, Door, PLATFORM_HEIGHT, PLATFORM_WIDTH, Platform};
 use crate::{
     constants::{DOOR_LAYER, LIGHT_LAYER, PLATFORM_LAYER, TEXT_LAYER},
     room::room_component::{DoorState, RoomState},
