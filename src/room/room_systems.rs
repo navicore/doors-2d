@@ -3,7 +3,7 @@ use crate::{
     constants::WINDOW_HEIGHT,
     floorplan,
     room::room_component::DoorState,
-    state::{state_component::FadeEffect, GameState},
+    state::{GameState, state_component::FadeEffect},
 };
 use avian2d::{parry::shape::SharedShape, prelude::*};
 use bevy::prelude::*;
