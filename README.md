@@ -1,3 +1,8 @@
+<!-- ghmig:moved -->
+> **This repository has moved to [https://git.navicore.tech/navicore/doors-2d](https://git.navicore.tech/navicore/doors-2d).**
+>
+> The GitHub copy is archived and no longer maintained.
+
 [![Dependabot Updates](https://github.com/navicore/doors-2d/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/navicore/doors-2d/actions/workflows/dependabot/dependabot-updates) [![Rust](https://github.com/navicore/doors-2d/actions/workflows/rust.yml/badge.svg)](https://github.com/navicore/doors-2d/actions/workflows/rust.yml) [![rust-clippy analyze](https://github.com/navicore/doors-2d/actions/workflows/rust-clippy.yml/badge.svg)](https://github.com/navicore/doors-2d/actions/workflows/rust-clippy.yml) [![CodeQL](https://github.com/navicore/doors-2d/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/navicore/doors-2d/actions/workflows/github-code-scanning/codeql)
 
 Doors
@@ -81,5 +86,3 @@ cargo run --features bevy/dynamic_linking
 # for avoiding the expensive kube crate compile
 cargo run --features bevy/dynamic_linking --no-default-features
 ```
-
-
